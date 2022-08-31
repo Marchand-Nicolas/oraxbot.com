@@ -1,0 +1,16 @@
+.section h2 {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    color: black;
+}
+
+.page {
+    padding: 90px 60px 40px;
+}
+
+@media screen and (max-width: 500px) {
+    .page {
+        padding: 90px 0 40px;
+    }
+}

@@ -1,0 +1,175 @@
+.background {
+    position: fixed;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(37deg, rgb(0,161,232) 0%, rgb(128,244,192) 100%);
+    background-size: cover;
+    transition: background-image 0.2s ease-in-out;
+}
+.background::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    backdrop-filter: blur(100px);
+}
+
+.page {
+    margin: 20px 0 0 120px;
+    position: absolute;
+    padding: 0 20px;
+    width: calc(100% - 180px);
+    border-radius: 12px;
+    min-height: calc(100vh - 40px);
+    box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+    backdrop-filter: blur( 4px );
+    -webkit-backdrop-filter: blur( 4px );
+    border: 1px solid rgba( 255, 255, 255, 0.18 );
+    background: rgba( 0, 0, 0, 0.45 );
+}
+
+@media screen and (max-width: 550px) {
+    .page {
+        margin: 0 0 0 100px;
+        position: absolute;
+        padding: 0 20px;
+        width: calc(100% - 140px);
+        border-radius: 0;
+        border: none;
+        min-height: 100%;
+    }
+}
+
+.title {
+    font-weight: bold;
+    width: fit-content;
+    color: rgb(255, 255, 255);
+}
+
+.navbar {
+    width: 100px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    overflow-y: overlay;
+    overflow-x: hidden;
+    background: rgba( 0, 0, 0, 0.45 );
+    box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+    backdrop-filter: blur( 4px );
+    -webkit-backdrop-filter: blur( 4px );
+    border: 1px solid rgba( 255, 255, 255, 0.18 );
+    padding: 0 0 0 0;
+}
+
+.navbar::-webkit-scrollbar {
+    width: 12px;
+    background: transparent;
+}
+
+.navbar::-webkit-scrollbar-thumb {
+    background: linear-gradient(37deg, rgb(0,161,232) 0%, rgb(7, 101, 59) 100%);
+    position: relative;
+    border-radius: 1em;
+}
+
+.navbar .guildIcon {
+    width: 60px;
+    height: 60px;
+    border-radius: 2em;
+    transition: 0.4s;
+    margin-top: 5px;
+    position: relative;
+}
+
+.navbar .navGuild {
+    cursor: pointer;
+    display: block;
+    margin: 0 auto;
+    width: fit-content;
+    position: relative;
+}
+
+.navbar .navGuild:hover .guildIcon {
+    border-radius: 1.2em;
+}
+
+.navbar .navGuild::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 8px;
+    height: 8px;
+    transform: translateY(-50%) translateX(calc(-20px - 50%));
+    transition: 0.4s;
+    background: white;
+    border-radius: 1em;
+}
+
+.navbar .navGuild:hover::before {
+    height: 50%;
+}
+
+.navbar .navGuild.selected::before {
+    content: "";
+    position: absolute;
+    height: 80%;
+    border-radius: 40px;
+}
+.navbar .navGuild.selected img {
+    border-radius: 1.2em;
+}
+
+.navbar .placeHolder {
+    background: linear-gradient(37deg, rgb(177, 177, 177) 0%, rgb(210, 255, 235) 100%);
+}
+
+.button {
+    background: linear-gradient(37deg, rgb(0,161,232) 0%, rgb(128,244,192) 100%);
+    border: none;
+    color: white;
+    padding: 10px 20px 10px 60px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    position: relative;
+    transition: 0.4s;
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: 20px;
+    display: block;
+    text-align: center;
+}
+
+.button strong, .button svg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    padding: 10px;
+    background-color: rgb(255, 255, 255);
+    color: rgb(0,161,232);
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+    width: 25px;
+}
+
+.button.buyButton.done {
+    background: linear-gradient(37deg, rgb(0,161,232) 0%, rgb(128,244,192) 50%);
+}
+
+.button svg {
+    padding: 5px 10px;
+}
+
+.inviteBot {
+    width: 100% !important;
+    max-width: 400px !important;
+}

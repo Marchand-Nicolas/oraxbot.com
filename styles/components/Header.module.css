@@ -1,0 +1,56 @@
+.nav {
+    display: flex;
+    flex: 1;
+    padding: 0.8rem;
+    align-items: center;
+    background: rgba( 255, 255, 255, 0.2 );
+    box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+    backdrop-filter: blur( 4px );
+    -webkit-backdrop-filter: blur( 4px );
+    border-bottom: 1px solid rgba( 255, 255, 255, 0.18 );
+    position: fixed;
+    left: 0;
+    top: 0;
+    right: 0;
+    z-index: 10;
+}
+
+.nav a {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+}
+
+.nav span {
+    height: 1em;
+}
+
+.title {
+    font-size: 1.3rem;
+    margin-left: 12px;
+    color: rgb(30, 55, 48);
+}
+.goHomeIcon {
+    width: 50px;
+    margin-right: 10px;
+}
+
+.goHomeContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.goHomeContainer:hover .goHomeIcon {
+    color: rgb(0,161,232);
+}
+
+.goHomeContainer:hover {
+    background: linear-gradient(37deg, rgb(0,161,232) 0%, rgb(128,244,192) 100%);
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}

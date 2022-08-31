@@ -1,0 +1,13 @@
+.container {
+    max-width: calc(400px - 32px);
+    background-color: white;
+    border-radius: 12px;
+    padding: 24px 16px 0;
+}
+
+@media screen and (max-width: 550px) {
+    .container {
+        max-width: calc(400px - 8px);
+        padding: 4px 4px 0;
+    }
+}

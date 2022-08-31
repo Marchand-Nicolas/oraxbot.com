@@ -1,0 +1,163 @@
+@import url(https://fonts.googleapis.com/css?family=Roboto:400,100,100italic,300,300ita‌​lic,400italic,500,500italic,700,700italic,900italic,900);
+
+:root {
+  --scroll_percent: 0.5;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: Roboto;
+  overflow: overlay;
+  scroll-behavior: smooth;
+}
+
+body > h1, h2, h3, h4, h5, h6, strong {
+  color:#FFFFFF;
+}
+html > body {
+  color:#8f9093;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a * {
+  cursor: pointer;
+}
+
+.button {
+  cursor: pointer;
+  border: none;
+}
+
+.button.round {
+  background: linear-gradient(37deg, rgb(0,161,232) 0%, rgb(128,244,192) 100%);
+  color: white;
+  padding: 0.5rem 2rem;
+  border-radius: 3em;
+  width: fit-content;
+}
+
+.button.center {
+  display: block;
+  margin: 0 auto;
+}
+
+* {
+  scrollbar-width: auto;
+  scrollbar-color: #24a0ff #ffffff;
+}
+
+*::-webkit-scrollbar {
+  width: 12px;
+  background-color: white;
+  background: linear-gradient(0deg, rgb(0,161,232) 0%, rgba(255, 255, 255, 0) calc(var(--scroll_percent) * 100% - 90%), rgba(255, 255, 255, 0) calc(var(--scroll_percent) * 100% + 90%), rgb(128,244,192) 100%);
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgb(0,161,232);
+  background: linear-gradient(0deg, rgba(255, 255, 255, 0) 0%, rgb(0,161,232) min(calc(100% - var(--scroll_percent) * 100%), 30%), rgb(128,244,192) max(calc(100% - var(--scroll_percent) * 100%), 70%), rgba(255, 255, 255, 0) 100%);
+}
+
+*::selection {
+  background-color: rgba(40, 142, 96, 0.571);
+  color: white;
+}
+
+*::-moz-selection {
+  background-color: rgba(40, 142, 96, 0.571);
+  color: white;
+}
+
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 99999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.popup h2 {
+  background: linear-gradient(37deg, rgb(0,161,232) 0%, rgb(128,244,192) 100%);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  width: fit-content;
+}
+
+
+.popup .container  {
+  padding: 15px;
+  border-radius: .9em;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+  background: rgba( 0, 0, 0, 0.45 );
+  box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+  backdrop-filter: blur( 4px );
+  -webkit-backdrop-filter: blur( 4px );
+  border: 1px solid rgba( 255, 255, 255, 0.18 );
+  width: 400px;
+  max-width: calc(100% - 40px);
+}
+
+.popup .container div {
+  display: flex;
+  align-items: center;
+}
+
+.popup .description {
+  color: white;
+}
+
+.popup input {
+  margin-bottom: 20px;
+  width: calc(100% - 40px);
+  font-size: 14px;
+  padding: 10px 20px;
+  border: none;
+}
+
+.popup button {
+  background: linear-gradient(37deg, rgb(0,161,232) 0%, rgb(128,244,192) 100%);
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  position: relative;
+  width: 100%;
+  display: block;
+  text-align: center;
+  margin: 0 auto;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 60px;
+  height: 60px;
+  margin-top: 5px;
+  border-radius: 100%;
+  background: linear-gradient(37deg, rgba(190, 229, 245, 0.641) 0%, rgba(99, 207, 158, 0.772) 100%);
+  animation: loading 0.4s linear infinite alternate;
+}
+
+@keyframes loading {
+  0% {
+      transform: scale(0);
+  }
+  100% {
+      transform: scale(0.9);
+  }
+}

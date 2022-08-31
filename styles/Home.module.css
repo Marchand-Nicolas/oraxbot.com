@@ -1,0 +1,204 @@
+.main {
+  padding: 4rem 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.strong {
+  background-color: #292828;
+  -webkit-box-shadow: inset 0 -1px 0 rgba(0,0,0,.25);
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,.25);
+  background: #fafafa;
+  color: black;
+  border-radius: 5px;
+  padding: 0.75rem;
+  font-size: 1rem;
+}
+.strong.v2 {
+  font-size: 1.3rem;
+}
+
+.gradient {
+  background: rgb(0,161,232);
+  background: linear-gradient(37deg, rgb(0,161,232) 0%, rgb(128,244,192) 40%, white 50%);
+  height: 100vh;
+  width: 100%;
+	height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bottomArrow {
+  width: 5em;
+  color: rgb(255, 255, 255);
+  display: block;
+  margin: 1em auto;
+  cursor: pointer;
+  transition: 0.15s;
+  position: relative;
+}
+
+.bottomArrow:hover {
+  transform: scale(1.1);
+  
+}
+
+.title {
+  margin: 0;
+  line-height: 1.15;
+  font-size: 4rem;
+  position: relative;
+  background: linear-gradient(37deg, rgb(0,161,232) 0%, rgb(128,244,192) 100%);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.title,
+.description {
+  text-align: center;
+}
+
+.description {
+  margin: 2rem 0 0 0;
+  line-height: 1.5;
+  font-size: 1.5rem;
+  color: rgb(27, 27, 27);
+}
+
+.grid {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  max-width: 800px;
+}
+
+.card {
+  margin: 1rem;
+  padding: 1.5rem;
+  text-align: left;
+  color: inherit;
+  text-decoration: none;
+  border: 1px solid #eaeaea;
+  border-radius: 10px;
+  transition: color 0.15s ease, border-color 0.15s ease;
+  width: 300px;
+  height: 105px;
+  cursor: pointer;
+}
+
+@media screen and (max-width: 600px) {
+  .card {
+    border-radius: 0;
+    width: 100%;
+    margin: 1rem 0;
+    height: auto;
+  }
+}
+
+.card:hover,
+.card:focus,
+.card:active {
+  border-color: rgb(84, 194, 145);
+}
+
+.card h2 {
+  margin: 0 0 1rem 0;
+  font-size: 1.5rem;
+  color: #0070f3;
+  transition: 0.15s;
+}
+
+.card:hover h2,
+.card:focus h2,
+.card:active h2 {
+  color: rgb(84, 194, 145);
+  transform: translateX(15px);
+}
+
+.card p {
+  margin: 0;
+  font-size: 1.25rem;
+  line-height: 1.5;
+}
+
+.exampleContainer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 70px;
+}
+
+.exampleContainer p {
+  margin: 40px min(10vw, 200px);
+  line-height: 2.3em;
+  text-overflow: wrap;
+  width: 350px;
+}
+
+.glassCard {
+  width: 400px;
+  max-width: 90%;
+  aspect-ratio: 1;
+  transition: transform 0.5s ease;
+  transform: rotate3d(1, 0.5, 0.1, 20deg);
+  background: rgba( 255, 255, 255, 0.25 );
+  box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+  border: 1px solid rgba( 255, 255, 255, 0.18 );
+  border-radius: 1em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.exampleContainer.reverse  {
+  flex-direction: row-reverse;
+}
+
+.exampleContainer.reverse .glassCard {
+  transform: rotateX(-20deg) rotateY(10deg) rotateZ(-2deg);
+}
+
+.glassCard img {
+  padding: 15px !important;
+  border-radius: 1.4em;
+  opacity: 1;
+}
+
+.exampleContainer.reverse .glassCard:hover, .glassCard:hover {
+  transform: rotate3d(1, 0.5, 0.1, 0deg);
+}
+
+@media (max-width: 939px) {
+  .glassCard {
+    transform: rotate3d(1, 0.5, 0.1, 0deg) !important;
+  }
+  .exampleContainer p {
+    text-align: center;
+  }
+}
+
+.glassCard.v2 {
+  box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0 );
+  transform: rotate3d(0, 0, 0, 0) !important;
+}
+
+.strip {
+  position: absolute;
+  z-index: -1;
+  max-width: 2000px;
+}
+
+.shape {
+  position: absolute;
+  z-index: -1;
+  width: 500px;
+  max-width: 100%;
+}
