@@ -52,7 +52,7 @@ export default function Home() {
                 </section>
                 <section className={styles.section}>
                     <h2>9. Privacy</h2>
-                    <Link className='link' href="/privacy">Please read our dedicated page</Link>
+                    <Link href="/privacy"><strong className='link'>Please read our dedicated page</strong></Link>
                 </section>
             </div>
         <Footer />

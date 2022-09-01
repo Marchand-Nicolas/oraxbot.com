@@ -35,6 +35,7 @@ a * {
   -webkit-text-fill-color: transparent;
   position: relative;
   font-weight: bold;
+  cursor: pointer;
 }
 
 .link::after {
