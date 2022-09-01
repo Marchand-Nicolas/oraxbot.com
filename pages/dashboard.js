@@ -99,7 +99,7 @@ export default function Dashboard() {
         if (!guild) return;
         if (!guild.id) return;
         try {
-            fetch(`${serverIp}status`, { method: 'POST', body : `{ "guildId": "${guild.id}" }` }).then(res => res.json()).then(res => {
+            fetch(`${serverIp}get_server_datas`, { method: 'POST', body : `{ "guildId": "${guild.id}", "token": "${getCookie('token')}" }` }).then(res => res.json()).then(res => {
                 if (res.result) {
                     setGuildStatus(res.status)
                 }
@@ -129,7 +129,7 @@ export default function Dashboard() {
                     checkAdminPerms(g) ?
                     <Link key={"nav_guild_" + g.id} href={"?guild=" + g.id}>
                         <div id={"guild_" + g.id} className={[styles.navGuild, !document.getElementById("guild_" + g.id) && "loading", guild.id === g.id ? styles.selected : null].join(" ")}>
-                            <img className={styles.guildIcon} onLoad={() => endImgLoading(g.id)} onError={() => imgError(g.id)} src={`https://cdn.discordapp.com/icons/${g.id}/${g.icon}.webp?size=96`} alt={g.name + " (guild icon)"} />
+                            <img className={styles.guildIcon} onLoad={() => endImgLoading(g.id)} onError={() => imgError(g.id)} src={g.icon ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.webp?size=96` : '/assets/default_guild_icon.jpg'} alt={g.name + " (guild icon)"} />
                         </div>
                     </Link> : null
                 ) : [...Array(3)].map((o, index) => <div key={"nav_guild_" + index} className={styles.navGuild} >
