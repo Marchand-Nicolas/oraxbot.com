@@ -14,7 +14,7 @@ export default function Home() {
           Interserv
           </h1>
           <p className={styles.description}>
-            Connect your favorite servers<strong className={[styles.strong, styles.v2].join(" ")}>together</strong>
+            Connect your favorite servers <strong className={[styles.strong, styles.v2].join(" ")}>together</strong>
           </p>
           <a href='#description'>
             <svg className={styles.bottomArrow} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
