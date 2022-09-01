@@ -1,6 +1,7 @@
 import styles from '../styles/Tos.module.css'
 import Footer from '../components/Footer'
 import Header from '../components/Header'
+import Link from 'next/link'
 
 export default function Home() {
     return (
@@ -51,7 +52,7 @@ export default function Home() {
                 </section>
                 <section className={styles.section}>
                     <h2>9. Privacy</h2>
-                    <a className='link' href="/privacy">Please read our dedicated page</a>
+                    <Link className='link' href="/privacy">Please read our dedicated page</Link>
                 </section>
             </div>
         <Footer />
