@@ -29,13 +29,32 @@ a * {
   cursor: pointer;
 }
 
+.link {
+  background: linear-gradient(37deg, rgb(0,161,232) 0%, #8151fc 100%);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  position: relative;
+  font-weight: bold;
+}
+
+.link::after {
+  content: "";
+  display: block;
+  height: 2px;
+  background: linear-gradient(37deg, rgb(0,161,232) 0%, #8151fc 100%);
+  transition: width .3s;
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+
 .button {
   cursor: pointer;
   border: none;
 }
 
 .button.round {
-  background: linear-gradient(37deg, rgb(0,161,232) 0%, rgb(128,244,192) 100%);
+  background: linear-gradient(37deg, rgb(0,161,232) 0%, #8151fc 100%);
   color: white;
   padding: 0.5rem 2rem;
   border-radius: 3em;
@@ -55,12 +74,12 @@ a * {
 *::-webkit-scrollbar {
   width: 12px;
   background-color: white;
-  background: linear-gradient(0deg, rgb(0,161,232) 0%, rgba(255, 255, 255, 0) calc(var(--scroll_percent) * 100% - 90%), rgba(255, 255, 255, 0) calc(var(--scroll_percent) * 100% + 90%), rgb(128,244,192) 100%);
+  background: linear-gradient(0deg, rgb(0,161,232) 0%, rgba(255, 255, 255, 0) calc(var(--scroll_percent) * 100% - 90%), rgba(255, 255, 255, 0) calc(var(--scroll_percent) * 100% + 90%), #8151fc 100%);
 }
 
 *::-webkit-scrollbar-thumb {
   background: rgb(0,161,232);
-  background: linear-gradient(0deg, rgba(255, 255, 255, 0) 0%, rgb(0,161,232) min(calc(100% - var(--scroll_percent) * 100%), 30%), rgb(128,244,192) max(calc(100% - var(--scroll_percent) * 100%), 70%), rgba(255, 255, 255, 0) 100%);
+  background: linear-gradient(0deg, rgba(255, 255, 255, 0) 0%, rgb(0,161,232) min(calc(100% - var(--scroll_percent) * 100%), 30%), #8151fc max(calc(100% - var(--scroll_percent) * 100%), 70%), rgba(255, 255, 255, 0) 100%);
 }
 
 *::selection {
@@ -87,7 +106,7 @@ a * {
 }
 
 .popup h2 {
-  background: linear-gradient(37deg, rgb(0,161,232) 0%, rgb(128,244,192) 100%);
+  background: linear-gradient(37deg, rgb(0,161,232) 0%, #8151fc 100%);
   background-clip: text;
   -webkit-text-fill-color: transparent;
   width: fit-content;
@@ -125,7 +144,7 @@ a * {
 }
 
 .popup button {
-  background: linear-gradient(37deg, rgb(0,161,232) 0%, rgb(128,244,192) 100%);
+  background: linear-gradient(37deg, rgb(0,161,232) 0%, #8151fc 100%);
   border: none;
   color: white;
   padding: 10px 20px;

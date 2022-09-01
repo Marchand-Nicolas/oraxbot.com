@@ -10,7 +10,7 @@ export default function Footer() {
             {
                 router.pathname === "/" ? <>
                 <Image src="/logo.png" alt="Captcha logo" width={50} height={50} />
-                <strong className={styles.title}>Captcha bot</strong>
+                <strong className={styles.title}>Orax bot</strong>
                 </>
                 : <Link href="/">
                     <div className={styles.goHomeContainer}>

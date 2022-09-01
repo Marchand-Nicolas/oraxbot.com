@@ -1,7 +1,7 @@
 import { render, unmountComponentAtNode } from "react-dom"
 import Image from 'next/image'
 
-export default function popup(title, description, type, datas) {
+export default function popup(title, description, type, datas={}) {
     if (typeof window === 'undefined') return
     const popupContainer = document.getElementById('popup')
     render(
@@ -13,7 +13,7 @@ export default function popup(title, description, type, datas) {
                 </div>
                 <p className="description">{description}</p>
                 {datas && datas.content ? datas.content : ""}
-                <button onClick={() => unmountComponentAtNode(document.getElementById("popup"))}>Okay</button>
+                <button onClick={() => {if (datas.action) datas.action();unmountComponentAtNode(document.getElementById("popup"))}}>Okay</button>
             </div>
         </div>,
         popupContainer

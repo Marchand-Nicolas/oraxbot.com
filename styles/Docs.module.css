@@ -15,26 +15,6 @@
     color: rgb(82, 82, 82);
 }
 
-.link {
-    color: rgb(82, 82, 82);
-    background: linear-gradient(37deg, rgb(0,161,232) 0%, rgb(128,244,192) 100%);
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    position: relative;
-    font-weight: bold;
-}
-
-.link::before {
-    content: "";
-    position: absolute;
-    top: 100%;
-    width: 100%;
-    left: 0;
-    height: 3px;
-    border-radius: 20px;
-    background: linear-gradient(37deg, rgb(0,161,232) 0%, rgb(128,244,192) 100%);
-}
-
 .section {
     padding: 0 0 0 35px;
     position: relative;

@@ -50,7 +50,7 @@
 }
 
 .goHomeContainer:hover {
-    background: linear-gradient(37deg, rgb(0,161,232) 0%, rgb(128,244,192) 100%);
+    background: linear-gradient(37deg, rgb(0,161,232) 0%, #8151fc 100%);
     background-clip: text;
     -webkit-text-fill-color: transparent;
 }

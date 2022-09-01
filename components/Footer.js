@@ -6,7 +6,7 @@ export default function Footer() {
         <footer className={styles.footer}>
             Captcha bot
             <span>
-                <Image src="/logo.png" alt="Captcha logo" width={16} height={16} />
+                <Image src="/favicon.ico" alt="Captcha logo" width={16} height={16} />
             </span>
         </footer>
     )

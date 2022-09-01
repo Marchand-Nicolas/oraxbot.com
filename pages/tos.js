@@ -1,7 +1,6 @@
 import styles from '../styles/Tos.module.css'
 import Footer from '../components/Footer'
 import Header from '../components/Header'
-import Image from 'next/image'
 
 export default function Home() {
     return (
@@ -24,7 +23,7 @@ export default function Home() {
                         <li>transferring the materials to another person or &quot;mirror&quot; the materials on any other server.</li>
                     </ul>
                     
-                    <p>This will let us to terminate upon violations of any of these restrictions. Upon termination, your viewing right will also be terminated and you should destroy any downloaded materials in your possession whether it is printed or electronic format. These Terms of Service has been created with the help of the <a href="https://www.termsofservicegenerator.net">Terms Of Service Generator</a>.</p>
+                    <p>This will let us to terminate upon violations of any of these restrictions. Upon termination, your viewing right will also be terminated and you should destroy any downloaded materials in your possession whether it is printed or electronic format. These Terms of Service has been created with the help of the <a className='link' href="https://www.termsofservicegenerator.net">Terms Of Service Generator</a>.</p>
                 </section>
                 <section className={styles.section}>
                     <h2>3. Disclaimer</h2>
@@ -52,28 +51,7 @@ export default function Home() {
                 </section>
                 <section className={styles.section}>
                     <h2>9. Privacy</h2>
-                    <p>We will not use your personal information for any purpose other than to provide the service, unless we have your permission or are otherwise required to do so by law.</p>
-                    <p>We do not store any data related to your discord server, its members, its administrators, its messages, its roles. Absolutely nothing except :</p>
-                    <ul>
-                        <li>Your discord user id if you make a purchase on our website. It will be used in these circumstances :</li>
-                        <ul>
-                            <li>Problem with a purchase, migration of the purchase</li>
-                        </ul>
-                        <li>the email address linked to your discord account, at the time of each purchase. It will be used in these circumstances :</li>
-                        <ul>
-                            <li>Problem with a purchase, migration of the purchase</li>
-                        </ul>
-                        <li>The discord server id linked to your purchase. It will be used in these circumstances :</li>
-                        <ul>
-                            <li>Check if your discord server has a paid license for the bot.</li>
-                        </ul>
-                        <li>In case of purchase with Paypal, the order ID. It will be used in these circumstances :</li>
-                        <ul>
-                            <li>Purchase a license for the bot, problem with a purchase, migration of the purchase</li>
-                        </ul>
-                    </ul>
-                    <p>We do not store any other data about you, your actions, or anything related to you, except some statistical data about your browsing (page load times, amount of visits on the website), for the sole purpose of learning about the performance of our site, including its optimization, especially in an attempt to reduce load times.</p>
-                    <p>If you wish to delete some or all of this data, please contact us to this email address : nicomarchand29@gmail.com</p>
+                    <a className='link' href="/privacy">Please read our dedicated page</a>
                 </section>
             </div>
         <Footer />

@@ -23,7 +23,7 @@
 
 .gradient {
   background: rgb(0,161,232);
-  background: linear-gradient(37deg, rgb(0,161,232) 0%, rgb(128,244,192) 40%, white 50%);
+  background: linear-gradient(37deg, rgb(0,161,232) 10%, #8151fc55 40%, white 50%);
   height: 100vh;
   width: 100%;
 	height: 100vh;
@@ -34,7 +34,7 @@
 
 .bottomArrow {
   width: 5em;
-  color: rgb(255, 255, 255);
+  color: rgb(0,161,232);
   display: block;
   margin: 1em auto;
   cursor: pointer;
@@ -52,7 +52,7 @@
   line-height: 1.15;
   font-size: 4rem;
   position: relative;
-  background: linear-gradient(37deg, rgb(0,161,232) 0%, rgb(128,244,192) 100%);
+  background: linear-gradient(37deg, rgb(0,161,232) 0%, #8151fc 100%);
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -103,7 +103,7 @@
 .card:hover,
 .card:focus,
 .card:active {
-  border-color: rgb(84, 194, 145);
+  border-color: #8151fc;
 }
 
 .card h2 {
@@ -116,7 +116,7 @@
 .card:hover h2,
 .card:focus h2,
 .card:active h2 {
-  color: rgb(84, 194, 145);
+  color: #8151fc;
   transform: translateX(15px);
 }
 

@@ -4,7 +4,7 @@
     top: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(37deg, rgb(0,161,232) 0%, rgb(128,244,192) 100%);
+    background: linear-gradient(37deg, rgb(0,161,232) 0%, #8151fc 100%);
     background-size: cover;
     transition: background-image 0.2s ease-in-out;
 }
@@ -73,7 +73,7 @@
 }
 
 .navbar::-webkit-scrollbar-thumb {
-    background: linear-gradient(37deg, rgb(0,161,232) 0%, rgb(7, 101, 59) 100%);
+    background: linear-gradient(37deg, rgb(0,161,232) 0%, #6e34ff 100%);
     position: relative;
     border-radius: 1em;
 }
@@ -127,11 +127,11 @@
 }
 
 .navbar .placeHolder {
-    background: linear-gradient(37deg, rgb(177, 177, 177) 0%, rgb(210, 255, 235) 100%);
+    background: linear-gradient(37deg, rgb(177, 177, 177) 0%, #bea5ff 100%);
 }
 
 .button {
-    background: linear-gradient(37deg, rgb(0,161,232) 0%, rgb(128,244,192) 100%);
+    background: linear-gradient(37deg, rgb(0,161,232) 0%, #8151fc 100%);
     border: none;
     color: white;
     padding: 10px 20px 10px 60px;
@@ -162,7 +162,7 @@
 }
 
 .button.buyButton.done {
-    background: linear-gradient(37deg, rgb(0,161,232) 0%, rgb(128,244,192) 50%);
+    background: linear-gradient(37deg, rgb(0,161,232) 0%, #8151fc 50%);
 }
 
 .button svg {

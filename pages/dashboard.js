@@ -7,6 +7,7 @@ import PaypalButton from "../components/PaypalButton"
 import { render } from 'react-dom'
 import popup from '../utils/popup'
 import fire from '../public/icons/fire.svg'
+import meteor from '../public/icons/meteor.svg'
 
 export default function Dashboard() {
     const serverIp = config.serverIp
@@ -138,7 +139,7 @@ export default function Dashboard() {
         </nav>
         <div className={styles.page}>
             <h1 className={styles.title}>{guild.name}</h1>
-            <a href='/docs' target="_blank" rel="noreferrer">
+            {/*<a href='/docs' target="_blank" rel="noreferrer">
                 <button className={styles.button}>
                     Documentation <strong><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path d="M12 14l9-5-9-5-9 5 9 5z" />
@@ -146,8 +147,8 @@ export default function Dashboard() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
                     </svg></strong>
                 </button>
-            </a>
-            <a href='https://discord.gg/Edb5UUsnTy' target="_blank" rel="noreferrer">
+        </a>*/}
+            <a href='https://discord.gg/PJumX8FjRV' target="_blank" rel="noreferrer">
                 <button className={styles.button}>
                     Support <strong><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -155,9 +156,23 @@ export default function Dashboard() {
                     </strong>
                 </button>
             </a>
-            
+            <button onClick={() => popup("Invite the bot", `Warning`, "warning", {
+                content: <p className='content'>
+                    It is necessary for Orax to access the content of the messages in order to synchronize them between the channels. By inviting Orax, it will be able to read all the messages of your server.<br></br>
+                    For security and privacy reasons, we suggest you to give him the permission to read the messages only in the channels the bot is concerned with.
+                </p>,
+                icon: meteor,
+                action: function() {window.open('https://discord.com/oauth2/authorize?client_id=812298057470967858&scope=bot&permissions=536871936&guild_id=' + guild.id)}
+            })} className={styles.button}>
+                Add bot
+                <strong>
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                </strong>
+            </button>
             {
-                guildStatus ? 
+                /*guildStatus ? 
                 <>
                     <button className={[styles.button, styles.buyButton, styles.done].join(" ")}>
                         Purchased <strong>10$</strong>
@@ -177,7 +192,7 @@ export default function Dashboard() {
                             Try the bot for free <strong>0$</strong>
                         </button>
                     </a>
-                </>
+                </>*/
             }
             <div id="container" key={guild.id + "_" + paymentProgress}>
 
