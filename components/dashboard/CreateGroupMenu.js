@@ -8,7 +8,7 @@ import { unmountComponentAtNode } from "react-dom"
 import meteor from "../../public/icons/meteor.svg"
 import drop from "../../public/icons/drop.svg"
 
-export default function createGroupMenu(props) {
+export default function CreateGroupMenu(props) {
     const serverIp = config.serverIp
     const [channels, setChannels] = useState([])
 
