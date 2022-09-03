@@ -5,7 +5,7 @@ export default function App () {
         <Html>
             <Head />
             <title>Orax bot</title>
-            <meta name="description" content="Captcha is a Discord bot providing an anti-bot system using a Captcha." />
+            <meta name="description" content="Orax allows you to sync channels between multiple different Discord servers, allowing great discussions of people from other servers, events, etc..." />
             <link rel="icon" href="/favicon.ico" />
             <body>
                 <Main />
