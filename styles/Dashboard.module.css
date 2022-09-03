@@ -173,3 +173,38 @@
     width: 100% !important;
     max-width: 400px !important;
 }
+
+.emptyGroupContainer {
+    width: calc(100% - 1em);
+    border: dotted 4px white;
+    padding: 1em 0.5em;
+}
+
+.emptyGroupContainer h2 {
+    text-align: center;
+}
+
+.groupContainer {
+    width: 100%;
+    margin: 0 0 1em 0;
+}
+
+.groupContainer h2 {
+    width: 100%;
+    margin: 0 0 0.5em 0;
+}
+
+.groupContainer .group {
+    width: calc(100% - 2em);
+    display: block;
+    background: rgba( 0, 0, 0, 0.25 );
+    box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+    backdrop-filter: blur( 4px );
+    -webkit-backdrop-filter: blur( 4px );
+    border-radius: 10px;
+    border: 1px solid rgba( 255, 255, 255, 0.18 );
+    color: rgb(180, 180, 180);
+    padding: 0.5em 1em;
+    cursor: pointer;
+    margin: 0.4em 0;
+}

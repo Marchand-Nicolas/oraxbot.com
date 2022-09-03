@@ -29,6 +29,11 @@ a * {
   cursor: pointer;
 }
 
+.line {
+  display: flex;
+  align-items: center;
+}
+
 .link {
   background: linear-gradient(37deg, rgb(0,161,232) 0%, #8151fc 100%);
   background-clip: text;

@@ -1,0 +1,57 @@
+.page {
+    margin: 20px 0 0 20px;
+    position: absolute;
+    padding: 0 20px;
+    width: calc(100% - 80px);
+    border-radius: 12px;
+    min-height: calc(100vh - 40px);
+    box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+    backdrop-filter: blur( 4px );
+    -webkit-backdrop-filter: blur( 4px );
+    border: 1px solid rgba( 255, 255, 255, 0.18 );
+    background: rgba( 0, 0, 0, 0.45 );
+    color: white;
+}
+
+.title {
+    color: white;
+}
+
+.inviteLink {
+    color: #8151fc;
+    font-weight: bold;
+    margin: 0 10px;
+}
+
+.regenerateInviteLink {
+    color: #ffffff;
+    font-weight: bold;
+    border:none;
+    background-color: #8151fc;
+    border-radius: 1em;
+    font-weight: bold;
+    display: block;
+    font-size: 16px;
+    padding: 5px 20px;
+    cursor: pointer;
+}
+
+.linkIcon {
+    cursor: pointer;
+    width: 27px;
+    background-color: #ffffff;
+    border-radius: 2em;
+    padding: 5px;
+    color: #8151fc;
+}
+
+.back {
+    cursor: pointer;
+    width: 40px;
+    margin-right: 20px;
+    transition: 0.2s;
+}
+
+.back:hover {
+    color: #8151fc;
+}
