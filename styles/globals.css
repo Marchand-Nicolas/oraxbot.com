@@ -54,6 +54,17 @@ a * {
   right: 0;
 }
 
+.textInput {
+  width: calc(100% - 50px);
+  font-size: 14px;
+  padding: 10px 20px;
+  border: none;
+  border: 10px solid;
+  border-image-slice: 1;
+  border-width: 5px;
+  border-image-source: linear-gradient(37deg, rgb(0,161,232) 0%, #8151fc 100%);
+}
+
 .button {
   cursor: pointer;
   border: none;
@@ -139,14 +150,6 @@ a * {
 
 .popup .description {
   color: white;
-}
-
-.popup input {
-  margin-bottom: 20px;
-  width: calc(100% - 40px);
-  font-size: 14px;
-  padding: 10px 20px;
-  border: none;
 }
 
 .popup button {

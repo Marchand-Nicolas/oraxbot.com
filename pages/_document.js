@@ -10,6 +10,7 @@ export default function App () {
             <body>
                 <Main />
                 <NextScript />
+                <div id="menu"></div>
                 <div id="popup"></div>
             </body>
         </Html>

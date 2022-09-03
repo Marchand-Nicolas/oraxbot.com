@@ -23,8 +23,8 @@ export default function JoinGroup() {
         return guild.permissions_new.toString(16) & 0x0000000000000008
     }
 
-    const currentGuildId = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get("guild") : ""
-    let guild = guilds.find(guild => guild.id === currentGuildId)
+    const guildId = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get("guild") : ""
+    let guild = guilds.find(guild => guild.id === guildId)
 
     if (!guild) {
         if (guilds.length > 0) {
@@ -54,8 +54,8 @@ export default function JoinGroup() {
         fetch(`${serverIp}preview_group`, { method: 'POST', body : `{ "linkId": "${linkId}" }` }).then(res => res.json()).then(res => {
             setGroup(res)
         })
-        if(currentGuildId) {
-            fetch(`${serverIp}get_guild_channels`, { method: 'POST', body : `{ "guildId": "${currentGuildId}" }` }).then(res => res.json()).then(res => {
+        if(guildId) {
+            fetch(`${serverIp}get_guild_channels`, { method: 'POST', body : `{ "guildId": "${guildId}" }` }).then(res => res.json()).then(res => {
                 setChannels(res)
             })
         }
@@ -106,7 +106,7 @@ export default function JoinGroup() {
                 }
             }
         }
-    }, [linkId, currentGuildId]);
+    }, [linkId, guildId]);
     let adminGuildNumber = 0
     for (let index = 0; index < guilds.length; index++) {
         const guild = guilds[index];
@@ -117,17 +117,17 @@ export default function JoinGroup() {
         <div className={dashboardStyles.background} />
         <div className={styles.page}>
             <a href="/" target="_blank" rel="noreferrer"><button className={styles.helpButton}>What is an interserver group ?</button></a>
-            {currentGuildId ?
+            {guildId ?
             channels.result ?
                 <div className={styles.channelContainer}>
                     <h2 className={styles.subtitle}>And finally, select channel</h2>
                     {channels.result.map((channel, index) => 
                         <button onClick={() => {
-                            fetch(`${serverIp}join_group_by_link`, { method: 'POST', body : `{ "linkId": "${linkId}", "guildId": "${currentGuildId}", "channelId": "${channel.id}", "token": "${getCookie('token')}" }` }).then(res => res.json()).then(res => {
+                            fetch(`${serverIp}join_group_by_link`, { method: 'POST', body : `{ "linkId": "${linkId}", "guildId": "${guildId}", "channelId": "${channel.id}", "token": "${getCookie('token')}" }` }).then(res => res.json()).then(res => {
                                 if (res.error) popup("Error", res.error, "error")
                                 else {
                                     popup("Success", "You have successfully joined the group !", "success")
-                                    router.push(`/dashboard?guild=${currentGuildId}`)
+                                    router.push(`/dashboard?guild=${guildId}`)
                                 }
                                 console.log(res)
                             })
@@ -140,7 +140,7 @@ export default function JoinGroup() {
                     For security and privacy reasons, we suggest you to give him the permission to read the messages only in the channels the bot is concerned with.
                 </p>,
                 icon: meteor,
-                action: function() {window.open('https://discord.com/oauth2/authorize?client_id=812298057470967858&scope=bot&permissions=536871936&guild_id=' + currentGuildId)}
+                action: function() {window.open('https://discord.com/oauth2/authorize?client_id=812298057470967858&scope=bot&permissions=536871936&guild_id=' + guildId)}
             })} className={styles.addOraxButton}>
                 You must add orax to your server to continue
             </button>

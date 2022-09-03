@@ -8,6 +8,7 @@ import { render } from 'react-dom'
 import popup from '../../utils/popup'
 import fire from '../../public/icons/fire.svg'
 import meteor from '../../public/icons/meteor.svg'
+import CreateGroupMenu from '../../components/dashboard/CreateGroupMenu'
 
 export default function Dashboard() {
     const serverIp = config.serverIp
@@ -15,6 +16,7 @@ export default function Dashboard() {
     const [guilds, setGuilds] = useState([])
     const [guildDatas, setGuildDatas] = useState({})
     const [paymentProgress, setPaymentProgress] = useState(0)
+    const [refreshGuildDatas, setRefreshGuildDatas] = useState(false)
     useEffect(() => {
         let token = getCookie('token')
         if (!token || token === 'undefined') {
@@ -73,8 +75,8 @@ export default function Dashboard() {
         guildElement.classList.remove("loading")
     }
 
-    const currentGuildId = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get("guild") : ""
-    let guild = guilds.find(guild => guild.id === currentGuildId)
+    const guildId = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get("guild") : ""
+    let guild = guilds.find(guild => guild.id === guildId)
     
     function checkAdminPerms(guild) {
         // Check if user has admin permission on this guild (https://discord.com/developers/docs/topics/permissions)
@@ -96,6 +98,7 @@ export default function Dashboard() {
     }
 
     useEffect(() => {
+        if (refreshGuildDatas) return setRefreshGuildDatas(false)
         if (!guild) return;
         if (!guild.id) return;
         try {
@@ -119,8 +122,8 @@ export default function Dashboard() {
                 icon: fire
             })
         }
-    }, [guild, paymentProgress]);
-
+    }, [guild, paymentProgress, refreshGuildDatas]);
+    
     return <>
         <div style={{backgroundImage: guild.icon ? `url('https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.webp?size=96')` : null}} className={styles.background} />
         <nav className={styles.navbar}>
@@ -150,8 +153,8 @@ export default function Dashboard() {
         </a>*/}
             <a href='https://discord.gg/PJumX8FjRV' target="_blank" rel="noreferrer">
                 <button className={styles.button}>
-                    Support <strong><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+                    Support <strong><svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.712 4.33a9.027 9.027 0 011.652 1.306c.51.51.944 1.064 1.306 1.652M16.712 4.33l-3.448 4.138m3.448-4.138a9.014 9.014 0 00-9.424 0M19.67 7.288l-4.138 3.448m4.138-3.448a9.014 9.014 0 010 9.424m-4.138-5.976a3.736 3.736 0 00-.88-1.388 3.737 3.737 0 00-1.388-.88m2.268 2.268a3.765 3.765 0 010 2.528m-2.268-4.796a3.765 3.765 0 00-2.528 0m4.796 4.796c-.181.506-.475.982-.88 1.388a3.736 3.736 0 01-1.388.88m2.268-2.268l4.138 3.448m0 0a9.027 9.027 0 01-1.306 1.652c-.51.51-1.064.944-1.652 1.306m0 0l-3.448-4.138m3.448 4.138a9.014 9.014 0 01-9.424 0m5.976-4.138a3.765 3.765 0 01-2.528 0m0 0a3.736 3.736 0 01-1.388-.88 3.737 3.737 0 01-.88-1.388m2.268 2.268L7.288 19.67m0 0a9.024 9.024 0 01-1.652-1.306 9.027 9.027 0 01-1.306-1.652m0 0l4.138-3.448M4.33 16.712a9.014 9.014 0 010-9.424m4.138 5.976a3.765 3.765 0 010-2.528m0 0c.181-.506.475-.982.88-1.388a3.736 3.736 0 011.388-.88m-2.268 2.268L4.33 7.288m6.406 1.18L7.288 4.33m0 0a9.024 9.024 0 00-1.652 1.306A9.025 9.025 0 004.33 7.288" />
                     </svg>
                     </strong>
                 </button>
@@ -159,6 +162,14 @@ export default function Dashboard() {
             {
                 guildDatas.bot ? 
                 <>
+                    <button onClick={() => render(<CreateGroupMenu guildId={guildId} setRefreshGuildDatas={setRefreshGuildDatas} />, document.getElementById('menu'))} className={styles.button}>
+                        Create an interserver group
+                        <strong>
+                        <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12.75 3.03v.568c0 .334.148.65.405.864l1.068.89c.442.369.535 1.01.216 1.49l-.51.766a2.25 2.25 0 01-1.161.886l-.143.048a1.107 1.107 0 00-.57 1.664c.369.555.169 1.307-.427 1.605L9 13.125l.423 1.059a.956.956 0 01-1.652.928l-.679-.906a1.125 1.125 0 00-1.906.172L4.5 15.75l-.612.153M12.75 3.031a9 9 0 00-8.862 12.872M12.75 3.031a9 9 0 016.69 14.036m0 0l-.177-.529A2.25 2.25 0 0017.128 15H16.5l-.324-.324a1.453 1.453 0 00-2.328.377l-.036.073a1.586 1.586 0 01-.982.816l-.99.282c-.55.157-.894.702-.8 1.267l.073.438c.08.474.49.821.97.821.846 0 1.598.542 1.865 1.345l.215.643m5.276-3.67a9.012 9.012 0 01-5.276 3.67m0 0a9 9 0 01-10.275-4.835M15.75 9c0 .896-.393 1.7-1.016 2.25" />
+                        </svg>
+                        </strong>
+                    </button>
                     {guildDatas.ownedGroups.length ? <section className={styles.groupContainer}>
                         <h2>Owned groups</h2>
                         {
