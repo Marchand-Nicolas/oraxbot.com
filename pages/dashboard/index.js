@@ -159,7 +159,7 @@ export default function Dashboard() {
             {
                 guildDatas.bot ? 
                 <>
-                    {guildDatas.ownedGroups ? <section className={styles.groupContainer}>
+                    {guildDatas.ownedGroups.length ? <section className={styles.groupContainer}>
                         <h2>Owned groups</h2>
                         {
                             guildDatas.ownedGroups.map(group => <Link key={"ownedGroup_" + group.id} href={`/dashboard/ownedgroup/${group.id}?guild=${guild.id}&icon=${guild.icon}&groupName=${group.name}`}><div className={styles.group}>{group.name}</div></Link>)

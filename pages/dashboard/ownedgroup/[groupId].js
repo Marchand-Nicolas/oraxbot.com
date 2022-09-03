@@ -27,7 +27,7 @@ export default function OwnedGroup() {
     const guildIcon = params.get('icon')
     const groupName = params.get('groupName')
     return <>
-        <div style={{backgroundImage: guildIcon ? `url('https://cdn.discordapp.com/icons/${guildId}/${guildIcon}.webp?size=96')` : null}} className={dashboardStyles.background} />
+        <div style={{backgroundImage: guildIcon && guildIcon != 'null' ? `url('https://cdn.discordapp.com/icons/${guildId}/${guildIcon}.webp?size=96')` : null}} className={dashboardStyles.background} />
         <div className={styles.page}>
             <div className='line'>
                 <Link href={'../?guild=' + guildId}>
