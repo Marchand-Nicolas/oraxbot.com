@@ -6,6 +6,7 @@ import config from '../../../utils/config'
 import { getCookie } from '../../../utils/cookies'
 import popup from '../../../utils/popup'
 import drop from '../../../public/icons/drop.svg'
+import meteor from '../../../public/icons/meteor.svg'
 import Link from 'next/link'
 
 export default function OwnedGroup() {
@@ -48,6 +49,16 @@ export default function OwnedGroup() {
                     setLink( "https://oraxbot.com/join/" + datas.link)
                 }
             })} className={styles.regenerateInviteLink}>Regenerate invite link</button>
+            <br></br>
+            <button onClick={() => 
+                popup("Delete the group", "This action is irreversible. All channels linked to your group will be unlinked.", "error", { icon: meteor, close: true, customButtonName: "Delete", action: function() {
+                    fetch(`${serverIp}delete_interserv_group`, { method: 'POST', body : `{ "token": "${getCookie('token')}", "groupId": ${groupId}, "guildId":"${guildId}" }`}).then(res => res.json()).then(datas => {
+                        if (datas.result) {
+                            router.push('../?guild=' + guildId)
+                        }
+                    })
+                }})
+            } className={styles.deleteGroup}>Delete the group</button>
         </div>
     </>
 }

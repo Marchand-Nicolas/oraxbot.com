@@ -52,7 +52,7 @@ export default function CreateGroupMenu(props) {
                             popup("Error", "A single server cannot have more than 10 groups", "error", { icon: meteor })
                         break;
                         default:
-                            popup("Error", "Unknown error; Error code : " + res.error, "error", { icon: meteor })
+                            popup("Error", `Unknown error; Error code : ${res.error}${res.customError && ("; Custom error : " + res.customError)}`, "error", { icon: meteor })
                         break;
                     }
                 }

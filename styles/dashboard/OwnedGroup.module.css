@@ -36,6 +36,19 @@
     cursor: pointer;
 }
 
+.deleteGroup {
+    color: #ffffff;
+    font-weight: bold;
+    border:none;
+    background-color: #fc5151;
+    border-radius: 1em;
+    font-weight: bold;
+    display: block;
+    font-size: 16px;
+    padding: 5px 20px;
+    cursor: pointer;
+}
+
 .linkIcon {
     cursor: pointer;
     width: 27px;

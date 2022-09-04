@@ -168,6 +168,19 @@ a * {
   margin: 0 auto;
 }
 
+.popup .close {
+  position: absolute;
+  width: 40px;
+  right: 5px;
+  top: 5px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.popup .close:hover {
+  transform: rotate(180deg);
+}
+
 .loading::after {
   content: '';
   position: absolute;
