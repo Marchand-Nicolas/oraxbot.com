@@ -147,8 +147,10 @@ export default function JoinGroup() {
 
             : 
             
-            <div className={styles.selectGuildContainer}>
-                <h1 className={styles.title}>You have been invited to join the {group.name} interserver group.</h1>
+            (guilds.length && group.hasOwnProperty('error')) ? 
+            <h1 className={styles.title}>The invitation link has expired</h1>
+            : <div className={styles.selectGuildContainer}>
+                <h1 className={styles.title}>You have been invited to join the {group.name ? group.name : "..."} interserver group.</h1>
                 <h2 className={styles.subtitle}>Select a server to join the group.</h2>
                 <div style={{maxWidth: adminGuildNumber > 9 ? '1000px' : '500px'}} className={styles.guilds}>
                 {
