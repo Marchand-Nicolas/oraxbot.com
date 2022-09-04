@@ -48,11 +48,14 @@ export default function CreateGroupMenu(props) {
                 console.log(res)
                 if (res.error) {
                     switch (res.error) {
+                        case 1:
+                            popup("Error", 'You must give the "Manage Webhooks" permission to the bot', "error", { icon: meteor })
+                        break;
                         case 2:
                             popup("Error", "A single server cannot have more than 10 groups", "error", { icon: meteor })
                         break;
                         default:
-                            popup("Error", `Unknown error; Error code : ${res.error}${res.customError && ("; Custom error : " + res.customError)}`, "error", { icon: meteor })
+                            popup("Error", `Unknown error; Error code : ${res.error}${res.customError ? ("; Custom error : " + res.customError) : ''}`, "error", { icon: meteor })
                         break;
                     }
                 }
