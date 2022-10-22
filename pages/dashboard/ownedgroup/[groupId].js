@@ -55,7 +55,7 @@ export default function OwnedGroup() {
             {channels.length ?
             <section>
                 <h2>Linked channels</h2>
-                <div className={styles.channelList}>
+                <div>
                     {channels.map((channel, index) => <div key={"channel_" + index} className={styles.channelContainer}>
                         <p>{channel.guildName}</p>
                         <svg className={styles.channelIcon} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
