@@ -69,3 +69,39 @@
 .back:hover {
     color: #8151fc;
 }
+
+.channelList {
+    
+}
+
+.channelContainer {
+    display: flex;
+    align-items: center;
+    background-color: rgba(128, 128, 128, 0.333);
+    width: fit-content;
+    padding: 5px 15px;
+    border-radius: 2em;
+    margin: 10px 0;
+}
+
+.channelContainer p {
+    margin: 0;
+}
+
+.channelIcon {
+    width: 20px;
+    margin-right: 5px;
+    margin-left: 5px;
+}
+
+.removeChannelIcon {
+    width: 20px;
+    margin-left: 15px;
+    color: rgb(255, 100, 100);
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.removeChannelIcon:hover {
+    color: red;
+}
