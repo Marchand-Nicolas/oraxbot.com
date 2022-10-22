@@ -76,7 +76,7 @@ export default function Dashboard() {
     }
 
     const guildId = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get("guild") : ""
-    let guild = guilds.find(guild => guild.id === guildId)
+    let guild = guilds ? guilds.find(guild => guild.id === guildId) : undefined
     
     function checkAdminPerms(guild) {
         // Check if user has admin permission on this guild (https://discord.com/developers/docs/topics/permissions)
