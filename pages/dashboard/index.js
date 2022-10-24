@@ -9,14 +9,17 @@ import popup from '../../utils/popup'
 import fire from '../../public/icons/fire.svg'
 import meteor from '../../public/icons/meteor.svg'
 import CreateGroupMenu from '../../components/dashboard/CreateGroupMenu'
+import Settings from './settings'
 
 export default function Dashboard() {
     const serverIp = config.serverIp
     const [user, setUser] = useState(undefined)
     const [guilds, setGuilds] = useState([])
     const [guildDatas, setGuildDatas] = useState({})
+    const [settings, setSettings] = useState({ lang: 0 })
     const [paymentProgress, setPaymentProgress] = useState(0)
     const [refreshGuildDatas, setRefreshGuildDatas] = useState(false)
+
     useEffect(() => {
         let token = getCookie('token')
         if (!token || token === 'undefined') {
@@ -105,6 +108,7 @@ export default function Dashboard() {
             fetch(`${serverIp}get_server_datas`, { method: 'POST', body : `{ "guildId": "${guild.id}", "token": "${getCookie('token')}" }` }).then(res => res.json()).then(res => {
                 if (res.result) {
                     setGuildDatas(res)
+                    setSettings(res.settings)
                 }
                 else {
                     requestError()
@@ -159,6 +163,7 @@ export default function Dashboard() {
                     </strong>
                 </button>
             </a>
+            <br></br>
             {
                 guildDatas.bot ? 
                 <>
@@ -170,6 +175,7 @@ export default function Dashboard() {
                         </svg>
                         </strong>
                     </button>
+                    <br></br>
                     {guildDatas.ownedGroups.length ? <section className={styles.groupContainer}>
                         <h2>Owned groups</h2>
                         {
@@ -178,6 +184,7 @@ export default function Dashboard() {
                     </section> : <section className={styles.emptyGroupContainer}><h2>This server does not own any group</h2></section>}
                     <br></br>
                     <br></br>
+                    <Settings key={"settingsGuild_" + guildId} guildId={guildId} settings={settings} />
                     {/*guildDatas.connectedGroups ? null : <section className={styles.emptyGroupContainer}><h2>This server isn't connected to any group</h2></section>*/}
                 </> :
             <button onClick={() => popup("Invite the bot", `Warning`, "warning", {

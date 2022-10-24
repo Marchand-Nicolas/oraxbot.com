@@ -1,3 +1,8 @@
 {
-    "serverIp": "https://api.oraxbot.com/"
+    "serverIp": "https://api.oraxbot.com/",
+    "serverLanguages": [
+        "English",
+        "Français",
+        "Español"
+    ]
 }
