@@ -182,8 +182,6 @@ export default function Dashboard() {
                             guildDatas.ownedGroups.map(group => <Link key={"ownedGroup_" + group.id} href={`/dashboard/ownedgroup/${group.id}?guild=${guild.id}&icon=${guild.icon}&groupName=${group.name}`}><div className={styles.group}>{group.name}</div></Link>)
                         }
                     </section> : <section className={styles.emptyGroupContainer}><h2>This server does not own any group</h2></section>}
-                    <br></br>
-                    <br></br>
                     <Settings key={"settingsGuild_" + guildId} guildId={guildId} settings={settings} />
                     {/*guildDatas.connectedGroups ? null : <section className={styles.emptyGroupContainer}><h2>This server isn't connected to any group</h2></section>*/}
                 </> :
