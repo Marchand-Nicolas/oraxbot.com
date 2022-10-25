@@ -191,7 +191,7 @@ export default function Dashboard() {
                     For security and privacy reasons, we suggest you to give him the permission to read the messages only in the channels the bot is concerned with.
                 </p>,
                 icon: meteor,
-                action: function() {window.open('https://discord.com/oauth2/authorize?client_id=812298057470967858&scope=bot&permissions=536871936&guild_id=' + guild.id)}
+                action: function() {window.open(config.inviteLink + '&guild_id=' + guild.id)}
             })} className={styles.button}>
                 Add bot
                 <strong>

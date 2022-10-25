@@ -4,5 +4,6 @@
         "English",
         "Español",
         "Français"
-    ]
+    ],
+    "inviteLink": "https://discord.com/oauth2/authorize?client_id=812298057470967858&scope=bot&permissions=537144384"
 }
