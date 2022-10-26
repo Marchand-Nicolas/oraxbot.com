@@ -22,12 +22,15 @@ export default function Dashboard() {
 
     useEffect(() => {
         let token = getCookie('token')
-        if (!token || token === 'undefined') {
-            const code = new URLSearchParams(window.location.search).get("code")
+        const params = new URLSearchParams(window.location.search)
+        const state = params.get("state")
+        if (!token || token === 'undefined' || state) {
+            const code = params.get("code")
             if (code) {
                 fetch(`${serverIp}login`, { method: 'POST', body : `{ "token": "${code}" }` }).then(res => res.json()).then(res => {
                     if (!res.access_token || res.access_token === 'undefined') {
-                        window.location.href = '/dashboard'
+                        if (state) window.location.href = state
+                        else window.location.href = '/dashboard'
                     }
                     else {
                         setCookie('token', res.access_token, res.expires_in - 1000)
