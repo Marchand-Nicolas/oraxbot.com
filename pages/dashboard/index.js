@@ -29,7 +29,6 @@ export default function Dashboard() {
             const code = params.get("code")
             if (code) {
                 fetch(`${serverIp}login`, { method: 'POST', body : `{ "token": "${code}" }` }).then(res => res.json()).then(res => {
-                    console.log(res)
                     if (!res.access_token || res.access_token === 'undefined') {
                         window.location.href = '/dashboard'
                     }
