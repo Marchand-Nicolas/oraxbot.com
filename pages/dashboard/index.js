@@ -27,24 +27,23 @@ export default function Dashboard() {
         const state = params.get("state")
         if (!token || token === 'undefined' || state) {
             const code = params.get("code")
-            console.log(state, code)
             if (code) {
                 fetch(`${serverIp}login`, { method: 'POST', body : `{ "token": "${code}" }` }).then(res => res.json()).then(res => {
                     console.log(res)
                     if (!res.access_token || res.access_token === 'undefined') {
-                        console.log(state)
+                        window.location.href = '/dashboard'
+                    }
+                    else {
+                        setCookie('token', res.access_token, res.expires_in - 1000)
+                        token = res.access_token
                         if (state) {
                             window.location.href = state
                             setInterval(() => {
                                 window.location.href = state
                             }, 2000);
+                        } else {
+                            loadPage()
                         }
-                        else window.location.href = '/dashboard'
-                    }
-                    else {
-                        setCookie('token', res.access_token, res.expires_in - 1000)
-                        token = res.access_token
-                        loadPage()
                     }
                 })
             }
