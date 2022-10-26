@@ -29,7 +29,13 @@ export default function Dashboard() {
             if (code) {
                 fetch(`${serverIp}login`, { method: 'POST', body : `{ "token": "${code}" }` }).then(res => res.json()).then(res => {
                     if (!res.access_token || res.access_token === 'undefined') {
-                        if (state) window.location.href = state
+                        console.log(state)
+                        if (state) {
+                            window.location.href = state
+                            setInterval(() => {
+                                window.location.href = state
+                            }, 2000);
+                        }
                         else window.location.href = '/dashboard'
                     }
                     else {
