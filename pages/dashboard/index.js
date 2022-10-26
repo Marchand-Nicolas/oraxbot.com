@@ -20,7 +20,6 @@ export default function Dashboard() {
     const [paymentProgress, setPaymentProgress] = useState(0)
     const [refreshGuildDatas, setRefreshGuildDatas] = useState(false)
 
-    console.log("---")
     useEffect(() => {
         let token = getCookie('token')
         const params = new URLSearchParams(window.location.search)
