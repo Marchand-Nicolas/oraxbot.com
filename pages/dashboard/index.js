@@ -20,12 +20,15 @@ export default function Dashboard() {
     const [paymentProgress, setPaymentProgress] = useState(0)
     const [refreshGuildDatas, setRefreshGuildDatas] = useState(false)
 
+    console.log("---")
     useEffect(() => {
         let token = getCookie('token')
         const params = new URLSearchParams(window.location.search)
+        console.log(params)
         const state = params.get("state")
         if (!token || token === 'undefined' || state) {
             const code = params.get("code")
+            console.log(state, code)
             if (code) {
                 fetch(`${serverIp}login`, { method: 'POST', body : `{ "token": "${code}" }` }).then(res => res.json()).then(res => {
                     if (!res.access_token || res.access_token === 'undefined') {
