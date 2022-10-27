@@ -92,7 +92,8 @@ export default function Dashboard() {
     
     function checkAdminPerms(guild) {
         // Check if user has admin permission on this guild (https://discord.com/developers/docs/topics/permissions)
-        return guild.permissions_new.toString(16) & 0x0000000000000008
+        const permissions = guild.permissions_new.toString(16)
+        return permissions & 0x0000000000000032
     }
 
     if (!guild) {
