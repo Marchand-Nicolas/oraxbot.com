@@ -20,7 +20,7 @@ export default function JoinGroup() {
 
     function checkAdminPerms(guild) {
         // Check if user has admin permission on this guild (https://discord.com/developers/docs/topics/permissions)
-        return guild.permissions_new.toString(16) & 0x0000000000000008
+        return guild.permissions_new.toString(16) & 0x0000000000000032
     }
 
     const guildId = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get("guild") : ""
