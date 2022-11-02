@@ -87,7 +87,8 @@ export default function Dashboard() {
         guildElement.classList.remove("loading")
     }
 
-    const guildId = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get("guild") : ""
+    const urlGuildId = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get("guild") : ""
+    const guildId = urlGuildId || guilds[0]?.id
     let guild = guilds ? guilds.find(guild => guild.id === guildId) : undefined
     
     function checkAdminPerms(guild) {
