@@ -17,8 +17,10 @@ export default function CreateGroupMenu(props) {
             fetch(`${serverIp}get_guild_channels`, { method: 'POST', body : `{ "guildId": "${props.guildId}" }` }).then(res => res.json()).then(res => {
                 setChannels(res.result)
             })
-        }
+        } else console.log(props)
     }, [props])
+
+
     return <div className={"popup"}>
     <div className="container">
         <div>
