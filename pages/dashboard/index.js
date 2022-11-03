@@ -88,7 +88,7 @@ export default function Dashboard() {
     }
 
     const urlGuildId = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get("guild") : ""
-    const guildId = urlGuildId || guilds[0]?.id
+    const guildId = urlGuildId || guilds.find(g => g.permissions_new & 0x0000000000000032)?.id
     let guild = guilds ? guilds.find(guild => guild.id === guildId) : undefined
     
     function checkAdminPerms(guild) {
