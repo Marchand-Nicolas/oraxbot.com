@@ -120,7 +120,7 @@ export default function JoinGroup() {
             {guildId ?
             channels.result ?
                 <div className={styles.channelContainer}>
-                    <h2 className={styles.subtitle}>And finally, select channel</h2>
+                    <h2 className={styles.subtitle}>And finally, select a channel</h2>
                     {channels.result.map((channel, index) => 
                         <button onClick={() => {
                             fetch(`${serverIp}join_group_by_link`, { method: 'POST', body : `{ "linkId": "${linkId}", "guildId": "${guildId}", "channelId": "${channel.id}", "token": "${getCookie('token')}" }` }).then(res => res.json()).then(res => {
