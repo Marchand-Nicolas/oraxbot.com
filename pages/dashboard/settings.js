@@ -22,7 +22,7 @@ export default function Settings(props) {
     }
 
     return <>
-            <h2>Settings</h2>
+            <h2>⚙️ Settings</h2>
             <div className={[styles.parameter, 'line'].join(' ')}>
                 <p className={styles.parameterName}>Language</p>
                 <select key={"guild_" + props.guildId + "_" + settings.lang} id="selectLang" onChange={(e) => updateSettings(e, 'lang')} defaultValue={settings.lang} className={['input', styles.parameterInput].join(' ')}>

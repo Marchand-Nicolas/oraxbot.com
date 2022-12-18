@@ -198,13 +198,13 @@ export default function Dashboard() {
                     </button>
                     <br></br>
                     {guildDatas.ownedGroups.length ? <section className={styles.groupContainer}>
-                        <h2>Owned groups</h2>
+                        <h2>📺 Owned groups</h2>
                         {
                             guildDatas.ownedGroups.map(group => <Link key={"ownedGroup_" + group.id} href={`/dashboard/ownedgroup/${group.id}?guild=${guild.id}&icon=${guild.icon}&groupName=${group.name}`}><div className={styles.group}>{group.name}</div></Link>)
                         }
                     </section> : <section className={styles.emptyGroupContainer}><h2>This server does not own any group</h2></section>}
                     <Settings key={"settingsGuild_" + guildId} guildId={guildId} settings={settings} />
-                    <h2>Service limits</h2>
+                    <h2>🚫 Service limits</h2>
                     <section className={styles.section}>
                         <p className='hint'>
                             There are no paid products for Orax, everything is free.
