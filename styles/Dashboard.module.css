@@ -68,12 +68,12 @@
 }
 
 .navbar::-webkit-scrollbar {
-    width: 12px;
+    width: 5px;
     background: transparent;
 }
 
 .navbar::-webkit-scrollbar-thumb {
-    background: linear-gradient(37deg, rgb(0,161,232) 0%, #6e34ff 100%);
+    background: white;
     position: relative;
     border-radius: 1em;
 }
