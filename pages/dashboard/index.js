@@ -10,6 +10,7 @@ import fire from '../../public/icons/fire.svg'
 import meteor from '../../public/icons/meteor.svg'
 import CreateGroupMenu from '../../components/dashboard/CreateGroupMenu'
 import Settings from './settings'
+import Loading from '../../components/Loading'
 
 export default function Dashboard() {
     const serverIp = config.serverIp
@@ -19,6 +20,7 @@ export default function Dashboard() {
     const [settings, setSettings] = useState({ lang: 0 })
     const [paymentProgress, setPaymentProgress] = useState(0)
     const [refreshGuildDatas, setRefreshGuildDatas] = useState(false)
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         let token = getCookie('token')
@@ -57,6 +59,11 @@ export default function Dashboard() {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json', 'Authorization': 'Bearer ' + token },
             })).json()
+            if (userDatas.retry_after) {
+                setTimeout(() => {
+                    loadPage();
+                }, userDatas.retry_after + 50)
+            }
             if (userDatas.message === '401: Unauthorized') {
                 setCookie('token', '', 0)
                 window.location.href = '/dashboard'
@@ -69,10 +76,13 @@ export default function Dashboard() {
                 })).json()
                 if (guilds.retry_after) {
                     setTimeout(() => {
-                        window.location.reload();
-                    }, guilds.retry_after)
+                        loadPage();
+                    }, guilds.retry_after + 50)
                 }
-                setGuilds(guilds)
+                if (guilds)  {
+                    setGuilds(guilds);
+                    setLoading(false);
+                }
             }
         }
     }, []);
@@ -88,8 +98,8 @@ export default function Dashboard() {
     }
 
     const urlGuildId = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get("guild") : ""
-    const guildId = urlGuildId || guilds.find(g => g.permissions_new & 0x0000000000000032)?.id
-    let guild = guilds ? guilds.find(guild => guild.id === guildId) : undefined
+    const guildId = urlGuildId || guilds?.find(g => g.permissions_new & 0x0000000000000032)?.id
+    let guild = guilds?.find(guild => guild.id === guildId)
     
     function checkAdminPerms(guild) {
         // Check if user has admin permission on this guild (https://discord.com/developers/docs/topics/permissions)
@@ -99,7 +109,7 @@ export default function Dashboard() {
 
     if (!guild) {
         if (guilds.length > 0) {
-            guild = guilds.find(guild => checkAdminPerms(guild))
+            guild = guilds?.find(guild => checkAdminPerms(guild))
         }
         if (!guild) guild = {
             "id": "",
@@ -240,5 +250,6 @@ export default function Dashboard() {
             </div>
             <br></br>
         </div>
+        {loading && <Loading />}
     </>
 }

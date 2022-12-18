@@ -34,6 +34,11 @@ a * {
   align-items: center;
 }
 
+.line * {
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
 .link {
   background: linear-gradient(37deg, rgb(0,161,232) 0%, #8151fc 100%);
   background-clip: text;
@@ -58,11 +63,16 @@ a * {
   width: calc(100% - 50px);
   font-size: 14px;
   padding: 10px 20px;
-  border: none;
   border: 10px solid;
   border-image-slice: 1;
   border-width: 5px;
   border-image-source: linear-gradient(37deg, rgb(0,161,232) 0%, #8151fc 100%);
+}
+
+.textInput.normal {
+  border: gray solid 2px;
+  border-image-slice : unset;
+  border-image-source: unset;
 }
 
 .button {
@@ -76,6 +86,20 @@ a * {
   padding: 0.5rem 2rem;
   border-radius: 3em;
   width: fit-content;
+}
+
+.button.dangerous {
+  background: #fc5151;
+  font-weight: bold;
+}
+
+.button.normal {
+  background: gray;
+}
+
+.button.border.normal {
+  background: transparent;
+  border: gray solid 1px;
 }
 
 .button.center {
@@ -153,6 +177,11 @@ a * {
 }
 
 .popup button {
+  width: 100% !important;
+  margin-top: 10px;
+}
+
+.popup button.default {
   background: linear-gradient(37deg, rgb(0,161,232) 0%, #8151fc 100%);
   border: none;
   color: white;
@@ -162,7 +191,6 @@ a * {
   font-size: 14px;
   cursor: pointer;
   position: relative;
-  width: 100%;
   display: block;
   text-align: center;
   margin: 0 auto;

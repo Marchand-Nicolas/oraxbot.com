@@ -6,11 +6,12 @@ import config from '../../../utils/config'
 import { getCookie } from '../../../utils/cookies'
 import popup from '../../../utils/popup'
 import drop from '../../../public/icons/drop.svg'
-import meteor from '../../../public/icons/meteor.svg'
+import fire from '../../../public/icons/fire.svg'
 import Link from 'next/link'
 
 export default function OwnedGroup() {
     const serverIp = config.serverIp
+    const apiV2 = config.apiV2
     const router = useRouter()
     const { groupId } = router.query
     const [link, setLink] = useState('')
@@ -77,15 +78,43 @@ export default function OwnedGroup() {
             :
             <section className={dashboardStyles.emptyGroupContainer}><h2>No channels linked to this group. Use or share the invite link to start adding more channels</h2></section>}
             <br></br>
-            <button onClick={() => 
-                popup("Delete the group", "This action is irreversible. All channels linked to your group will be unlinked.", "error", { icon: meteor, close: true, customButtonName: "Delete", action: function() {
-                    fetch(`${serverIp}delete_interserv_group`, { method: 'POST', body : `{ "token": "${getCookie('token')}", "groupId": ${groupId}, "guildId":"${guildId}" }`}).then(res => res.json()).then(datas => {
-                        if (datas.result) {
-                            router.push('../?guild=' + guildId)
+            <div className='line'>
+                <button onClick={() => 
+                    popup("Rename the group", <div></div>, "error", { icon: drop, close: true, buttons: [
+                        {
+                            name: "Cancel",
+                            className: "border normal"
+                        },
+                        {
+                            name: "Rename",
+                            className: "normal",
+                            action: function() {
+                                fetch(`${apiV2}rename_interserv_group`, { method: 'POST', body : `{ "token": "${getCookie('token')}", "groupId": ${groupId}, "guildId":"${guildId}", "newName": "${document.getElementById('renameGroupInput').value}" }`}).then(res => res.json()).then(datas => {
+                                    if (datas.result) {
+                                        router.push('../?guild=' + guildId)
+                                    }
+                                })
+                            }
                         }
-                    })
-                }})
-            } className={styles.deleteGroup}>Delete the group</button>
+                    ], action: function() {
+                        fetch(`${serverIp}delete_interserv_group`, { method: 'POST', body : `{ "token": "${getCookie('token')}", "groupId": ${groupId}, "guildId":"${guildId}" }`}).then(res => res.json()).then(datas => {
+                            if (datas.result) {
+                                router.push('../?guild=' + guildId)
+                            }
+                        })
+                    },
+                    content: <input id='renameGroupInput' className='textInput normal' placeholder='New group name'></input>})
+                } className='button round normal'>Rename</button>
+                <button onClick={() => 
+                    popup("Delete the group", "This action is irreversible. All channels linked to your group will be unlinked.", "error", { icon: fire, close: true, customButtonName: "Delete", action: function() {
+                        fetch(`${serverIp}delete_interserv_group`, { method: 'POST', body : `{ "token": "${getCookie('token')}", "groupId": ${groupId}, "guildId":"${guildId}" }`}).then(res => res.json()).then(datas => {
+                            if (datas.result) {
+                                router.push('../?guild=' + guildId)
+                            }
+                        })
+                    }})
+                } className='button round dangerous'>Delete the group</button>
+            </div>
         </div>
     </>
 }
