@@ -87,7 +87,6 @@ export default function OwnedGroup() {
                         },
                         {
                             name: "Rename",
-                            className: "normal",
                             action: function() {
                                 fetch(`${apiV2}rename_interserv_group`, { method: 'POST', body : `{ "token": "${getCookie('token')}", "groupId": ${groupId}, "guildId":"${guildId}", "newName": "${document.getElementById('renameGroupInput').value}" }`}).then(res => res.json()).then(datas => {
                                     if (datas.result) {
