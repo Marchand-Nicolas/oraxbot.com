@@ -4,7 +4,6 @@ import Image from 'next/image'
 export default function popup(title, description, type, datas={}) {
     if (typeof window === 'undefined') return
     const popupContainer = document.getElementById('popup')
-    console.log(datas)
     render(
         <div className={["popup", type].join(" ")}>
             <div className="container">
