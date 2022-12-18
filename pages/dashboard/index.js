@@ -206,6 +206,13 @@ export default function Dashboard() {
                     <Settings key={"settingsGuild_" + guildId} guildId={guildId} settings={settings} />
                     <h2>Service limits</h2>
                     <section className={styles.section}>
+                        <p className='hint'>
+                            There are no paid products for Orax, everything is free.
+                            <br />
+                            However, to avoid abuse, we have set limits that we hope will not harm your experience.
+                            <br />
+                            If you need to exceed them, please contact us.
+                        </p>
                         <div className='line wrap'>
                             <p>{guildDatas.ownedGroups.length || '0'}/100 owned groups</p>
                             <div className={[styles.progress, 'progress'].join(' ')}><div className='shrinker' style={{width: guildDatas.ownedGroups.length + '%'}} /></div>

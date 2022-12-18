@@ -24,11 +24,11 @@ export default function Home() {
         </div>
       </section>
       <section id="description">
-        <br></br>
-        <br></br>
-        <br></br>
-        <br></br>
-        <br></br>
+      <br />
+        <br />
+        <br />
+        <br />
+        <br />
         <div className={styles.exampleContainer}>
         <img src="/assets/strip1.svg" className={[styles.strip, styles.v1].join(" ")} />
           <div className={styles.glassCard}>
@@ -36,8 +36,8 @@ export default function Home() {
           </div>
           <p>
             <strong className={styles.strong}>Connect multiple channels together</strong>
-            <br></br>
-            <br></br>
+            <br />
+            <br />
             Orax allows you to sync channels between multiple different servers, allowing great discussions of people from other servers, events, etc... without forcing everyone to join a specific server to discuss with each other.
           </p>
         </div>
@@ -47,8 +47,8 @@ export default function Home() {
           </div>
           <p>
           <strong className={styles.strong}>Like a real chat</strong>
-            <br></br>
-            <br></br>
+          <br />
+          <br />
             Everything works as in a normal channel, you can send, modify, delete messages, and all this will be replicated on other Discord servers.
           </p>
         </div>

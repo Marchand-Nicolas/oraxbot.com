@@ -29,6 +29,10 @@ a * {
   cursor: pointer;
 }
 
+.hint {
+  color: #cdd0d6 !important;
+}
+
 .line {
   display: flex;
   align-items: center;
