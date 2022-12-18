@@ -8,6 +8,7 @@ import popup from '../../../utils/popup'
 import drop from '../../../public/icons/drop.svg'
 import fire from '../../../public/icons/fire.svg'
 import Link from 'next/link'
+import Loading from '../../../components/Loading'
 
 export default function OwnedGroup() {
     const serverIp = config.serverIp
@@ -16,16 +17,20 @@ export default function OwnedGroup() {
     const { groupId } = router.query
     const [link, setLink] = useState('')
     const [channels, setChannels] = useState([])
+    const [loading, setLoading] = useState(true)
+
     useEffect(() => {
         if (groupId) {
             fetch(`${serverIp}get_admin_group_datas`, { method: 'POST', body : `{ "token": "${getCookie('token')}", "groupId": ${groupId}, "guildId":"${guildId}" }` }).then(res => res.json()).then(datas => {
                 if (datas.result) {
                     setLink("https://oraxbot.com/join/" + datas.link)
                     setChannels(datas.channels)
+                    setLoading(false)
                 }
             })
         }
     }, [groupId])
+
     const params = new URLSearchParams(router.asPath.split('?')[1])
     const guildId = params.get('guild')
     const guildIcon = params.get('icon')
@@ -115,5 +120,6 @@ export default function OwnedGroup() {
                 } className='button round dangerous'>Delete the group</button>
             </div>
         </div>
+        { loading && <Loading />}
     </>
 }
