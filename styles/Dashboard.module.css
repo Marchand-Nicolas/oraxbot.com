@@ -32,18 +32,6 @@
     background: rgba( 0, 0, 0, 0.45 );
 }
 
-@media screen and (max-width: 550px) {
-    .page {
-        margin: 0 0 0 100px;
-        position: absolute;
-        padding: 0 20px;
-        width: calc(100% - 140px);
-        border-radius: 0;
-        border: none;
-        min-height: 100%;
-    }
-}
-
 .title {
     font-weight: bold;
     width: fit-content;
@@ -64,7 +52,7 @@
     backdrop-filter: blur( 4px );
     -webkit-backdrop-filter: blur( 4px );
     border: 1px solid rgba( 255, 255, 255, 0.18 );
-    padding: 0 0 0 0;
+    padding: 0;
 }
 
 .navbar::-webkit-scrollbar {
@@ -73,7 +61,7 @@
 }
 
 .navbar::-webkit-scrollbar-thumb {
-    background: white;
+    background: rgba(255, 255, 255, 0.794);
     position: relative;
     border-radius: 1em;
 }
@@ -114,6 +102,7 @@
 
 .navbar .navGuild:hover::before {
     height: 50%;
+    opacity: 1;
 }
 
 .navbar .navGuild.selected::before {
@@ -121,7 +110,9 @@
     position: absolute;
     height: 80%;
     border-radius: 40px;
+    opacity: 1;
 }
+
 .navbar .navGuild.selected img {
     border-radius: 1.2em;
 }
@@ -233,4 +224,52 @@
 
 .progress {
     width: 100%;
+}
+
+@media screen and (max-width: 550px) {
+    .page {
+        margin: 0 0 0 70px;
+        position: absolute;
+        padding: 0 20px;
+        width: calc(100% - 110px);
+        border-radius: 0;
+        border: none;
+        min-height: 100%;
+    }
+
+    .navbar::-webkit-scrollbar {
+        width: 3px;
+    }
+
+    .navbar {
+        width: 60px;
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+        overflow-y: overlay;
+        overflow-x: hidden;
+        background: rgba( 0, 0, 0, 0.45 );
+        box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+        backdrop-filter: blur( 4px );
+        -webkit-backdrop-filter: blur( 4px );
+        border: 1px solid rgba( 255, 255, 255, 0.18 );
+        padding: 0 10px 0 0;
+    }
+
+    .navbar .navGuild::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 0;
+        width: 10px;
+        height: 8px;
+        transform: translateY(-50%) translateX(calc(-2px - 50%));
+        transition: 0.4s;
+        background: white;
+        border-radius: 1em;
+        z-index: 10;
+        opacity: 0;
+    }
 }
