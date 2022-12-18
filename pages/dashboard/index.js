@@ -148,7 +148,7 @@ export default function Dashboard() {
             })
         }
     }, [guild, paymentProgress, refreshGuildDatas]);
-    
+
     return <>
         <div style={{backgroundImage: guild.icon ? `url('https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.webp?size=96')` : null}} className={styles.background} />
         <nav className={styles.navbar}>
@@ -204,6 +204,19 @@ export default function Dashboard() {
                         }
                     </section> : <section className={styles.emptyGroupContainer}><h2>This server does not own any group</h2></section>}
                     <Settings key={"settingsGuild_" + guildId} guildId={guildId} settings={settings} />
+                    <h2>Service limits</h2>
+                    <section className={styles.section}>
+                        <div className='line wrap'>
+                            <p>{guildDatas.ownedGroups.length || '0'}/100 owned groups</p>
+                            <div className={[styles.progress, 'progress'].join(' ')}><div className='shrinker' style={{width: guildDatas.ownedGroups.length + '%'}} /></div>
+                        </div>
+                        {
+                            guildDatas.ownedGroups.map(group => <div key={"group_" + group.id} className='line wrap'>
+                                <p>{group.name} : {group.linkedChannels.length || '0'}/30 connected channels</p>
+                                <div className={[styles.progress, 'progress'].join(' ')} value={group.linkedChannels.length || 0}><div className='shrinker' style={{width: (group.linkedChannels.length / 30 * 100 || 0) + '%'}} /></div>
+                            </div>)
+                        }
+                    </section>
                     {/*guildDatas.connectedGroups ? null : <section className={styles.emptyGroupContainer}><h2>This server isn't connected to any group</h2></section>*/}
                 </> :
             <button onClick={() => popup("Invite the bot", `Warning`, "warning", {
@@ -246,7 +259,6 @@ export default function Dashboard() {
                 </>*/
             }
             <div id="container" key={guild.id + "_" + paymentProgress}>
-
             </div>
             <br></br>
         </div>

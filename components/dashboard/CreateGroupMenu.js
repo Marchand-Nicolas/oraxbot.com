@@ -35,7 +35,7 @@ export default function CreateGroupMenu(props) {
         </select>
         <br></br>
         <br></br>
-        <button onClick={() => {
+        <button className="default" onClick={() => {
             const groupName = document.getElementById("groupName").value
             const selectedChannelId = document.getElementById("selectChannel").value
             if (!groupName) {
@@ -69,7 +69,7 @@ export default function CreateGroupMenu(props) {
             })
         }}>Create</button>
         <br></br>
-        <button className={styles.cancelButton} onClick={() => {
+        <button className={[styles.cancelButton, 'default'].join(' ')} onClick={() => {
             unmountComponentAtNode(document.getElementById("menu"))
         }}>Cancel</button>
     </div>

@@ -226,3 +226,11 @@
         opacity: 1;
     }
 }
+
+.section p {
+    color: white;
+}
+
+.progress {
+    width: 100%;
+}
