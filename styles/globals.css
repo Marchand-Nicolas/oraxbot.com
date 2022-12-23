@@ -284,3 +284,34 @@ a * {
 .toggleMenu:checked ~ .overlay.hidden {
   display: unset;
 }
+
+.message {
+  padding: 15px;
+  background: rgba( 255, 255, 255, 0.25 );
+  box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+  backdrop-filter: blur( 4px );
+  -webkit-backdrop-filter: blur( 4px );
+  border-radius: 10px;
+  border: 1px solid rgba( 255, 255, 255, 0.18 );
+}
+
+.message.error {
+  background: rgba( 255, 31, 31, 0.25 );
+  box-shadow: 0 8px 32px 0 rgba(135, 31, 31, 0.37);
+}
+
+.message.success {
+  background: rgba(31, 255, 218, 0.25);
+  box-shadow: 0 8px 32px 0 rgba(31, 135, 93, 0.37);
+}
+
+.information {
+  padding: 15px;
+  background: rgba( 255, 255, 255, 0.25 );
+  box-shadow: 0 8px 32px 0 rgba(75, 75, 75, 0.37);
+  backdrop-filter: blur( 4px );
+  -webkit-backdrop-filter: blur( 4px );
+  border-radius: 10px;
+  border: 1px solid rgba( 255, 255, 255, 0.18 );
+  color: white;
+}

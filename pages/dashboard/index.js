@@ -17,7 +17,7 @@ export default function Dashboard() {
     const [user, setUser] = useState(undefined)
     const [guilds, setGuilds] = useState([])
     const [guildDatas, setGuildDatas] = useState({})
-    const [settings, setSettings] = useState({ lang: 0 })
+    const [settings, setSettings] = useState({ lang: 0, public: false, public_link: '', default: true })
     const [paymentProgress, setPaymentProgress] = useState(0)
     const [refreshGuildDatas, setRefreshGuildDatas] = useState(false)
     const [loading, setLoading] = useState(true)
@@ -203,7 +203,7 @@ export default function Dashboard() {
                             guildDatas.ownedGroups.map(group => <Link key={"ownedGroup_" + group.id} href={`/dashboard/ownedgroup/${group.id}?guild=${guild.id}&icon=${guild.icon}&groupName=${group.name}`}><div className={styles.group}>{group.name}</div></Link>)
                         }
                     </section> : <section className={styles.emptyGroupContainer}><h2>This server does not own any group</h2></section>}
-                    <Settings key={"settingsGuild_" + guildId} guildId={guildId} settings={settings} />
+                    <Settings key={"settingsGuild_" + guildId} guild={guild} guildId={guildId} settings={settings} setSettings={setSettings} />
                     <h2>🚫 Service limits</h2>
                     <section className={styles.section}>
                         <p className='hint'>
