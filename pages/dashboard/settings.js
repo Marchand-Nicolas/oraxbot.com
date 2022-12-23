@@ -20,8 +20,8 @@ export default function Settings({ guild, guildId, settings, setSettings }) {
                 newValue = e.target.value
                 if (field === 'public_link') {
                     const element = inviteLink
-                    newValue = newValue.replace('https://discord.gg/', '')
-                    if (newValue.length > 8 || newValue.length < 4) return setErrorMessages("Invalid link");
+                    newValue = newValue.split('https://discord.gg/').join('')
+                    if (newValue.length > 15 || newValue.length < 4) return setErrorMessages("Invalid link");
                     setErrorMessages("")
                     element.value = newValue
                 }
@@ -68,7 +68,7 @@ export default function Settings({ guild, guildId, settings, setSettings }) {
                 </p>
                 <div className={[styles.parameter, 'line'].join(' ')}>
                     <p className={styles.parameterName}>Public link</p>
-                    <p>discord.gg/</p>
+                    <p className='hint'>discord.gg/</p>
                     <input id="inviteLink" type="text" defaultValue={settings.public_link ? settings.public_link : ''} onChange={(e) => {
                         updateSettings(e, 'public_link')
                     }} className={['input', styles.parameterInput].join(' ')} />
