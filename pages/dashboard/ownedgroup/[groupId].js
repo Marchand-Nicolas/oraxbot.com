@@ -18,6 +18,11 @@ export default function OwnedGroup() {
     const [channels, setChannels] = useState([])
     const [loading, setLoading] = useState(true)
 
+    const params = new URLSearchParams(router.asPath.split('?')[1])
+    const guildId = params.get('guild')
+    const guildIcon = params.get('icon')
+    const groupName = params.get('groupName')
+    
     useEffect(() => {
         if (groupId) {
             fetch(`${config.serverIp}get_admin_group_datas`, { method: 'POST', body : `{ "token": "${getCookie('token')}", "groupId": ${groupId}, "guildId":"${guildId}" }` }).then(res => res.json()).then(datas => {
@@ -30,10 +35,6 @@ export default function OwnedGroup() {
         }
     }, [groupId, guildId])
 
-    const params = new URLSearchParams(router.asPath.split('?')[1])
-    const guildId = params.get('guild')
-    const guildIcon = params.get('icon')
-    const groupName = params.get('groupName')
     return <>
         <div style={{backgroundImage: guildIcon && guildIcon != 'null' ? `url('https://cdn.discordapp.com/icons/${guildId}/${guildIcon}.webp?size=96')` : null}} className={dashboardStyles.background} />
         <div className={styles.page}>
