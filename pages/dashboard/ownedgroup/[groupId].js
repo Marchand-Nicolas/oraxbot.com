@@ -11,7 +11,6 @@ import Link from 'next/link'
 import Loading from '../../../components/Loading'
 
 export default function OwnedGroup() {
-    const serverIp = config.serverIp
     const apiV2 = config.apiV2
     const router = useRouter()
     const { groupId } = router.query
@@ -21,7 +20,7 @@ export default function OwnedGroup() {
 
     useEffect(() => {
         if (groupId) {
-            fetch(`${serverIp}get_admin_group_datas`, { method: 'POST', body : `{ "token": "${getCookie('token')}", "groupId": ${groupId}, "guildId":"${guildId}" }` }).then(res => res.json()).then(datas => {
+            fetch(`${config.serverIp}get_admin_group_datas`, { method: 'POST', body : `{ "token": "${getCookie('token')}", "groupId": ${groupId}, "guildId":"${guildId}" }` }).then(res => res.json()).then(datas => {
                 if (datas.result) {
                     setLink("https://oraxbot.com/join/" + datas.link)
                     setChannels(datas.channels)
@@ -29,7 +28,7 @@ export default function OwnedGroup() {
                 }
             })
         }
-    }, [groupId, guildId, serverIp])
+    }, [groupId, guildId])
 
     const params = new URLSearchParams(router.asPath.split('?')[1])
     const guildId = params.get('guild')
@@ -52,7 +51,7 @@ export default function OwnedGroup() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
                 </svg>
             </div>
-            <button onClick={() => fetch(`${serverIp}generate_interserv_group_link`, { method: 'POST', body : `{ "token": "${getCookie('token')}", "groupId": ${groupId}, "guildId":"${guildId}" }`}).then(res => res.json()).then(datas => {
+            <button onClick={() => fetch(`${config.serverIp}generate_interserv_group_link`, { method: 'POST', body : `{ "token": "${getCookie('token')}", "groupId": ${groupId}, "guildId":"${guildId}" }`}).then(res => res.json()).then(datas => {
                 if (datas.result) {
                     setLink( "https://oraxbot.com/join/" + datas.link)
                 }
@@ -69,7 +68,7 @@ export default function OwnedGroup() {
                         </svg>
                         <p>{channel.name}</p>
                         <svg onClick={() => {
-                            fetch(`${serverIp}unlink_channel`, { method: 'POST', body : `{ "token": "${getCookie('token')}", "groupId":${groupId}, "channelId": "${channel.id}", "guildId":"${guildId}" }`}).then(res => res.json()).then(datas => {
+                            fetch(`${config.serverIp}unlink_channel`, { method: 'POST', body : `{ "token": "${getCookie('token')}", "groupId":${groupId}, "channelId": "${channel.id}", "guildId":"${guildId}" }`}).then(res => res.json()).then(datas => {
                                 if (datas.result) {
                                     setChannels(channels.filter(c => c.id != channel.id))
                                 }
@@ -101,7 +100,7 @@ export default function OwnedGroup() {
                             }
                         }
                     ], action: function() {
-                        fetch(`${serverIp}delete_interserv_group`, { method: 'POST', body : `{ "token": "${getCookie('token')}", "groupId": ${groupId}, "guildId":"${guildId}" }`}).then(res => res.json()).then(datas => {
+                        fetch(`${config.serverIp}delete_interserv_group`, { method: 'POST', body : `{ "token": "${getCookie('token')}", "groupId": ${groupId}, "guildId":"${guildId}" }`}).then(res => res.json()).then(datas => {
                             if (datas.result) {
                                 router.push('../?guild=' + guildId)
                             }
@@ -111,7 +110,7 @@ export default function OwnedGroup() {
                 } className='button round normal'>Rename</button>
                 <button onClick={() => 
                     popup("Delete the group", "This action is irreversible. All channels linked to your group will be unlinked.", "error", { icon: fire, close: true, customButtonName: "Delete", action: function() {
-                        fetch(`${serverIp}delete_interserv_group`, { method: 'POST', body : `{ "token": "${getCookie('token')}", "groupId": ${groupId}, "guildId":"${guildId}" }`}).then(res => res.json()).then(datas => {
+                        fetch(`${config.serverIp}delete_interserv_group`, { method: 'POST', body : `{ "token": "${getCookie('token')}", "groupId": ${groupId}, "guildId":"${guildId}" }`}).then(res => res.json()).then(datas => {
                             if (datas.result) {
                                 router.push('../?guild=' + guildId)
                             }
