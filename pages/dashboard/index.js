@@ -9,7 +9,7 @@ import popup from '../../utils/popup'
 import fire from '../../public/icons/fire.svg'
 import meteor from '../../public/icons/meteor.svg'
 import CreateGroupMenu from '../../components/dashboard/CreateGroupMenu'
-import Settings from './settings'
+import Settings from '../../components/dashboard/Settings'
 import Loading from '../../components/Loading'
 
 export default function Dashboard() {

@@ -29,7 +29,7 @@ export default function OwnedGroup() {
                 }
             })
         }
-    }, [groupId])
+    }, [groupId, guildId, serverIp])
 
     const params = new URLSearchParams(router.asPath.split('?')[1])
     const guildId = params.get('guild')

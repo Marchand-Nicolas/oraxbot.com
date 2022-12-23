@@ -98,7 +98,7 @@ export default function JoinGroup() {
                 })).json()
                 if (guilds.retry_after) {
                     setTimeout(() => {
-                        //window.location.reload();
+                        window.location.reload();
                     }, guilds.retry_after + 1000)
                 }
                 else {
@@ -106,7 +106,7 @@ export default function JoinGroup() {
                 }
             }
         }
-    }, [linkId, guildId]);
+    }, [linkId, guildId, serverIp]);
     let adminGuildNumber = 0
     for (let index = 0; index < guilds.length; index++) {
         const guild = guilds[index];
