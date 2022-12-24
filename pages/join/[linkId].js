@@ -97,8 +97,8 @@ export default function JoinGroup() {
                 })).json()
                 if (guilds.retry_after) {
                     setTimeout(() => {
-                        window.location.reload();
-                    }, guilds.retry_after + 1000)
+                        loadPage()
+                    }, guilds.retry_after)
                 }
                 else {
                     setGuilds(guilds)
