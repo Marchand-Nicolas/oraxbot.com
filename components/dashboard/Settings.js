@@ -3,7 +3,7 @@ import styles from '../../styles/components/dashboard/Settings.module.css'
 import config from '../../utils/config.json'
 import { getCookie } from '../../utils/cookies'
 import { useEffect, useState } from 'react'
-import Command from '../../components/dashboard/elements/Command'
+import Command from './elements/Command'
 
 export default function Settings({ guild, guildId, settings, setSettings }) {
     const [save , setSave] = useState(0);
@@ -41,7 +41,7 @@ export default function Settings({ guild, guildId, settings, setSettings }) {
             })
         }, 500)
         return () => clearTimeout(timeout)
-    }, [save, settings])
+    }, [save, settings, guildId])
 
     return <>
             <h2>⚙️ Settings</h2>

@@ -9,7 +9,6 @@ import popup from "../../utils/popup";
 import meteor from "../../public/icons/meteor.svg";
 
 export default function JoinGroup() {
-    const serverIp = config.serverIp
     const router = useRouter()
     const [guilds, setGuilds] = useState([])
     const [user, setUser] = useState({})
@@ -51,11 +50,11 @@ export default function JoinGroup() {
     }
 
     useEffect(() => {
-        fetch(`${serverIp}preview_group`, { method: 'POST', body : `{ "linkId": "${linkId}" }` }).then(res => res.json()).then(res => {
+        fetch(`${config.serverIp}preview_group`, { method: 'POST', body : `{ "linkId": "${linkId}" }` }).then(res => res.json()).then(res => {
             setGroup(res)
         })
         if(guildId) {
-            fetch(`${serverIp}get_guild_channels`, { method: 'POST', body : `{ "guildId": "${guildId}" }` }).then(res => res.json()).then(res => {
+            fetch(`${config.serverIp}get_guild_channels`, { method: 'POST', body : `{ "guildId": "${guildId}" }` }).then(res => res.json()).then(res => {
                 setChannels(res)
             })
         }
@@ -63,7 +62,7 @@ export default function JoinGroup() {
         if (!token || token === 'undefined') {
             const code = new URLSearchParams(window.location.search).get("code")
             if (code) {
-                fetch(`${serverIp}login`, { method: 'POST', body : `{ "token": "${code}" }` }).then(res => res.json()).then(res => {
+                fetch(`${config.serverIp}login`, { method: 'POST', body : `{ "token": "${code}" }` }).then(res => res.json()).then(res => {
                     if (!res.access_token || res.access_token === 'undefined') {
                         window.location.href = '/dashboard'
                     }
@@ -98,7 +97,7 @@ export default function JoinGroup() {
                 })).json()
                 if (guilds.retry_after) {
                     setTimeout(() => {
-                        //window.location.reload();
+                        window.location.reload();
                     }, guilds.retry_after + 1000)
                 }
                 else {
@@ -123,7 +122,7 @@ export default function JoinGroup() {
                     <h2 className={styles.subtitle}>And finally, select a channel</h2>
                     {channels.result.map((channel, index) => 
                         <button onClick={() => {
-                            fetch(`${serverIp}join_group_by_link`, { method: 'POST', body : `{ "linkId": "${linkId}", "guildId": "${guildId}", "channelId": "${channel.id}", "token": "${getCookie('token')}" }` }).then(res => res.json()).then(res => {
+                            fetch(`${config.serverIp}join_group_by_link`, { method: 'POST', body : `{ "linkId": "${linkId}", "guildId": "${guildId}", "channelId": "${channel.id}", "token": "${getCookie('token')}" }` }).then(res => res.json()).then(res => {
                                 if (res.error) popup("Error", res.error, "error")
                                 else {
                                     popup("Success", "You have successfully joined the group !", "success")
