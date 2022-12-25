@@ -8,4 +8,6 @@
     color: white;
     cursor: pointer;
     transition: 0.2s;
+    white-space: nowrap;
+    line-height: 40px;
 }

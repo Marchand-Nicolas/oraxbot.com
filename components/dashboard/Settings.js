@@ -66,7 +66,7 @@ export default function Settings({ guild, guildId, settings, setSettings }) {
                     <br />
                     this means that members of your interserver group(s) will be able to join <strong>{guild.name}</strong> using the <Command name="channel-infos" /> command
                 </p>
-                <div className={[styles.parameter, 'line'].join(' ')}>
+                <div className={[styles.parameter, 'line wrap'].join(' ')}>
                     <p className={styles.parameterName}>Public link</p>
                     <p className='hint'>discord.gg/</p>
                     <input id="inviteLink" type="text" defaultValue={settings.public_link ? settings.public_link : ''} onChange={(e) => {
