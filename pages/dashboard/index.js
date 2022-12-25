@@ -24,6 +24,13 @@ export default function Dashboard() {
 
     useEffect(() => {
         let token = getCookie('token')
+        let cachedUserDatas = getCookie('cachedUserDatas')
+        let cachedGuilds = getCookie('cachedGuilds')
+        if (cachedGuilds && cachedUserDatas && token) {
+            setLoading(false);
+            setUser(JSON.parse(cachedUserDatas))
+            setGuilds(JSON.parse(cachedGuilds))
+        }
         const params = new URLSearchParams(window.location.search)
         const state = params.get("state")
         if (!token || token === 'undefined' || state) {
@@ -69,7 +76,7 @@ export default function Dashboard() {
                 window.location.href = '/dashboard'
             }
             else {
-                setUser(userDatas)
+                setCookie('cachedUserDatas', JSON.stringify(userDatas), 3600)
                 const guilds = await (await fetch('https://discordapp.com/api/v6/users/@me/guilds', {
                     method: 'GET',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json', 'Authorization': 'Bearer ' + token },
@@ -80,6 +87,14 @@ export default function Dashboard() {
                     }, guilds.retry_after + 50)
                 }
                 if (guilds)  {
+                    const parsedGuilds = []
+                    for (let index = 0; index < guilds.length; index++) {
+                        const guild = guilds[index];
+                        if (guild.permissions_new & 0x0000000000000032) {
+                            parsedGuilds.push({ id: guild.id, name: guild.name, icon: guild.icon, permissions_new: guild.permissions_new })
+                        }
+                    }
+                    setCookie('cachedGuilds', JSON.stringify(parsedGuilds), 3600);
                     setGuilds(guilds);
                     setLoading(false);
                 }
