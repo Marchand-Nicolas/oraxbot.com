@@ -1,100 +1,100 @@
 .page {
-    margin: 20px 0 0 20px;
-    position: absolute;
-    padding: 0 20px;
-    width: calc(100% - 80px);
-    border-radius: 12px;
-    min-height: calc(100vh - 40px);
-    box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
-    backdrop-filter: blur( 4px );
-    -webkit-backdrop-filter: blur( 4px );
-    border: 1px solid rgba( 255, 255, 255, 0.18 );
-    background: rgba( 0, 0, 0, 0.45 );
-    color: white;
+  margin: 20px 0 0 20px;
+  position: absolute;
+  padding: 0 20px;
+  width: calc(100% - 80px);
+  border-radius: 12px;
+  min-height: calc(100vh - 40px);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.45);
+  color: white;
 }
 
 .title {
-    color: white;
+  color: white;
 }
 
 .inviteLink {
-    color: #8151fc;
-    font-weight: bold;
-    overflow-wrap: anywhere;
+  color: #8151fc;
+  font-weight: bold;
+  overflow-wrap: anywhere;
 }
 
 .regenerateInviteLink {
-    color: #ffffff;
-    font-weight: bold;
-    border:none;
-    background-color: #8151fc;
-    border-radius: 1em;
-    font-weight: bold;
-    display: block;
-    font-size: 16px;
-    padding: 5px 20px;
-    cursor: pointer;
+  color: #ffffff;
+  font-weight: bold;
+  border: none;
+  background-color: #8151fc;
+  border-radius: 1em;
+  font-weight: bold;
+  display: block;
+  font-size: 16px;
+  padding: 5px 20px;
+  cursor: pointer;
 }
 
 .deleteGroup {
-    color: #ffffff;
-    font-weight: bold;
-    border:none;
-    background-color: #fc5151;
-    border-radius: 1em;
-    font-weight: bold;
-    display: block;
-    font-size: 16px;
-    padding: 5px 20px;
-    cursor: pointer;
+  color: #ffffff;
+  font-weight: bold;
+  border: none;
+  background-color: #fc5151;
+  border-radius: 1em;
+  font-weight: bold;
+  display: block;
+  font-size: 16px;
+  padding: 5px 20px;
+  cursor: pointer;
 }
 
 .linkIcon {
-    cursor: pointer;
-    width: 27px;
-    background-color: #ffffff;
-    border-radius: 2em;
-    padding: 5px;
-    color: #8151fc;
+  cursor: pointer;
+  width: 27px;
+  background-color: #ffffff;
+  border-radius: 2em;
+  padding: 5px;
+  color: #8151fc;
 }
 
 .back {
-    cursor: pointer;
-    width: 40px;
-    margin-right: 20px;
-    transition: 0.2s;
+  cursor: pointer;
+  width: 40px;
+  margin-right: 20px;
+  transition: 0.2s;
 }
 
 .back:hover {
-    color: #8151fc;
+  color: #8151fc;
 }
 
 .channelContainer {
-    display: flex;
-    align-items: center;
-    background-color: rgba(128, 128, 128, 0.333);
-    width: fit-content;
-    padding: 5px 15px;
-    border-radius: 2em;
-    margin: 10px 0;
+  display: flex;
+  align-items: center;
+  background-color: rgba(128, 128, 128, 0.333);
+  width: fit-content;
+  padding: 5px 15px;
+  border-radius: 2em;
+  margin: 10px 0;
 }
 
 .channelContainer p {
-    margin: 0;
+  margin: 0;
 }
 
 .channelIcon {
-    width: 20px;
+  width: 20px;
 }
 
 .removeChannelIcon {
-    width: 20px;
-    margin-left: 15px;
-    color: rgb(255, 100, 100);
-    cursor: pointer;
-    transition: 0.2s;
+  width: 20px;
+  margin-left: 15px;
+  color: rgb(255, 100, 100);
+  cursor: pointer;
+  transition: 0.2s;
 }
 
 .removeChannelIcon:hover {
-    color: red;
+  color: red;
 }

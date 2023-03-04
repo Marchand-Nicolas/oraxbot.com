@@ -1,17 +1,17 @@
 .parameter {
-    width: 100%;
+  width: 100%;
 }
 
 .parameterName {
-    font-weight: bold;
-    color: white;
-    margin-right: 20px;
+  font-weight: bold;
+  color: white;
+  margin-right: 20px;
 }
 
 .parameterInput {
-    font-size: 14px;
-    padding: 10px 20px;
-    border: none;
-    padding: 2px 12px;
-    border-radius: 1em;
+  font-size: 14px;
+  padding: 10px 20px;
+  border: none;
+  padding: 2px 12px;
+  border-radius: 1em;
 }
