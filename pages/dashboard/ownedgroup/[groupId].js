@@ -9,6 +9,7 @@ import drop from "../../../public/icons/drop.svg";
 import fire from "../../../public/icons/fire.svg";
 import Link from "next/link";
 import Loading from "../../../components/Loading";
+import AdvancedSettings from "../../../components/dashboard/groupSettings/advancedSettings";
 
 export default function OwnedGroup() {
   const apiV2 = config.apiV2;
@@ -280,6 +281,7 @@ export default function OwnedGroup() {
             Delete the group
           </button>
         </div>
+        <AdvancedSettings />
       </div>
       {loading && <Loading />}
     </>

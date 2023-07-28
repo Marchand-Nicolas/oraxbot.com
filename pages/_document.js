@@ -7,7 +7,7 @@ export default function App() {
       <title>Orax bot</title>
       <meta
         name="description"
-        content="Orax allows you to sync channels between multiple different Discord servers, allowing great discussions of people from other servers, events, etc..."
+        content="Orax allows you to sync channels between multiple different Discord servers, allowing great discussions of people from other servers, events, etc... on Discord."
       />
       <link rel="icon" href="/favicon.ico" />
       <body>
