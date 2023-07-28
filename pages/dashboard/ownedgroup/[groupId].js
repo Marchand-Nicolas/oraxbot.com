@@ -18,6 +18,8 @@ export default function OwnedGroup() {
   const [link, setLink] = useState("");
   const [channels, setChannels] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [disableUserWarningMessage, setDisableUserWarningMessage] =
+    useState(false);
 
   const params = new URLSearchParams(router.asPath.split("?")[1]);
   const guildId = params.get("guild");
@@ -26,7 +28,7 @@ export default function OwnedGroup() {
 
   useEffect(() => {
     if (groupId) {
-      fetch(`${config.serverIp}get_admin_group_datas`, {
+      fetch(`${config.apiV2}get_admin_group_data`, {
         method: "POST",
         body: `{ "token": "${getCookie(
           "token"
@@ -38,6 +40,7 @@ export default function OwnedGroup() {
             setLink("https://oraxbot.com/join/" + datas.link);
             setChannels(datas.channels);
             setLoading(false);
+            setDisableUserWarningMessage(datas.disableUserWarningMessage);
           }
         });
     }
@@ -281,7 +284,9 @@ export default function OwnedGroup() {
             Delete the group
           </button>
         </div>
-        <AdvancedSettings />
+        <AdvancedSettings
+          defaultDisableUserWarningMessage={disableUserWarningMessage}
+        />
       </div>
       {loading && <Loading />}
     </>

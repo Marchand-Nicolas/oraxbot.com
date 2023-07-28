@@ -23,7 +23,7 @@ const setDisableUserWarningMessage = (
     });
 };
 
-const AdvancedSettings = ({}) => {
+const AdvancedSettings = ({ defaultDisableUserWarningMessage }) => {
   const router = useRouter();
   const params = new URLSearchParams(router.asPath.split("?")[1]);
   const guildId = params.get("guild");
@@ -57,6 +57,7 @@ const AdvancedSettings = ({}) => {
         <div className={styles.content}>
           <div className={styles.line}>
             <input
+              defaultChecked={defaultDisableUserWarningMessage}
               onClick={(e) => {
                 const checked = e.target.checked;
                 if (!checked)
