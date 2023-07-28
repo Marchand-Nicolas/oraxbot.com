@@ -13,11 +13,17 @@ body {
   scroll-behavior: smooth;
 }
 
-body > h1, h2, h3, h4, h5, h6, strong {
-  color:#FFFFFF;
+body > h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+strong {
+  color: #ffffff;
 }
 html > body {
-  color:#8f9093;
+  color: #8f9093;
 }
 
 a {
@@ -48,7 +54,7 @@ a * {
 }
 
 .link {
-  background: linear-gradient(37deg, rgb(0,161,232) 0%, #8151fc 100%);
+  background: linear-gradient(37deg, rgb(0, 161, 232) 0%, #8151fc 100%);
   background-clip: text;
   -webkit-text-fill-color: transparent;
   position: relative;
@@ -60,8 +66,8 @@ a * {
   content: "";
   display: block;
   height: 2px;
-  background: linear-gradient(37deg, rgb(0,161,232) 0%, #8151fc 100%);
-  transition: width .3s;
+  background: linear-gradient(37deg, rgb(0, 161, 232) 0%, #8151fc 100%);
+  transition: width 0.3s;
   position: absolute;
   left: 0;
   right: 0;
@@ -74,13 +80,17 @@ a * {
   border: 10px solid;
   border-image-slice: 1;
   border-width: 5px;
-  border-image-source: linear-gradient(37deg, rgb(0,161,232) 0%, #8151fc 100%);
+  border-image-source: linear-gradient(
+    37deg,
+    rgb(0, 161, 232) 0%,
+    #8151fc 100%
+  );
 }
 
 .textInput.normal {
-  border: gray solid 2px;
-  border-image-slice : unset;
+  border-image-slice: unset;
   border-image-source: unset;
+  border-radius: 0.5rem;
 }
 
 .button {
@@ -89,7 +99,7 @@ a * {
 }
 
 .button.round {
-  background: linear-gradient(37deg, rgb(0,161,232) 0%, #8151fc 100%);
+  background: linear-gradient(37deg, rgb(0, 161, 232) 0%, #8151fc 100%);
   color: white;
   padding: 0.5rem 2rem;
   border-radius: 3em;
@@ -123,12 +133,24 @@ a * {
 *::-webkit-scrollbar {
   width: 12px;
   background-color: white;
-  background: linear-gradient(0deg, rgb(0,161,232) 0%, rgba(255, 255, 255, 0) calc(var(--scroll_percent) * 100% - 90%), rgba(255, 255, 255, 0) calc(var(--scroll_percent) * 100% + 90%), #8151fc 100%);
+  background: linear-gradient(
+    0deg,
+    rgb(0, 161, 232) 0%,
+    rgba(255, 255, 255, 0) calc(var(--scroll_percent) * 100% - 90%),
+    rgba(255, 255, 255, 0) calc(var(--scroll_percent) * 100% + 90%),
+    #8151fc 100%
+  );
 }
 
 *::-webkit-scrollbar-thumb {
-  background: rgb(0,161,232);
-  background: linear-gradient(0deg, rgba(255, 255, 255, 0) 0%, rgb(0,161,232) min(calc(100% - var(--scroll_percent) * 100%), 30%), #8151fc max(calc(100% - var(--scroll_percent) * 100%), 70%), rgba(255, 255, 255, 0) 100%);
+  background: rgb(0, 161, 232);
+  background: linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgb(0, 161, 232) min(calc(100% - var(--scroll_percent) * 100%), 30%),
+    #8151fc max(calc(100% - var(--scroll_percent) * 100%), 70%),
+    rgba(255, 255, 255, 0) 100%
+  );
 }
 
 *::selection {
@@ -155,22 +177,21 @@ a * {
 }
 
 .popup h2 {
-  background: linear-gradient(37deg, rgb(0,161,232) 0%, #8151fc 100%);
+  background: linear-gradient(37deg, rgb(0, 161, 232) 0%, #8151fc 100%);
   background-clip: text;
   -webkit-text-fill-color: transparent;
   width: fit-content;
 }
 
-
-.popup .container  {
+.popup .container {
   padding: 15px;
-  border-radius: .9em;
+  border-radius: 0.9em;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-  background: rgba( 0, 0, 0, 0.45 );
-  box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
-  backdrop-filter: blur( 4px );
-  -webkit-backdrop-filter: blur( 4px );
-  border: 1px solid rgba( 255, 255, 255, 0.18 );
+  background: rgba(0, 0, 0, 0.45);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   width: 400px;
   max-width: calc(100% - 40px);
 }
@@ -190,7 +211,7 @@ a * {
 }
 
 .popup button.default {
-  background: linear-gradient(37deg, rgb(0,161,232) 0%, #8151fc 100%);
+  background: linear-gradient(37deg, rgb(0, 161, 232) 0%, #8151fc 100%);
   border: none;
   color: white;
   padding: 10px 20px;
@@ -218,7 +239,7 @@ a * {
 }
 
 .loading::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -226,16 +247,20 @@ a * {
   height: 60px;
   margin-top: 5px;
   border-radius: 100%;
-  background: linear-gradient(37deg, rgba(190, 229, 245, 0.641) 0%, rgba(99, 207, 158, 0.772) 100%);
+  background: linear-gradient(
+    37deg,
+    rgba(190, 229, 245, 0.641) 0%,
+    rgba(99, 207, 158, 0.772) 100%
+  );
   animation: loading 0.4s linear infinite alternate;
 }
 
 @keyframes loading {
   0% {
-      transform: scale(0);
+    transform: scale(0);
   }
   100% {
-      transform: scale(0.9);
+    transform: scale(0.9);
   }
 }
 
@@ -250,7 +275,7 @@ a * {
 }
 
 .progress .shrinker {
-  background: linear-gradient(37deg, rgb(0,161,232) 0%, #8151fc 100%);
+  background: linear-gradient(37deg, rgb(0, 161, 232) 0%, #8151fc 100%);
   height: 100%;
   margin: 0;
   position: absolute;
@@ -287,16 +312,16 @@ a * {
 
 .message {
   padding: 15px;
-  background: rgba( 255, 255, 255, 0.25 );
-  box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
-  backdrop-filter: blur( 4px );
-  -webkit-backdrop-filter: blur( 4px );
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   border-radius: 10px;
-  border: 1px solid rgba( 255, 255, 255, 0.18 );
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .message.error {
-  background: rgba( 255, 31, 31, 0.25 );
+  background: rgba(255, 31, 31, 0.25);
   box-shadow: 0 8px 32px 0 rgba(135, 31, 31, 0.37);
 }
 
@@ -308,11 +333,11 @@ a * {
 
 .information {
   padding: 15px;
-  background: rgba( 255, 255, 255, 0.25 );
+  background: rgba(255, 255, 255, 0.25);
   box-shadow: 0 8px 32px 0 rgba(75, 75, 75, 0.37);
-  backdrop-filter: blur( 4px );
-  -webkit-backdrop-filter: blur( 4px );
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   border-radius: 10px;
-  border: 1px solid rgba( 255, 255, 255, 0.18 );
+  border: 1px solid rgba(255, 255, 255, 0.18);
   color: white;
 }
