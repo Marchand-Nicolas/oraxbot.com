@@ -4,9 +4,9 @@ import styles from "../styles/components/Footer.module.css";
 export default function Footer() {
   return (
     <footer className={styles.footer}>
-      Captcha bot
+      Orax bot
       <span>
-        <Image src="/favicon.ico" alt="Captcha logo" width={16} height={16} />
+        <Image src="/favicon.ico" alt="Orax logo" width={16} height={16} />
       </span>
     </footer>
   );
