@@ -37,7 +37,9 @@ export default function OwnedGroup() {
         .then((res) => res.json())
         .then((datas) => {
           if (datas.result) {
-            setLink("https://oraxbot.com/join/" + datas.link);
+            setLink(
+              process.env.NEXT_PUBLIC_WEBSITE_URL + "/join/" + datas.link
+            );
             setChannels(datas.channels);
             setLoading(false);
             setDisableUserWarningMessage(datas.disableUserWarningMessage);
@@ -117,7 +119,9 @@ export default function OwnedGroup() {
               .then((res) => res.json())
               .then((datas) => {
                 if (datas.result) {
-                  setLink("https://oraxbot.com/join/" + datas.link);
+                  setLink(
+                    process.env.NEXT_PUBLIC_WEBSITE_URL + "/join/" + datas.link
+                  );
                 }
               })
           }
