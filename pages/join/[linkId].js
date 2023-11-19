@@ -256,6 +256,11 @@ export default function JoinGroup() {
                             }
                             alt={g.name + " (guild icon)"}
                           />
+                          <p>
+                            {g.name.length > 10
+                              ? g.name.substring(0, 10) + "..."
+                              : g.name}
+                          </p>
                         </div>
                       </Link>
                     ) : null
