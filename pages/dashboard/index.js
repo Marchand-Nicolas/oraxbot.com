@@ -144,8 +144,10 @@ export default function Dashboard() {
       : "";
   const guildId =
     urlGuildId ||
-    guilds?.find((g) => g.permissions_new & 0x0000000000000032)?.id;
-  let guild = guilds?.find((guild) => guild.id === guildId);
+    (guilds?.find
+      ? guilds?.find((g) => g.permissions_new & 0x0000000000000032)?.id
+      : "");
+  let guild = guilds?.find ? guilds?.find((guild) => guild.id === guildId) : "";
 
   function checkAdminPerms(guild) {
     // Check if user has admin permission on this guild (https://discord.com/developers/docs/topics/permissions)
@@ -155,7 +157,9 @@ export default function Dashboard() {
 
   if (!guild) {
     if (guilds.length > 0) {
-      guild = guilds?.find((guild) => checkAdminPerms(guild));
+      guild = guilds?.find
+        ? guilds?.find((guild) => checkAdminPerms(guild))
+        : null;
     }
     if (!guild)
       guild = {
