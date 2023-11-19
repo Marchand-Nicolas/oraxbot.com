@@ -23,7 +23,7 @@
   padding: 0 20px;
   width: calc(100% - 160px);
   border-radius: 12px;
-  min-height: calc(100vh - 40px);
+  min-height: calc(100vh - 42px);
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);

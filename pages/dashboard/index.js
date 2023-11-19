@@ -11,6 +11,7 @@ import meteor from "../../public/icons/meteor.svg";
 import CreateGroupMenu from "../../components/dashboard/CreateGroupMenu";
 import Settings from "../../components/dashboard/Settings";
 import Loading from "../../components/Loading";
+import HiddenMenu from "../../components/ui/hiddenMenu";
 
 export default function Dashboard() {
   const serverIp = config.serverIp;
@@ -338,46 +339,48 @@ export default function Dashboard() {
               settings={settings}
               setSettings={setSettings}
             />
-            <h2>🚫 Service limits</h2>
-            <section className={styles.section}>
-              <p className="hint">
-                There are no paid products for Orax, everything is free.
-                <br />
-                However, to avoid abuse, we have set limits that we hope will
-                not harm your experience.
-                <br />
-                If you need to exceed them, please contact us.
-              </p>
-              <div className="line wrap">
-                <p>{guildDatas.ownedGroups.length || "0"}/100 owned groups</p>
-                <div className={[styles.progress, "progress"].join(" ")}>
-                  <div
-                    className="shrinker"
-                    style={{ width: guildDatas.ownedGroups.length + "%" }}
-                  />
-                </div>
-              </div>
-              {guildDatas.ownedGroups.map((group) => (
-                <div key={"group_" + group.id} className="line wrap">
-                  <p>
-                    {group.name} : {group.linkedChannels.length || "0"}/30
-                    connected channels
-                  </p>
-                  <div
-                    className={[styles.progress, "progress"].join(" ")}
-                    value={group.linkedChannels.length || 0}
-                  >
+            <HiddenMenu title="🚫 Service limits">
+              <section className={styles.section}>
+                <p className="hint">
+                  There are no paid products for Orax, everything is free.
+                  <br />
+                  However, to avoid abuse, we have set limits that we hope will
+                  not harm your experience.
+                  <br />
+                  If you need to exceed them, please contact us.
+                </p>
+                <div className="line wrap">
+                  <p>{guildDatas.ownedGroups.length || "0"}/100 owned groups</p>
+                  <div className={[styles.progress, "progress"].join(" ")}>
                     <div
                       className="shrinker"
-                      style={{
-                        width:
-                          ((group.linkedChannels.length / 30) * 100 || 0) + "%",
-                      }}
+                      style={{ width: guildDatas.ownedGroups.length + "%" }}
                     />
                   </div>
                 </div>
-              ))}
-            </section>
+                {guildDatas.ownedGroups.map((group) => (
+                  <div key={"group_" + group.id} className="line wrap">
+                    <p>
+                      {group.name} : {group.linkedChannels.length || "0"}/30
+                      connected channels
+                    </p>
+                    <div
+                      className={[styles.progress, "progress"].join(" ")}
+                      value={group.linkedChannels.length || 0}
+                    >
+                      <div
+                        className="shrinker"
+                        style={{
+                          width:
+                            ((group.linkedChannels.length / 30) * 100 || 0) +
+                            "%",
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </section>
+            </HiddenMenu>
             {/*guildDatas.connectedGroups ? null : <section className={styles.emptyGroupContainer}><h2>This server isn't connected to any group</h2></section>*/}
           </>
         ) : (
