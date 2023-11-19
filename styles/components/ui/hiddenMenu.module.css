@@ -1,0 +1,37 @@
+.openMenuLabel {
+  position: relative;
+}
+
+.openMenuCheckbox {
+  position: absolute;
+  opacity: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  cursor: pointer;
+}
+
+.openMenuVisual {
+  display: flex;
+  align-items: center;
+}
+
+.openMenuIcon {
+  width: 40px;
+  color: white;
+  margin-left: 0.5rem;
+}
+
+.content {
+  display: none;
+}
+
+.openMenuLabel:has(> .openMenuCheckbox:checked) .openMenuIcon {
+  transform: rotate(180deg);
+}
+
+.openMenuLabel:has(> .openMenuCheckbox:checked) + .content {
+  display: flex;
+  flex-direction: column;
+}
