@@ -8,12 +8,17 @@ const CustomUsernames = ({ groupId, guildId }) => {
 
   useEffect(() => {
     // Load the custom usernames pattern
-    fetch(`${config.apiV2}get_custom_usernames_pattern`).then((res) =>
+    fetch(`${config.apiV2}get_custom_usernames_pattern`, {
+      method: "POST",
+      body: `{ "token": "${getCookie(
+        "token"
+      )}", "groupId": ${groupId}, "guildId":"${guildId}" }`,
+    }).then((res) =>
       res.json().then((datas) => {
         setPattern(datas.customUsernamesPattern || "");
       })
     );
-  }, []);
+  }, [groupId, guildId]);
 
   return (
     <>
