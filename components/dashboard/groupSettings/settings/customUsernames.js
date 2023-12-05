@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import TextInput from "../../../ui/textInput";
 import config from "../../../../utils/config";
+import { getCookie } from "../../../../utils/cookies";
 
 const CustomUsernames = ({ groupId, guildId }) => {
   const [pattern, setPattern] = useState("");
