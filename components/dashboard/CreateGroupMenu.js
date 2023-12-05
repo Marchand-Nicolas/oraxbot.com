@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { useState } from "react";
 import styles from "../../styles/components/dashboard/CreateGroupMenu.module.css";
-import { getCookie } from "../../utils/cookies";
 import config from "../../utils/config";
 import popup from "../../utils/popup";
 import { unmountComponentAtNode } from "react-dom";
