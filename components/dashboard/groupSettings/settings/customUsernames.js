@@ -7,6 +7,7 @@ const CustomUsernames = ({ groupId, guildId }) => {
   const [pattern, setPattern] = useState("");
 
   useEffect(() => {
+    if (!groupId || !guildId) return;
     // Load the custom usernames pattern
     fetch(`${config.apiV2}get_custom_usernames_pattern`, {
       method: "POST",
@@ -14,8 +15,8 @@ const CustomUsernames = ({ groupId, guildId }) => {
         "token"
       )}", "groupId": ${groupId}, "guildId":"${guildId}" }`,
     }).then((res) =>
-      res.json().then((datas) => {
-        setPattern(datas.customUsernamesPattern || "");
+      res.json().then((data) => {
+        setPattern(data.customUsernamesPattern || "");
       })
     );
   }, [groupId, guildId]);
@@ -38,7 +39,9 @@ const CustomUsernames = ({ groupId, guildId }) => {
             method: "POST",
             body: `{ "token": "${getCookie(
               "token"
-            )}", "groupId": ${groupId}, "guildId":"${guildId}", "customUsernamesPattern": ${newPattern} }`,
+            )}", "groupId": ${groupId}, "guildId":"${guildId}", "customUsernamesPattern": ${JSON.stringify(
+              newPattern
+            )} }`,
           });
         }}
         value={pattern}
