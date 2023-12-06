@@ -1,6 +1,6 @@
 import styles from "../../styles/components/ui/hiddenMenu.module.css";
 
-const HiddenMenu = ({ children, title }) => {
+const HiddenMenu = ({ children, title, defaultOpen }) => {
   return (
     <>
       <label className={styles.openMenuLabel}>
@@ -8,6 +8,7 @@ const HiddenMenu = ({ children, title }) => {
           type="checkbox"
           id="group-advanced-settings"
           className={styles.openMenuCheckbox}
+          defaultChecked={defaultOpen ? defaultOpen : false}
         />
         <div className={styles.openMenuVisual}>
           <h2>{title}</h2>

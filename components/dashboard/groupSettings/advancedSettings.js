@@ -79,6 +79,97 @@ const AdvancedSettings = ({ defaultDisableUserWarningMessage }) => {
         <div className={styles.illustrationContainer}>
           <img src="/illustrations/userWarningMessage.png" />
         </div>
+        <div className="line">
+          <button
+            onClick={() =>
+              popup("Rename the group", <div></div>, "error", {
+                icon: drop,
+                close: true,
+                buttons: [
+                  {
+                    name: "Cancel",
+                    className: "border normal",
+                  },
+                  {
+                    name: "Rename",
+                    action: function () {
+                      fetch(`${apiV2}rename_interserv_group`, {
+                        method: "POST",
+                        body: `{ "token": "${getCookie(
+                          "token"
+                        )}", "groupId": ${groupId}, "guildId":"${guildId}", "newName": "${
+                          document.getElementById("renameGroupInput").value
+                        }" }`,
+                      })
+                        .then((res) => res.json())
+                        .then((datas) => {
+                          if (datas.result) {
+                            router.push("../?guild=" + guildId);
+                          }
+                        });
+                    },
+                  },
+                ],
+                action: function () {
+                  fetch(`${config.serverIp}delete_interserv_group`, {
+                    method: "POST",
+                    body: `{ "token": "${getCookie(
+                      "token"
+                    )}", "groupId": ${groupId}, "guildId":"${guildId}" }`,
+                  })
+                    .then((res) => res.json())
+                    .then((datas) => {
+                      if (datas.result) {
+                        router.push("../?guild=" + guildId);
+                      }
+                    });
+                },
+                content: (
+                  <input
+                    id="renameGroupInput"
+                    className="textInput normal"
+                    placeholder="New group name"
+                  ></input>
+                ),
+              })
+            }
+            className="button round normal"
+          >
+            Rename the group
+          </button>
+          <button
+            onClick={() =>
+              popup(
+                "Delete the group",
+                "This action is irreversible. All channels linked to your group will be unlinked.",
+                "error",
+                {
+                  icon: fire,
+                  close: true,
+                  customButtonName: "Delete",
+                  action: function () {
+                    fetch(`${config.serverIp}delete_interserv_group`, {
+                      method: "POST",
+                      body: `{ "token": "${getCookie(
+                        "token"
+                      )}", "groupId": ${groupId}, "guildId":"${guildId}" }`,
+                    })
+                      .then((res) => res.json())
+                      .then((datas) => {
+                        if (datas.result) {
+                          router.push("../?guild=" + guildId);
+                        }
+                      });
+                  },
+                }
+              )
+            }
+            className="button round dangerous"
+          >
+            Delete the group
+          </button>
+        </div>
+        <br></br>
       </>
     </HiddenMenu>
   );
