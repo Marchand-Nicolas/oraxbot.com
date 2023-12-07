@@ -6,7 +6,6 @@ import config from "../../../utils/config";
 import { getCookie } from "../../../utils/cookies";
 import popup from "../../../utils/popup";
 import drop from "../../../public/icons/drop.svg";
-import fire from "../../../public/icons/fire.svg";
 import Link from "next/link";
 import Loading from "../../../components/Loading";
 import AdvancedSettings from "../../../components/dashboard/groupSettings/advancedSettings";
