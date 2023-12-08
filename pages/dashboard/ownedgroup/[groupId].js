@@ -12,14 +12,11 @@ import AdvancedSettings from "../../../components/dashboard/groupSettings/advanc
 import Settings from "../../../components/dashboard/groupSettings/settings";
 
 export default function OwnedGroup() {
-  const apiV2 = config.apiV2;
   const router = useRouter();
   const { groupId } = router.query;
   const [link, setLink] = useState("");
   const [channels, setChannels] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [disableUserWarningMessage, setDisableUserWarningMessage] =
-    useState(false);
 
   const params = new URLSearchParams(router.asPath.split("?")[1]);
   const guildId = params.get("guild");
@@ -42,7 +39,6 @@ export default function OwnedGroup() {
             );
             setChannels(datas.channels);
             setLoading(false);
-            setDisableUserWarningMessage(datas.disableUserWarningMessage);
           }
         });
     }
@@ -198,12 +194,8 @@ export default function OwnedGroup() {
           </section>
         )}
         <br></br>
-        <Settings
-          defaultDisableUserWarningMessage={disableUserWarningMessage}
-        />
-        <AdvancedSettings
-          defaultDisableUserWarningMessage={disableUserWarningMessage}
-        />
+        <Settings />
+        <AdvancedSettings />
       </div>
       {loading && <Loading />}
     </>

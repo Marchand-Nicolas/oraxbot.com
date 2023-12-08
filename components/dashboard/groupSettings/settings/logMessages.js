@@ -28,7 +28,6 @@ const LogMessages = ({ groupId, guildId }) => {
         "token"
       )}", "groupId": ${groupId}, "guildId":"${guildId}", "fieldName": "logMessagesInChannel" }`,
     }).then((res) => {
-      console.log(res);
       res.json().then((data) => {
         setLogChannel(data.logMessagesInChannel || "");
       });

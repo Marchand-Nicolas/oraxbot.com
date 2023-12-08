@@ -175,7 +175,6 @@ export default function JoinGroup() {
                           );
                           router.push(`/dashboard?guild=${guildId}`);
                         }
-                        console.log(res);
                       });
                   }}
                   key={"channel_" + index}
