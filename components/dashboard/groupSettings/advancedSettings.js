@@ -7,7 +7,7 @@ import { useRouter } from "next/router";
 import HiddenMenu from "../../ui/hiddenMenu";
 import React, { useEffect, useState } from "react";
 
-const setDisableUserWarningMessage = (
+const updateDisableUserWarningMessage = (
   e,
   groupId,
   guildId,
@@ -27,10 +27,8 @@ const setDisableUserWarningMessage = (
 
 const AdvancedSettings = () => {
   const router = useRouter();
-  const [
-    defaultDisableUserWarningMessage,
-    setDefaultDisableUserWarningMessage,
-  ] = useState(false);
+  const [disableUserWarningMessage, setDisableUserWarningMessage] =
+    useState(false);
   const params = new URLSearchParams(router.asPath.split("?")[1]);
   const guildId = params.get("guild");
   const { groupId } = router.query;
@@ -46,20 +44,22 @@ const AdvancedSettings = () => {
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
-          setDefaultDisableUserWarningMessage(!!data.disableUserWarningMessage);
+          setDisableUserWarningMessage(!!data.disableUserWarningMessage);
         }
       });
-  }, [groupId, guildId, router.asPath]);
+  }, [groupId, guildId]);
+
   return (
     <HiddenMenu title={"Advanced Settings"}>
       <>
         <div className={styles.line}>
           <input
-            defaultChecked={defaultDisableUserWarningMessage}
-            onClick={(e) => {
+            checked={disableUserWarningMessage}
+            onChange={(e) => {
               const checked = e.target.checked;
+              setDisableUserWarningMessage(checked);
               if (!checked)
-                setDisableUserWarningMessage(e, groupId, guildId, false);
+                updateDisableUserWarningMessage(e, groupId, guildId, false);
               else {
                 e.target.checked = false;
                 popup(
@@ -77,7 +77,7 @@ const AdvancedSettings = () => {
                         name: "Continue",
                         className: "dangerous",
                         action: () => {
-                          setDisableUserWarningMessage(
+                          updateDisableUserWarningMessage(
                             e,
                             groupId,
                             guildId,
