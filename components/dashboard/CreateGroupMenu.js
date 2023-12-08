@@ -74,7 +74,6 @@ export default function CreateGroupMenu(props) {
             })
               .then((res) => res.json())
               .then((res) => {
-                console.log(res);
                 if (res.error) {
                   switch (res.error) {
                     case 1:

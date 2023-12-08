@@ -5,6 +5,7 @@ import config from "../../../utils/config";
 import { getCookie } from "../../../utils/cookies";
 import { useRouter } from "next/router";
 import HiddenMenu from "../../ui/hiddenMenu";
+import React, { useEffect, useState } from "react";
 
 const setDisableUserWarningMessage = (
   e,
@@ -24,11 +25,31 @@ const setDisableUserWarningMessage = (
     });
 };
 
-const AdvancedSettings = ({ defaultDisableUserWarningMessage }) => {
+const AdvancedSettings = () => {
   const router = useRouter();
+  const [
+    defaultDisableUserWarningMessage,
+    setDefaultDisableUserWarningMessage,
+  ] = useState(false);
   const params = new URLSearchParams(router.asPath.split("?")[1]);
   const guildId = params.get("guild");
   const { groupId } = router.query;
+
+  useEffect(() => {
+    if (!groupId || !guildId) return;
+    fetch(`${config.apiV2}get_group_disable_user_warning_message`, {
+      method: "POST",
+      body: `{ "token": "${getCookie(
+        "token"
+      )}", "groupId": ${groupId}, "guildId":"${guildId}" }`,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setDefaultDisableUserWarningMessage(!!data.disableUserWarningMessage);
+        }
+      });
+  }, [groupId, guildId, router.asPath]);
   return (
     <HiddenMenu title={"Advanced Settings"}>
       <>
