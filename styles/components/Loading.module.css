@@ -1,3 +1,7 @@
 .container {
   position: relative;
 }
+
+.loadingContainer {
+  position: relative;
+}

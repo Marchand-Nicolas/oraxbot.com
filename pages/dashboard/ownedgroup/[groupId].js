@@ -10,6 +10,7 @@ import Link from "next/link";
 import Loading from "../../../components/Loading";
 import AdvancedSettings from "../../../components/dashboard/groupSettings/advancedSettings";
 import Settings from "../../../components/dashboard/groupSettings/settings";
+import ActivityGraph from "../../../components/dashboard/groupSettings/activityGraph";
 
 export default function OwnedGroup() {
   const router = useRouter();
@@ -196,6 +197,7 @@ export default function OwnedGroup() {
         <br></br>
         <Settings />
         <AdvancedSettings />
+        <ActivityGraph />
       </div>
       {loading && <Loading />}
     </>

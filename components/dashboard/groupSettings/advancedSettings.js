@@ -42,11 +42,11 @@ const AdvancedSettings = () => {
       )}", "groupId": ${groupId}, "guildId":"${guildId}" }`,
     })
       .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          setDisableUserWarningMessage(!!data.disableUserWarningMessage);
-        }
-      });
+      .then(
+        (data) =>
+          data.success &&
+          setDisableUserWarningMessage(!!data.disableUserWarningMessage)
+      );
   }, [groupId, guildId]);
 
   return (
