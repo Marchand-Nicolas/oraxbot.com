@@ -4,4 +4,6 @@
 
 .loadingContainer {
   position: relative;
+  width: 60px;
+  height: 60px;
 }
