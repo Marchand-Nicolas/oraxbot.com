@@ -1,6 +1,5 @@
 .page {
-  margin: 20px 0 0 20px;
-  position: absolute;
+  margin: 20px;
   padding: 0 20px;
   width: calc(100% - 80px);
   border-radius: 12px;
