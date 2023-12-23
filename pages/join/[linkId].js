@@ -158,7 +158,7 @@ export default function JoinGroup() {
               {channels.result.map((channel, index) => (
                 <button
                   onClick={() => {
-                    fetch(`${config.apiV2}join_group_by_link`, {
+                    fetch(`${config.apiV2}join_group_with_link`, {
                       method: "POST",
                       body: `{ "linkId": "${linkId}", "guildId": "${guildId}", "channelId": "${
                         channel.id
