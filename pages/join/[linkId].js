@@ -201,10 +201,7 @@ export default function JoinGroup() {
                   ),
                   icon: meteor,
                   action: function () {
-                    window.open(
-                      "https://discord.com/oauth2/authorize?client_id=812298057470967858&scope=bot&permissions=536871936&guild_id=" +
-                        guildId
-                    );
+                    window.open(config.inviteLink + +"&guild_id=" + guildId);
                   },
                 })
               }
