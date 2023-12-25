@@ -94,24 +94,27 @@ export default function Home() {
             </div>
           </Link>
           <a
-            href="https://discord.gg/PJumX8FjRV"
+            href="https://www.patreon.com/user?u=111388918"
             target="_blank"
             rel="noreferrer"
             className={styles.card}
           >
+            <h2>❤️ Patreon &rarr;</h2>
+            <p>Support our hard work with our recently launched Patreon ✨</p>
+          </a>
+          <a
+            href="https://discord.gg/PJumX8FjRV"
+            target="_blank"
+            rel="noreferrer"
+            className={`${styles.card} ${styles.soft}`}
+          >
             <h2>Support server &rarr;</h2>
-            <p>Any questions? A problem? A suggestion? Contact us ❤️</p>
+            <p>Any questions? A problem? A suggestion? Contact us</p>
           </a>
           <Link href="/tos">
-            <div className={styles.card}>
+            <div className={`${styles.card} ${styles.soft}`}>
               <h2>TOS &rarr;</h2>
               <p>Terms of service</p>
-            </div>
-          </Link>
-          <Link href="/privacy">
-            <div className={styles.card}>
-              <h2>Privacy &rarr;</h2>
-              <p>How we use and store your data, and those of your community</p>
             </div>
           </Link>
         </div>
