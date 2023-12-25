@@ -24,10 +24,26 @@ const ActivityGraph = ({}) => {
       )}", "groupId": ${groupId}, "guildId":"${guildId}" }`,
     }).then((res) =>
       res.json().then((data) => {
-        console.log(data);
         const activity = data.activity;
-        setDates(activity.map((a) => new Date(a.date).toLocaleDateString()));
-        setMessages(activity.map((a) => a.count));
+        const dates = activity.map((a) =>
+          new Date(a.date).toLocaleDateString()
+        );
+        const messages = activity.map((a) => a.count);
+        const resDates = [];
+        const resMessages = [];
+        const firstDate = new Date(activity[0].date);
+        const today = new Date();
+        for (let d = firstDate; d <= today; d.setDate(d.getDate() + 1)) {
+          resDates.push(d.toLocaleDateString());
+          const index = dates.indexOf(d.toLocaleDateString());
+          if (index != -1) {
+            resMessages.push(messages[index]);
+          } else {
+            resMessages.push(0);
+          }
+        }
+        setDates(resDates);
+        setMessages(resMessages);
         setLoading(false);
       })
     );
@@ -40,22 +56,45 @@ const ActivityGraph = ({}) => {
     xaxis: {
       categories: dates,
       tickAmount: 10, // Set the desired number of ticks to display on the x-axis
+      show: false,
+      labels: {
+        show: false,
+      },
+      axisBorder: {
+        show: false,
+      },
+      axisTicks: {
+        show: false,
+      },
+    },
+    yaxis: {
+      show: false,
+      labels: {
+        show: false,
+      },
+      axisBorder: {
+        show: false,
+      },
+      axisTicks: {
+        show: false,
+      },
     },
     fill: {
       type: "gradient",
       gradient: {
-        shade: "dark",
         type: "vertical",
-        shadeIntensity: 0.6,
-        gradientToColors: "", // optional, if not defined - uses the shades of same color in series
+        shadeIntensity: 0.5,
+        gradientToColors: ["white"], // optional, if not defined - uses the shades of same color in series
         inverseColors: false,
-        opacityFrom: 0.9,
+        opacityFrom: 1,
         opacityTo: 1,
         stops: [0, 50, 100],
       },
     },
     stroke: {
       curve: "smooth",
+      width: 4,
+      lineCap: "round",
     },
     colors: ["#8151fc"],
     chart: {
@@ -71,11 +110,14 @@ const ActivityGraph = ({}) => {
       enabled: true,
       theme: "dark",
     },
+    dataLabels: {
+      enabled: false,
+    },
   };
 
   const series = [
     {
-      name: "Messages sent",
+      name: "Messages sent by the bot",
       data: messages,
     },
   ];
@@ -86,7 +128,7 @@ const ActivityGraph = ({}) => {
       {loading ? (
         <LoadingCircle />
       ) : (
-        <ApexChart options={options} series={series} type="line" height={320} />
+        <ApexChart options={options} series={series} type="line" height={150} />
       )}
     </>
   );
