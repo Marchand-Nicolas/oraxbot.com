@@ -68,12 +68,12 @@ const ActivityGraph = ({}) => {
       },
     },
     yaxis: {
-      show: false,
+      show: true,
       labels: {
-        show: false,
+        show: true,
       },
       axisBorder: {
-        show: false,
+        show: true,
       },
       axisTicks: {
         show: false,
