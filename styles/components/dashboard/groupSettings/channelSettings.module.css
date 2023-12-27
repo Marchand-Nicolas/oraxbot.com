@@ -1,0 +1,25 @@
+*:has(.background) {
+  overflow: hidden;
+}
+
+.background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  z-index: 1;
+  backdrop-filter: blur(10px);
+}
+
+.container {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  bottom: 10px;
+  right: 10px;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--border-radius);
+}
