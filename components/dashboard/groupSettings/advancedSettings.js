@@ -72,6 +72,9 @@ const AdvancedSettings = () => {
                       {
                         name: "Cancel",
                         className: "normal",
+                        action: () => {
+                          e.target.checked = false;
+                        },
                       },
                       {
                         name: "Continue",
