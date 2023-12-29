@@ -1,6 +1,6 @@
 import styles from "../../styles/dashboard/OwnedGroup.module.css";
 
-const BackButton = () => {
+const BackButton = ({ buttonName }) => {
   return (
     <div className="line">
       <svg
@@ -17,7 +17,7 @@ const BackButton = () => {
           d="M11.25 9l-3 3m0 0l3 3m-3-3h7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
         />
       </svg>
-      <h1 className={styles.title}>Back</h1>
+      <h1 className={styles.title}>{buttonName}</h1>
     </div>
   );
 };

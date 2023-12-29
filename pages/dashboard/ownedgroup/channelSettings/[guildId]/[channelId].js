@@ -20,7 +20,7 @@ export default function ChannelSettings() {
         className={dashboardStyles.background}
       />
       <div className={groupStyles.page}>
-        <BackButton />
+        <BackButton buttonName="Channel settings" />
       </div>
     </>
   );
