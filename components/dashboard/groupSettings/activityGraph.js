@@ -25,6 +25,7 @@ const ActivityGraph = ({}) => {
     }).then((res) =>
       res.json().then((data) => {
         const activity = data.activity;
+        if (!activity || activity.length == 0) return setLoading(false);
         const dates = activity.map((a) =>
           new Date(a.date).toLocaleDateString()
         );

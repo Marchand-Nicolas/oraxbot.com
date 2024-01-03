@@ -3,7 +3,7 @@
   padding: 0 20px;
   width: calc(100% - 80px);
   border-radius: 12px;
-  min-height: calc(100vh - 40px);
+  min-height: calc(100vh - 42px);
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
@@ -68,32 +68,72 @@
   color: #8151fc;
 }
 
+.channels {
+  display: flex;
+  flex-direction: column;
+  width: fit-content;
+}
+
 .channelContainer {
   display: flex;
   align-items: center;
   background-color: rgba(128, 128, 128, 0.333);
-  width: fit-content;
   padding: 5px 15px;
   border-radius: 2em;
   margin: 10px 0;
+  gap: 15px;
+}
+
+.channelContainer > div {
+  display: flex;
+}
+
+.channelButtons {
+  margin-left: auto;
 }
 
 .channelContainer p {
   margin: 0;
 }
 
-.channelIcon {
-  width: 20px;
+.channelName {
+  margin-right: auto !important;
 }
 
-.removeChannelIcon {
+.channelContainer svg {
   width: 20px;
-  margin-left: 15px;
-  color: rgb(255, 100, 100);
   cursor: pointer;
   transition: 0.2s;
 }
 
+.channelContainer svg:hover {
+  color: var(--secondary);
+}
+
+.removeChannelIcon {
+  color: rgb(255, 100, 100);
+}
+
 .removeChannelIcon:hover {
   color: red;
+}
+
+@media screen and (max-width: 800px) {
+  .channels {
+    width: 100%;
+  }
+  .channelContainer {
+    width: calc(100% - 30px);
+    border-radius: var(--border-radius);
+    flex-direction: column;
+  }
+  .channelContainer svg {
+    margin-left: 0;
+  }
+  .channelContainer > div {
+    gap: 10px;
+  }
+  .channelButtons {
+    margin-left: 0;
+  }
 }
