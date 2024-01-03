@@ -13,11 +13,11 @@ const updateDisableUserWarningMessage = (
   guildId,
   disableUserWarningMessage
 ) => {
-  fetch(`${config.apiV2}set_disable_user_warning_message`, {
+  fetch(`${config.apiV2}set_group_settings_field`, {
     method: "POST",
     body: `{ "token": "${getCookie(
       "token"
-    )}", "groupId": ${groupId}, "guildId":"${guildId}", "disableUserWarningMessage": ${disableUserWarningMessage} }`,
+    )}", "groupId": ${groupId}, "guildId":"${guildId}", "fieldValue": ${disableUserWarningMessage}, "fieldName": "disableUserWarningMessage" }`,
   })
     .then((res) => res.json())
     .then((datas) => {
@@ -35,11 +35,11 @@ const AdvancedSettings = () => {
 
   useEffect(() => {
     if (!groupId || !guildId) return;
-    fetch(`${config.apiV2}get_group_disable_user_warning_message`, {
+    fetch(`${config.apiV2}get_group_settings_field`, {
       method: "POST",
       body: `{ "token": "${getCookie(
         "token"
-      )}", "groupId": ${groupId}, "guildId":"${guildId}" }`,
+      )}", "groupId": ${groupId}, "guildId":"${guildId}", "fieldName": "disableUserWarningMessage" }`,
     })
       .then((res) => res.json())
       .then(

@@ -23,10 +23,8 @@ const ChannelButton = ({ channel, groupId, guildId, setChannels, icon }) => {
         </svg>
         <p className={styles.channelName}>{channel.name}</p>
       </div>
-      <div>
-        <Link
-          href={`./channelSettings/${guildId}/${channel.id}?icon=${icon}&guild=${guildId}`}
-        >
+      <div className={styles.channelButtons}>
+        <Link href={`./channelSettings/${guildId}/${channel.id}?icon=${icon}`}>
           <svg
             fill="none"
             viewBox="0 0 24 24"

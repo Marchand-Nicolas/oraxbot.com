@@ -88,6 +88,10 @@
   display: flex;
 }
 
+.channelButtons {
+  margin-left: auto;
+}
+
 .channelContainer p {
   margin: 0;
 }
@@ -128,5 +132,8 @@
   }
   .channelContainer > div {
     gap: 10px;
+  }
+  .channelButtons {
+    margin-left: 0;
   }
 }
