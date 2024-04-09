@@ -21,7 +21,7 @@ const updateDisableUserWarningMessage = (
   })
     .then((res) => res.json())
     .then((datas) => {
-      if (datas.result) e.target.checked = disableUserWarningMessage;
+      if (datas.success) e.target.checked = disableUserWarningMessage;
     });
 };
 
@@ -29,9 +29,23 @@ const AdvancedSettings = () => {
   const router = useRouter();
   const [disableUserWarningMessage, setDisableUserWarningMessage] =
     useState(false);
+  const [disableDeleteSync, setDisableDeleteSync] = useState(false);
   const params = new URLSearchParams(router.asPath.split("?")[1]);
   const guildId = params.get("guild");
   const { groupId } = router.query;
+
+  const updateDisableDeleteSync = (e, groupId, guildId, disableDeleteSync) => {
+    fetch(`${config.apiV2}set_group_settings_field`, {
+      method: "POST",
+      body: `{ "token": "${getCookie(
+        "token"
+      )}", "groupId": ${groupId}, "guildId":"${guildId}", "fieldValue": ${disableDeleteSync}, "fieldName": "disableDeleteSync" }`,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) setDisableDeleteSync(disableDeleteSync);
+      });
+  };
 
   useEffect(() => {
     if (!groupId || !guildId) return;
@@ -48,6 +62,22 @@ const AdvancedSettings = () => {
           setDisableUserWarningMessage(!!data.disableUserWarningMessage)
       );
   }, [groupId, guildId]);
+
+  useEffect(() => {
+    if (!groupId || !guildId) return;
+    fetch(`${config.apiV2}get_group_settings_field`, {
+      method: "POST",
+      body: `{ "token": "${getCookie(
+        "token"
+      )}", "groupId": ${groupId}, "guildId":"${guildId}", "fieldName": "disableDeleteSync" }`,
+    })
+      .then((res) => res.json())
+      .then(
+        (data) => data.success && setDisableDeleteSync(!!data.disableDeleteSync)
+      );
+  }, [groupId, guildId]);
+
+  console.log(disableDeleteSync);
 
   return (
     <HiddenMenu title={"Advanced Settings"}>
@@ -103,6 +133,19 @@ const AdvancedSettings = () => {
         <div className={styles.illustrationContainer}>
           <img src="/illustrations/userWarningMessage.png" />
         </div>
+        <div className={styles.line}>
+          <input
+            checked={disableDeleteSync}
+            onChange={(e) =>
+              updateDisableDeleteSync(e, groupId, guildId, e.target.checked)
+            }
+            type="checkbox"
+          />
+          <label htmlFor="disable-delete-sync">
+            Disable message deletion sync
+          </label>
+        </div>
+        <br></br>
         <div className="line">
           <button
             onClick={() =>
