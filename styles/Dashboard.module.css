@@ -38,7 +38,7 @@
 }
 
 .navbar {
-  width: 80px;
+  width: 88px;
   position: fixed;
   left: 0;
   top: 0;
@@ -52,6 +52,7 @@
   -webkit-backdrop-filter: blur(4px);
   border: 1px solid rgba(255, 255, 255, 0.18);
   padding: 0;
+  scrollbar-width: thin;
 }
 
 .navbar::-webkit-scrollbar {
@@ -71,9 +72,10 @@
 .navbar .navGuild {
   cursor: pointer;
   display: block;
-  margin: 0 auto;
+  margin-left: 4px;
   width: fit-content;
   position: relative;
+  transform: translateX(5px);
 }
 
 .navbar .navGuild:hover .guildIcon {
@@ -84,10 +86,11 @@
   content: "";
   position: absolute;
   top: 50%;
-  left: 0;
+  left: -4px;
   width: 8px;
   height: 0;
-  transform: translateY(-50%) translateX(calc(-10px - 50%));
+  transform: translateY(-50%) translateX(-100%);
+  z-index: 10;
   transition: 0.4s;
   background: white;
   border-radius: 1em;
@@ -246,14 +249,19 @@
     border: 1px solid rgba(255, 255, 255, 0.18);
   }
 
+  .navbar .guildIcon {
+    width: 40px;
+    height: 40px;
+  }
+
   .navbar .navGuild::before {
     content: "";
     position: absolute;
     top: 50%;
-    left: 0;
+    left: -5px;
     width: 10px;
     height: 8px;
-    transform: translateY(-50%) translateX(calc(-2px - 50%));
+    transform: translateY(-50%) translateX(-100%);
     transition: 0.4s;
     background: white;
     border-radius: 1em;
