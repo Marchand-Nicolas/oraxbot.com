@@ -120,7 +120,7 @@ const ActivityGraph = ({}) => {
 
   const series = [
     {
-      name: "Messages sent by the bot",
+      name: "Messages sent in the interserv",
       data: messages,
     },
   ];
@@ -128,7 +128,7 @@ const ActivityGraph = ({}) => {
   return (
     <>
       <h2>Activity graph (30 days)</h2>
-      <span>{totalCount} messages in the last 30 days.</span>
+      <span>{totalCount} messages sent in the last 30 days.</span>
       {loading ? (
         <LoadingCircle />
       ) : (
