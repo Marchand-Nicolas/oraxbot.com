@@ -15,6 +15,8 @@ const ActivityGraph = ({}) => {
   const [loading, setLoading] = useState(true);
   const { groupId } = router.query;
 
+  const totalCount = messages.reduce((a, b) => a + parseInt(b), 0);
+
   useEffect(() => {
     if (!groupId || !guildId) return;
     fetch(`${config.apiV2}get_group_activity_data`, {
@@ -125,7 +127,8 @@ const ActivityGraph = ({}) => {
 
   return (
     <>
-      <h2>Activity graph</h2>
+      <h2>Activity graph (30 days)</h2>
+      <span>{totalCount} messages in the last 30 days.</span>
       {loading ? (
         <LoadingCircle />
       ) : (
