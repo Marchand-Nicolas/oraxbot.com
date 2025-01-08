@@ -3,7 +3,7 @@
   flex: 1;
   padding: 0.8rem;
   align-items: center;
-  background: rgba(255, 255, 255, 0.2);
+  background: white;
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
@@ -13,6 +13,7 @@
   top: 0;
   right: 0;
   z-index: 10;
+  transition: all 0.3s ease-in-out;
 }
 
 .nav a {
@@ -53,4 +54,10 @@
   background: linear-gradient(37deg, rgb(0, 161, 232) 0%, #8151fc 100%);
   background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+.donate {
+  margin-left: auto;
+  margin-right: 1rem;
+  cursor: pointer;
 }

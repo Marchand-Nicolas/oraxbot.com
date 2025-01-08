@@ -32,6 +32,15 @@ export default function Footer() {
           </div>
         </Link>
       )}
+      <a
+        href="https://www.patreon.com/user?u=111388918"
+        target="_blank"
+        rel="noreferrer"
+      >
+        <div className={styles.donate}>
+          <p>❤️ Orax is 100% free</p>
+        </div>
+      </a>
     </nav>
   );
 }
