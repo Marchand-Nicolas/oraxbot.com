@@ -27,8 +27,9 @@ const CustomUsernames = ({ groupId, guildId }) => {
         <strong>Custom usernames pattern:</strong>
       </label>
       <label>
-        You can use <code>{`{username}`}</code>, <code>{`{nickname}`}</code> and{" "}
-        <code>{`{serverName}`}</code> to customize the usernames dynamically.
+        You can use <code>{`{username}`}</code>, <code>{`{nickname}`}</code>,{" "}
+        <code>{`{serverName}`}</code> and <code>{`{role}`}</code> to customize
+        the usernames dynamically.
       </label>
       <TextInput
         placeholder="{username} [{serverName}]"

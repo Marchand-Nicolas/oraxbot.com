@@ -1,0 +1,39 @@
+.skeleton {
+  display: inline-block;
+  height: 1em;
+  width: 100%;
+  max-width: 100%;
+  border-radius: var(--border-radius);
+  background-color: var(--skeleton-color);
+  position: relative;
+  overflow: hidden;
+  opacity: 0.5;
+}
+
+.skeleton::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200px; /* Ensure the gradient covers the entire width during animation */
+  height: 100%;
+  border-radius: inherit;
+  background-image: linear-gradient(
+    to right,
+    var(--skeleton-color) 0%,
+    var(--skeleton-color) 20%,
+    var(--skeleton-color-2) 50%,
+    var(--skeleton-color) 80%,
+    var(--skeleton-color) 100%
+  );
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    left: 100vw;
+  }
+}

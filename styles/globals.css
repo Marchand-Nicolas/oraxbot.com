@@ -5,6 +5,8 @@
   --border-radius: 0.5rem;
   --primary: #8151fc;
   --secondary: #00a1e8;
+  --skeleton-color: #8f9093;
+  --skeleton-color-2: #cdd0d6;
 }
 
 html,

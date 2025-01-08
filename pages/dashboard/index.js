@@ -27,6 +27,7 @@ export default function Dashboard() {
   const [paymentProgress, setPaymentProgress] = useState(0);
   const [refreshGuildDatas, setRefreshGuildDatas] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [lastLoadedGuildId, setLastLoadedGuildId] = useState("");
 
   useEffect(() => {
     let token = getCookie("token");
@@ -176,6 +177,10 @@ export default function Dashboard() {
     if (refreshGuildDatas) return setRefreshGuildDatas(false);
     if (!guild) return;
     if (!guild.id) return;
+    if (guild.id !== lastLoadedGuildId) {
+      setGuildDatas({});
+      setSettings({});
+    }
     try {
       fetch(`${serverIp}get_server_datas`, {
         method: "POST",
@@ -186,6 +191,7 @@ export default function Dashboard() {
           if (res.result) {
             setGuildDatas(res);
             setSettings(res.settings);
+            setLastLoadedGuildId(guild.id);
           } else {
             requestError();
           }
