@@ -260,4 +260,13 @@
     z-index: 10;
     opacity: 0;
   }
+
+  .navbar .guildIcon {
+    width: 53px;
+    height: 53px;
+  }
+
+  .navGuild {
+    transform: translateX(-2px);
+  }
 }
