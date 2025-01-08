@@ -112,7 +112,7 @@ export default function Home() {
             className={styles.card}
           >
             <h2>❤️ Patreon &rarr;</h2>
-            <p>Support our hard work with our recently launched Patreon ✨</p>
+            <p>Support my hard work with my recently launched Patreon ✨</p>
           </a>
           <a
             href="https://discord.gg/PJumX8FjRV"
