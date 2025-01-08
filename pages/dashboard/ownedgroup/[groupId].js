@@ -11,7 +11,7 @@ import AdvancedSettings from "../../../components/dashboard/groupSettings/advanc
 import Settings from "../../../components/dashboard/groupSettings/settings";
 import ActivityGraph from "../../../components/dashboard/groupSettings/activityGraph";
 import ChannelButton from "../../../components/dashboard/groupSettings/channelButton";
-import Skeleton from "../../../components/ui/Skeleton";
+import Skeleton from "../../../components/ui/skeleton";
 
 export default function OwnedGroup() {
   const router = useRouter();
