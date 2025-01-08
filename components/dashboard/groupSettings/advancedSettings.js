@@ -1,5 +1,6 @@
 import styles from "../../../styles/components/dashboard/groupSettings/advancedSettings.module.css";
 import fire from "../../../public/icons/fire.svg";
+import drop from "../../../public/icons/drop.svg";
 import popup from "../../../utils/popup";
 import config from "../../../utils/config";
 import { getCookie } from "../../../utils/cookies";
@@ -76,8 +77,6 @@ const AdvancedSettings = () => {
         (data) => data.success && setDisableDeleteSync(!!data.disableDeleteSync)
       );
   }, [groupId, guildId]);
-
-  console.log(disableDeleteSync);
 
   return (
     <HiddenMenu title={"Advanced Settings"}>
@@ -160,7 +159,7 @@ const AdvancedSettings = () => {
                   {
                     name: "Rename",
                     action: function () {
-                      fetch(`${apiV2}rename_interserv_group`, {
+                      fetch(`${config.apiV2}rename_interserv_group`, {
                         method: "POST",
                         body: `{ "token": "${getCookie(
                           "token"
