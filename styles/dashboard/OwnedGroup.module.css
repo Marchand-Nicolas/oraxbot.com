@@ -65,10 +65,13 @@
   width: 40px;
   margin-right: 20px;
   transition: 0.2s;
+  border-radius: 100px;
+  border-radius: 100px;
 }
 
 .back:hover {
-  color: #8151fc;
+  color: var(--secondary);
+  background-color: white;
 }
 
 .channels {
