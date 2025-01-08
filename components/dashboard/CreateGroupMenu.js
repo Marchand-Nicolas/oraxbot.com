@@ -50,80 +50,83 @@ export default function CreateGroupMenu(props) {
         </select>
         <br></br>
         <br></br>
-        <button
-          className="default"
-          onClick={() => {
-            const groupName = document.getElementById("groupName").value;
-            const selectedChannelId =
-              document.getElementById("selectChannel").value;
-            if (!groupName) {
-              popup("Error", "Please enter a group name", "error", {
-                icon: meteor,
-              });
-              return;
-            }
-            if (!selectedChannelId) {
-              popup("Error", "Please select a channel", "error", {
-                icon: meteor,
-              });
-              return;
-            }
-            fetch(`${serverIp}create_group`, {
-              method: "POST",
-              body: `{ "guildId": "${props.guildId}", "channelId": "${selectedChannelId}", "groupName": "${groupName}" }`,
-            })
-              .then((res) => res.json())
-              .then((res) => {
-                if (res.error) {
-                  switch (res.error) {
-                    case 1:
-                      popup(
-                        "Error",
-                        'You must give the "Manage Webhooks" permission to the bot',
-                        "error",
-                        { icon: meteor }
-                      );
-                      break;
-                    case 2:
-                      popup(
-                        "Error",
-                        "A single server cannot have more than 10 groups",
-                        "error",
-                        { icon: meteor }
-                      );
-                      break;
-                    default:
-                      popup(
-                        "Error",
-                        `Unknown error; Error code : ${res.error}${
-                          res.customError
-                            ? "; Custom error : " + res.customError
-                            : ""
-                        }`,
-                        "error",
-                        { icon: meteor }
-                      );
-                      break;
+        <div className="line">
+          <button
+            className={[styles.cancelButton, "default"].join(" ")}
+            onClick={() => {
+              unmountComponentAtNode(document.getElementById("menu"));
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            className="default"
+            onClick={() => {
+              const groupName = document.getElementById("groupName").value;
+              const selectedChannelId =
+                document.getElementById("selectChannel").value;
+              if (!groupName) {
+                popup("Error", "Please enter a group name", "error", {
+                  icon: meteor,
+                });
+                return;
+              }
+              if (!selectedChannelId) {
+                popup("Error", "Please select a channel", "error", {
+                  icon: meteor,
+                });
+                return;
+              }
+              fetch(`${serverIp}create_group`, {
+                method: "POST",
+                body: `{ "guildId": "${props.guildId}", "channelId": "${selectedChannelId}", "groupName": "${groupName}" }`,
+              })
+                .then((res) => res.json())
+                .then((res) => {
+                  if (res.error) {
+                    switch (res.error) {
+                      case 1:
+                        popup(
+                          "Error",
+                          'You must give the "Manage Webhooks" permission to the bot',
+                          "error",
+                          { icon: meteor }
+                        );
+                        break;
+                      case 2:
+                        popup(
+                          "Error",
+                          "A single server cannot have more than 10 groups",
+                          "error",
+                          { icon: meteor }
+                        );
+                        break;
+                      default:
+                        popup(
+                          "Error",
+                          `Unknown error; Error code : ${res.error}${
+                            res.customError
+                              ? "; Custom error : " + res.customError
+                              : ""
+                          }`,
+                          "error",
+                          { icon: meteor }
+                        );
+                        break;
+                    }
+                  } else {
+                    popup("Success", "Group created", "success", {
+                      icon: drop,
+                    });
+                    unmountComponentAtNode(document.getElementById("menu"));
+                    props.setRefreshGuildDatas(true);
                   }
-                } else {
-                  popup("Success", "Group created", "success", { icon: drop });
-                  unmountComponentAtNode(document.getElementById("menu"));
-                  props.setRefreshGuildDatas(true);
-                }
-              });
-          }}
-        >
-          Create
-        </button>
-        <br></br>
-        <button
-          className={[styles.cancelButton, "default"].join(" ")}
-          onClick={() => {
-            unmountComponentAtNode(document.getElementById("menu"));
-          }}
-        >
-          Cancel
-        </button>
+                });
+            }}
+          >
+            Create
+          </button>
+        </div>
       </div>
     </div>
   );

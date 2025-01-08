@@ -79,14 +79,7 @@ a * {
   width: calc(100% - 50px);
   font-size: 14px;
   padding: 10px 20px;
-  border: 10px solid;
-  border-image-slice: 1;
-  border-width: 5px;
-  border-image-source: linear-gradient(
-    37deg,
-    rgb(0, 161, 232) 0%,
-    #8151fc 100%
-  );
+  border: none;
 }
 
 .textInput.normal {
@@ -180,18 +173,14 @@ a * {
 }
 
 .popup h2 {
-  background: linear-gradient(37deg, rgb(0, 161, 232) 0%, #8151fc 100%);
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: white;
   width: fit-content;
 }
 
 .popup .container {
   padding: 15px;
   border-radius: 0.9em;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
   background: rgba(0, 0, 0, 0.45);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   border: 1px solid rgba(255, 255, 255, 0.18);
@@ -214,7 +203,7 @@ a * {
 }
 
 .popup button.default {
-  background: linear-gradient(37deg, rgb(0, 161, 232) 0%, #8151fc 100%);
+  background: var(--secondary);
   border: none;
   color: white;
   padding: 10px 20px;
