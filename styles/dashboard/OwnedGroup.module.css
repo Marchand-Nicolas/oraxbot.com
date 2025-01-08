@@ -17,16 +17,19 @@
 }
 
 .inviteLink {
-  color: #8151fc;
+  background-color: white;
+  padding: 1px 7px;
+  color: var(--secondary);
   font-weight: bold;
   overflow-wrap: anywhere;
+  border-radius: var(--border-radius);
 }
 
 .regenerateInviteLink {
   color: #ffffff;
   font-weight: bold;
   border: none;
-  background-color: #8151fc;
+  background-color: var(--secondary);
   border-radius: 1em;
   font-weight: bold;
   display: block;
@@ -54,7 +57,7 @@
   background-color: #ffffff;
   border-radius: 2em;
   padding: 5px;
-  color: #8151fc;
+  color: var(--secondary);
 }
 
 .back {
