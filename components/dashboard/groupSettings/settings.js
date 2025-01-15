@@ -29,7 +29,7 @@ const Settings = ({}) => {
         />
         <br></br>
         <OptionsField
-          label="Explaination message"
+          label="Explanation message"
           description="When enabled, the bot will send a message explaining how the interserv works"
           fieldName="interservHelper"
           groupId={groupId}
