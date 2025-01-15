@@ -18,7 +18,7 @@ const Settings = ({}) => {
         <LogMessages groupId={groupId} guildId={guildId} />
         <br></br>
         <OptionsField
-          label="Reply style"
+          label="Replies style"
           fieldName="replyStyle"
           groupId={groupId}
           guildId={guildId}
