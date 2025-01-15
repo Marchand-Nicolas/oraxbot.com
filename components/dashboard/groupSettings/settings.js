@@ -25,6 +25,7 @@ const Settings = ({}) => {
           options={[
             { name: "Embed", value: "embed" },
             { name: "Quote (Discord's legacy)", value: "quote" },
+            { name: "Quote without jump button", value: "quoteNoButton" },
           ]}
         />
         <br></br>
