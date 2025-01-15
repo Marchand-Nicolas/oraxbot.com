@@ -31,7 +31,9 @@ const OptionsField = ({
     })
       .then((res) => res.json())
       .then((data) => {
-        setFieldValue(data[fieldName] || "");
+        setFieldValue(
+          typeof data[fieldName] != "undefined" ? data[fieldName] : ""
+        );
       });
 
     // Fetch dynamic options if not provided
@@ -63,14 +65,20 @@ const OptionsField = ({
 
   return (
     <div className={styles.fieldContainer}>
-      <label>
+      <label htmlFor={fieldName}>
         <strong>{label}</strong>
       </label>
-      {description && <p className={styles.description}>{description}</p>}
+      {description && (
+        <>
+          <br />
+          <label>{description}</label>
+        </>
+      )}
       <select
         className={styles.selectInput}
-        value={fieldValue || ""}
+        value={fieldValue}
         onChange={(e) => handleChange(e.target.value)}
+        id={fieldName}
       >
         <option value="">Select an option</option>
         {availableOptions.map((option, index) => (

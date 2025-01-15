@@ -27,6 +27,21 @@ const Settings = ({}) => {
             { name: "Quote (Discord's legacy)", value: "quote" },
           ]}
         />
+        <br></br>
+        <OptionsField
+          label="Explaination message"
+          description="When enabled, the bot will send a message explaining how the interserv works"
+          fieldName="interservHelper"
+          groupId={groupId}
+          guildId={guildId}
+          options={[
+            { name: "Disabled", value: 0 },
+            { name: "Every 20 messages", value: 20 },
+            { name: "Every 50 messages", value: 50 },
+            { name: "Every 100 messages", value: 100 },
+            { name: "Every 200 messages", value: 200 },
+          ]}
+        />
       </>
     </HiddenMenu>
   );
