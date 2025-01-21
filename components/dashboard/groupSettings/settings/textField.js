@@ -58,7 +58,7 @@ const TextField = ({
       <label>
         <strong>{label}</strong>
       </label>
-      {description && <p className={styles.description}>{description}</p>}
+      {description && <label>{description}</label>}
       <TextInput
         placeholder={placeholder}
         value={value}
