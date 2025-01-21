@@ -36,6 +36,7 @@ const Settings = ({}) => {
           fieldName="moderators"
           groupId={groupId}
           guildId={guildId}
+          placeholder="Enter usernames separated by commas..."
           parser={(value) => value.replace(" ", ",")}
         />
       </>
