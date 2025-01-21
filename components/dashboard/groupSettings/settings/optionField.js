@@ -64,7 +64,7 @@ const OptionsField = ({
   };
 
   return (
-    <div className={styles.fieldContainer}>
+    <>
       <label htmlFor={fieldName}>
         <strong>{label}</strong>
       </label>
@@ -87,7 +87,7 @@ const OptionsField = ({
           </option>
         ))}
       </select>
-    </div>
+    </>
   );
 };
 

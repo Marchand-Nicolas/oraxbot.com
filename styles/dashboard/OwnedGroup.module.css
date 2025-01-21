@@ -80,7 +80,11 @@
   width: fit-content;
 }
 
-.channelContainer {
+.moderators {
+  min-width: 200px;
+}
+
+.buttonContainer {
   display: flex;
   align-items: center;
   background-color: rgba(128, 128, 128, 0.333);
@@ -90,7 +94,7 @@
   gap: 15px;
 }
 
-.channelContainer > div {
+.buttonContainer > div {
   display: flex;
 }
 
@@ -98,7 +102,7 @@
   margin-left: auto;
 }
 
-.channelContainer p {
+.buttonContainer p {
   margin: 0;
 }
 
@@ -106,13 +110,13 @@
   margin-right: auto !important;
 }
 
-.channelContainer svg {
+.buttonContainer svg {
   width: 20px;
   cursor: pointer;
   transition: 0.2s;
 }
 
-.channelContainer svg:hover {
+.buttonContainer svg:hover {
   color: var(--secondary);
 }
 
@@ -128,15 +132,15 @@
   .channels {
     width: 100%;
   }
-  .channelContainer {
+  .buttonContainer {
     width: calc(100% - 30px);
     border-radius: var(--border-radius);
     flex-direction: column;
   }
-  .channelContainer svg {
+  .buttonContainer svg {
     margin-left: 0;
   }
-  .channelContainer > div {
+  .buttonContainer > div {
     gap: 10px;
   }
   .channelButtons {

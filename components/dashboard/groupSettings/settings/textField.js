@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import config from "../../../../utils/config";
 import styles from "../../../../styles/components/dashboard/groupSettings/settings.module.css";
 import { getCookie } from "../../../../utils/cookies";
+import TextInput from "../../../ui/textInput";
 
-const CheckboxField = ({
+const TextField = ({
   label,
   fieldName,
   description = "",
@@ -11,8 +12,10 @@ const CheckboxField = ({
   guildId,
   apiEndpoint = `${config.apiV2}get_group_settings_field`,
   saveEndpoint = `${config.apiV2}set_group_settings_field`,
+  placeholder = "Enter text here...",
+  parser = (value) => value, // Default parser (no transformation)
 }) => {
-  const [isChecked, setIsChecked] = useState(false);
+  const [value, setValue] = useState("");
 
   useEffect(() => {
     if (!groupId || !guildId || !fieldName) return;
@@ -29,15 +32,15 @@ const CheckboxField = ({
     })
       .then((res) => res.json())
       .then((data) => {
-        setIsChecked(!!data[fieldName]); // Ensure it is treated as a boolean
+        setValue(data[fieldName] || ""); // Ensure it's set to a string
       });
   }, [groupId, guildId, fieldName, apiEndpoint]);
 
-  const handleToggle = () => {
-    const newValue = !isChecked;
-    setIsChecked(newValue);
+  const handleChange = (rawValue) => {
+    const parsedValue = parser(rawValue); // Apply the parser function
+    setValue(parsedValue);
 
-    // Save updated value
+    // Save the updated value
     fetch(saveEndpoint, {
       method: "POST",
       body: JSON.stringify({
@@ -45,25 +48,25 @@ const CheckboxField = ({
         groupId,
         guildId,
         fieldName,
-        fieldValue: newValue,
+        fieldValue: parsedValue,
       }),
     });
   };
 
   return (
     <>
-      <label className={styles.checkboxLabel}>
-        <input
-          type="checkbox"
-          checked={isChecked}
-          onChange={handleToggle}
-          className={styles.checkboxInput}
-        />
+      <label>
         <strong>{label}</strong>
       </label>
       {description && <p className={styles.description}>{description}</p>}
+      <TextInput
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => handleChange(e.target.value)}
+        id={fieldName}
+      />
     </>
   );
 };
 
-export default CheckboxField;
+export default TextField;

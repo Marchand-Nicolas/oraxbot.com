@@ -3,6 +3,7 @@ import HiddenMenu from "../../ui/hiddenMenu";
 import CustomUsernames from "./settings/customUsernames";
 import LogMessages from "./settings/logMessages";
 import OptionsField from "./settings/optionField";
+import TextField from "./settings/textField";
 
 const Settings = ({}) => {
   const router = useRouter();
@@ -29,19 +30,13 @@ const Settings = ({}) => {
           ]}
         />
         <br></br>
-        <OptionsField
-          label="Explanation message"
-          description="When enabled, the bot will send a message explaining how the interserv works"
-          fieldName="interservHelper"
+        <TextField
+          label="Moderators"
+          description="By default Orax considers all members with the 'Manage Messages' permission as moderators. You can override this behaviour by writting a list of comma separated usernames."
+          fieldName="moderators"
           groupId={groupId}
           guildId={guildId}
-          options={[
-            { name: "Disabled", value: 0 },
-            { name: "Every 20 messages", value: 20 },
-            { name: "Every 50 messages", value: 50 },
-            { name: "Every 100 messages", value: 100 },
-            { name: "Every 200 messages", value: 200 },
-          ]}
+          parser={(value) => value.replace(" ", ",")}
         />
       </>
     </HiddenMenu>

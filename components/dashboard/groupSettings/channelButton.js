@@ -5,7 +5,7 @@ import { getCookie } from "../../../utils/cookies";
 
 const ChannelButton = ({ channel, groupId, guildId, setChannels, icon }) => {
   return (
-    <div className={styles.channelContainer}>
+    <div className={styles.buttonContainer}>
       <p>{channel.guildName}</p>
       <div>
         <svg

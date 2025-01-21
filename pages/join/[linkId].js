@@ -153,7 +153,7 @@ export default function JoinGroup() {
         </a>
         {guildId ? (
           channels.result ? (
-            <div className={styles.channelContainer}>
+            <div className={styles.buttonContainer}>
               <h2 className={styles.subtitle}>And finally, select a channel</h2>
               {channels.result.map((channel, index) => (
                 <button
