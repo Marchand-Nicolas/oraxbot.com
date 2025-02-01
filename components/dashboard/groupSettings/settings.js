@@ -4,6 +4,7 @@ import CustomUsernames from "./settings/customUsernames";
 import LogMessages from "./settings/logMessages";
 import OptionsField from "./settings/optionField";
 import TextField from "./settings/textField";
+import CheckboxField from "./settings/checkboxField";
 
 const Settings = ({}) => {
   const router = useRouter();
@@ -38,6 +39,14 @@ const Settings = ({}) => {
           guildId={guildId}
           placeholder="Enter usernames separated by commas..."
           parser={(value) => value.replace(" ", ",")}
+        />
+        <br></br>
+        <CheckboxField
+          label="Allow @everyone and @here"
+          description="Allow people to ping @everyone and @here in the interserver."
+          fieldName="allowEveryone"
+          groupId={groupId}
+          guildId={guildId}
         />
       </>
     </HiddenMenu>

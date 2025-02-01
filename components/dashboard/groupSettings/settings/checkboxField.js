@@ -61,7 +61,7 @@ const CheckboxField = ({
         />
         <strong>{label}</strong>
       </label>
-      {description && <p className={styles.description}>{description}</p>}
+      {description && <label>{description}</label>}
     </>
   );
 };
