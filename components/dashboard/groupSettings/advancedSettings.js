@@ -79,7 +79,7 @@ const AdvancedSettings = () => {
   }, [groupId, guildId]);
 
   return (
-    <HiddenMenu title={"Advanced Settings"} defaultOpen>
+    <HiddenMenu title={"Advanced Settings"} defaultOpen={false}>
       <>
         <div className={styles.line}>
           <input
