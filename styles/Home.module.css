@@ -175,6 +175,10 @@
   justify-content: center;
 }
 
+.secondCard {
+  aspect-ratio: 608/460;
+}
+
 .exampleContainer.reverse {
   flex-direction: row-reverse;
 }

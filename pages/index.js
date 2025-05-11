@@ -77,7 +77,7 @@ export default function Home() {
           </p>
         </div>
         <div className={[styles.exampleContainer, styles.reverse].join(" ")}>
-          <div className={styles.glassCard}>
+          <div className={[styles.glassCard, styles.secondCard].join(" ")}>
             <Image
               src="/illustrations/example2.png"
               alt="Slash command example"
