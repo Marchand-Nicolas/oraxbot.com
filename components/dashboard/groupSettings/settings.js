@@ -41,6 +41,16 @@ const Settings = ({}) => {
           parser={(value) => value.replace(" ", ",")}
         />
         <br></br>
+        <TextField
+          label="Blacklist"
+          description="Prevent messages containing certain words from being sent in the interserver. Comma separated."
+          fieldName="wordBlacklist"
+          groupId={groupId}
+          guildId={guildId}
+          placeholder="Enter words separated by commas..."
+          parser={(value) => value.replace(" ", ",")}
+        />
+        <br></br>
         <CheckboxField
           label="Allow @everyone and @here"
           description="Allow people to ping @everyone and @here in the interserver."
