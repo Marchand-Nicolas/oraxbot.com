@@ -1,17 +1,15 @@
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "../../styles/components/dashboard/CreateGroupMenu.module.css";
 import config from "../../utils/config";
-import popup from "../../utils/popup";
 import { unmountComponentAtNode } from "react-dom";
-import meteor from "../../public/icons/meteor.svg";
-import drop from "../../public/icons/drop.svg";
+import { notify } from "../ui/NotificationSystem";
 
 export default function CreateGroupMenu(props) {
   const serverIp = config.serverIp;
   const [channels, setChannels] = useState([]);
 
-  useState(() => {
+  useEffect(() => {
     if (props.guildId) {
       fetch(`${serverIp}get_guild_channels`, {
         method: "POST",
@@ -20,15 +18,29 @@ export default function CreateGroupMenu(props) {
         .then((res) => res.json())
         .then((res) => {
           setChannels(res.result);
+        })
+        .catch((error) => {
+          notify.error(
+            "Channel Loading Failed",
+            "Unable to load server channels. Please try again."
+          );
+          setChannels([]);
         });
-    } else console.log(props);
-  }, [props]);
+    } else {
+      console.warn("No guildId provided to CreateGroupMenu");
+    }
+  }, [props.guildId, serverIp]);
 
   return (
     <div className={"popup"}>
       <div className="container">
         <div>
-          <Image src="/icons/drop.svg" height={50} width={50} />
+          <Image
+            alt="decoration"
+            src="/icons/drop.svg"
+            height={50}
+            width={50}
+          />
           <h2 style={{ marginLeft: "15px" }}>Create a new group</h2>
         </div>
         <br></br>
@@ -66,15 +78,11 @@ export default function CreateGroupMenu(props) {
               const selectedChannelId =
                 document.getElementById("selectChannel").value;
               if (!groupName) {
-                popup("Error", "Please enter a group name", "error", {
-                  icon: meteor,
-                });
+                notify.error("Validation Error", "Please enter a group name");
                 return;
               }
               if (!selectedChannelId) {
-                popup("Error", "Please select a channel", "error", {
-                  icon: meteor,
-                });
+                notify.error("Validation Error", "Please select a channel");
                 return;
               }
               fetch(`${serverIp}create_group`, {
@@ -82,45 +90,41 @@ export default function CreateGroupMenu(props) {
                 body: `{ "guildId": "${props.guildId}", "channelId": "${selectedChannelId}", "groupName": "${groupName}" }`,
               })
                 .then((res) => res.json())
-                .then((res) => {
-                  if (res.error) {
-                    switch (res.error) {
+                .then((data) => {
+                  if (data.error) {
+                    let errorMessage;
+                    switch (data.error) {
                       case 1:
-                        popup(
-                          "Error",
-                          'You must give the "Manage Webhooks" permission to the bot',
-                          "error",
-                          { icon: meteor }
-                        );
+                        errorMessage =
+                          'You must give the "Manage Webhooks" permission to the bot';
                         break;
                       case 2:
-                        popup(
-                          "Error",
-                          "A single server cannot have more than 10 groups",
-                          "error",
-                          { icon: meteor }
-                        );
+                        errorMessage =
+                          "A single server cannot have more than 10 groups";
                         break;
                       default:
-                        popup(
-                          "Error",
-                          `Unknown error; Error code : ${res.error}${
-                            res.customError
-                              ? "; Custom error : " + res.customError
-                              : ""
-                          }`,
-                          "error",
-                          { icon: meteor }
-                        );
+                        errorMessage = `Unknown error; Error code: ${
+                          data.error
+                        }${
+                          data.customError
+                            ? "; Custom error: " + data.customError
+                            : ""
+                        }`;
                         break;
                     }
+                    notify.error("Group Creation Failed", errorMessage);
                   } else {
-                    popup("Success", "Group created", "success", {
-                      icon: drop,
-                    });
+                    notify.success("Success", "Group created successfully!");
                     unmountComponentAtNode(document.getElementById("menu"));
                     props.setRefreshGuildDatas(true);
                   }
+                })
+                .catch((error) => {
+                  console.error("Failed to create group:", error);
+                  notify.error(
+                    "Group Creation Failed",
+                    "Unable to create group. Please try again."
+                  );
                 });
             }}
           >
