@@ -7,6 +7,7 @@ import { getCookie } from "../../../utils/cookies";
 import { useRouter } from "next/router";
 import HiddenMenu from "../../ui/hiddenMenu";
 import React, { useEffect, useState } from "react";
+import Filters from "./settings/filters";
 
 const updateDisableUserWarningMessage = (
   e,
@@ -21,10 +22,10 @@ const updateDisableUserWarningMessage = (
       groupId,
       guildId,
       fieldValue: disableUserWarningMessage,
-      fieldName: "disableUserWarningMessage"
+      fieldName: "disableUserWarningMessage",
     }),
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
   })
     .then((res) => res.json())
@@ -50,10 +51,10 @@ const AdvancedSettings = () => {
         groupId,
         guildId,
         fieldValue: disableDeleteSync,
-        fieldName: "disableDeleteSync"
+        fieldName: "disableDeleteSync",
       }),
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     })
       .then((res) => res.json())
@@ -70,10 +71,10 @@ const AdvancedSettings = () => {
         token: getCookie("token"),
         groupId,
         guildId,
-        fieldName: "disableUserWarningMessage"
+        fieldName: "disableUserWarningMessage",
       }),
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     })
       .then((res) => res.json())
@@ -92,10 +93,10 @@ const AdvancedSettings = () => {
         token: getCookie("token"),
         groupId,
         guildId,
-        fieldName: "disableDeleteSync"
+        fieldName: "disableDeleteSync",
       }),
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     })
       .then((res) => res.json())
@@ -171,6 +172,8 @@ const AdvancedSettings = () => {
           </label>
         </div>
         <br></br>
+        <Filters groupId={groupId} guildId={guildId} />
+        <br></br>
         <div className="line">
           <button
             onClick={() =>
@@ -191,10 +194,11 @@ const AdvancedSettings = () => {
                           token: getCookie("token"),
                           groupId,
                           guildId,
-                          newName: document.getElementById("renameGroupInput").value
+                          newName:
+                            document.getElementById("renameGroupInput").value,
                         }),
                         headers: {
-                          'Content-Type': 'application/json',
+                          "Content-Type": "application/json",
                         },
                       })
                         .then((res) => res.json())
@@ -212,10 +216,10 @@ const AdvancedSettings = () => {
                     body: JSON.stringify({
                       token: getCookie("token"),
                       groupId,
-                      guildId
+                      guildId,
                     }),
                     headers: {
-                      'Content-Type': 'application/json',
+                      "Content-Type": "application/json",
                     },
                   })
                     .then((res) => res.json())
@@ -254,10 +258,10 @@ const AdvancedSettings = () => {
                       body: JSON.stringify({
                         token: getCookie("token"),
                         groupId,
-                        guildId
+                        guildId,
                       }),
                       headers: {
-                        'Content-Type': 'application/json',
+                        "Content-Type": "application/json",
                       },
                     })
                       .then((res) => res.json())
