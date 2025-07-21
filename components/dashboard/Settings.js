@@ -3,7 +3,6 @@ import config from "../../utils/config.json";
 import { getCookie } from "../../utils/cookies";
 import { useEffect, useState } from "react";
 import Command from "./elements/Command";
-import { api } from "../../utils/apiClient";
 import { notify } from "../ui/NotificationSystem";
 
 export default function Settings({ guild, guildId, settings, setSettings }) {
