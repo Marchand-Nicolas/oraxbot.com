@@ -11,7 +11,10 @@ const LogMessages = ({ groupId, guildId }) => {
     if (guildId)
       fetch(`${config.serverIp}get_guild_channels`, {
         method: "POST",
-        body: `{ "guildId": "${guildId}" }`,
+        body: JSON.stringify({ guildId }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       })
         .then((res) => res.json())
         .then((res) => {
@@ -24,9 +27,15 @@ const LogMessages = ({ groupId, guildId }) => {
     // Load the custom usernames pattern
     fetch(`${config.apiV2}get_group_settings_field`, {
       method: "POST",
-      body: `{ "token": "${getCookie(
-        "token"
-      )}", "groupId": ${groupId}, "guildId":"${guildId}", "fieldName": "logMessagesInChannel" }`,
+      body: JSON.stringify({
+        token: getCookie("token"),
+        groupId,
+        guildId,
+        fieldName: "logMessagesInChannel"
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
     }).then((res) => {
       res.json().then((data) => {
         setLogChannel(data.logMessagesInChannel || "");
@@ -44,13 +53,20 @@ const LogMessages = ({ groupId, guildId }) => {
         className={styles.selectInput}
         value={logChannel || ""}
         onChange={(e) => {
-          const channelId = e.target.value;
-          setLogChannel(channelId);
+          const value = e.target.value;
+          setLogChannel(value);
           fetch(`${config.apiV2}set_group_settings_field`, {
             method: "POST",
-            body: `{ "token": "${getCookie(
-              "token"
-            )}", "groupId": ${groupId}, "guildId":"${guildId}", "fieldValue": "${channelId}", "fieldName": "logMessagesInChannel" }`,
+            body: JSON.stringify({
+              token: getCookie("token"),
+              groupId,
+              guildId,
+              fieldName: "logMessagesInChannel",
+              fieldValue: value
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+            },
           });
         }}
       >

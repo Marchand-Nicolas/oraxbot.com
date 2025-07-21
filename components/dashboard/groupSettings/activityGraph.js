@@ -21,9 +21,14 @@ const ActivityGraph = ({}) => {
     if (!groupId || !guildId) return;
     fetch(`${config.apiV2}get_group_activity_data`, {
       method: "POST",
-      body: `{ "token": "${getCookie(
-        "token"
-      )}", "groupId": ${groupId}, "guildId":"${guildId}" }`,
+      body: JSON.stringify({
+        token: getCookie("token"),
+        groupId,
+        guildId
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
     }).then((res) =>
       res.json().then((data) => {
         const activity = data.activity;

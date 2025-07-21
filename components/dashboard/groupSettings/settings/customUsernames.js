@@ -11,9 +11,14 @@ const CustomUsernames = ({ groupId, guildId }) => {
     // Load the custom usernames pattern
     fetch(`${config.apiV2}get_custom_usernames_pattern`, {
       method: "POST",
-      body: `{ "token": "${getCookie(
-        "token"
-      )}", "groupId": ${groupId}, "guildId":"${guildId}" }`,
+      body: JSON.stringify({
+        token: getCookie("token"),
+        groupId,
+        guildId
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
     }).then((res) =>
       res.json().then((data) => {
         setPattern(data.customUsernamesPattern || "");
@@ -38,11 +43,15 @@ const CustomUsernames = ({ groupId, guildId }) => {
           setPattern(newPattern);
           fetch(`${config.apiV2}set_custom_usernames_pattern`, {
             method: "POST",
-            body: `{ "token": "${getCookie(
-              "token"
-            )}", "groupId": ${groupId}, "guildId":"${guildId}", "customUsernamesPattern": ${JSON.stringify(
-              newPattern
-            )} }`,
+            body: JSON.stringify({
+              token: getCookie("token"),
+              groupId,
+              guildId,
+              customUsernamesPattern: newPattern
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+            },
           });
         }}
         value={pattern}

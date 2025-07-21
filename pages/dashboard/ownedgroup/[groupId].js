@@ -29,9 +29,14 @@ export default function OwnedGroup() {
     if (groupId) {
       fetch(`${config.apiV2}get_admin_group_data`, {
         method: "POST",
-        body: `{ "token": "${getCookie(
-          "token"
-        )}", "groupId": ${groupId}, "guildId":"${guildId}" }`,
+        body: JSON.stringify({
+          token: getCookie("token"),
+          groupId,
+          guildId
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       })
         .then((res) => res.json())
         .then((datas) => {
