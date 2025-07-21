@@ -14,6 +14,7 @@ import Loading from "../../components/Loading";
 import HiddenMenu from "../../components/ui/hiddenMenu";
 import { notify } from "../../components/ui/NotificationSystem";
 import ErrorBoundary from "../../components/ui/ErrorBoundary";
+import { getStorage, setStorage } from "../../utils/storage";
 
 export default function Dashboard() {
   const serverIp = config.serverIp;
@@ -33,12 +34,24 @@ export default function Dashboard() {
 
   useEffect(() => {
     let token = getCookie("token");
-    let cachedUserDatas = getCookie("cachedUserDatas");
-    let cachedGuilds = getCookie("cachedGuilds");
+    let cachedUserDatas = getStorage("cachedUserDatas");
+    let cachedGuilds = getStorage("cachedGuilds");
     if (cachedGuilds && cachedUserDatas && token) {
       setLoading(false);
-      setUser(JSON.parse(cachedUserDatas));
-      setGuilds(JSON.parse(cachedGuilds));
+      try {
+        setUser(JSON.parse(cachedUserDatas));
+        setGuilds(JSON.parse(cachedGuilds));
+      } catch (error) {
+        console.error("Error parsing cached data:", error);
+        setTimeout(() => {
+          notify.error(
+            "Error parsing cached data",
+            "An error occurred while parsing cached data. Please try refreshing the page."
+          );
+        }, 1000);
+        setUser(undefined);
+        setGuilds([]);
+      }
     }
     const params = new URLSearchParams(window.location.search);
     const state = params.get("state");
@@ -49,7 +62,7 @@ export default function Dashboard() {
           method: "POST",
           body: JSON.stringify({ token: code }),
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         })
           .then((res) => res.json())
@@ -111,7 +124,7 @@ export default function Dashboard() {
             return;
           }
           setUser(userDatas);
-          setCookie("cachedUserDatas", JSON.stringify(userDatas), 3600);
+          setStorage("cachedUserDatas", JSON.stringify(userDatas), 3600);
           fetch("https://discordapp.com/api/v6/users/@me/guilds", {
             method: "GET",
             headers: {
@@ -138,7 +151,7 @@ export default function Dashboard() {
                     permissions_new: guild.permissions_new,
                   }));
                 setGuilds(parsedGuilds);
-                setCookie("cachedGuilds", JSON.stringify(parsedGuilds), 3600);
+                setStorage("cachedGuilds", JSON.stringify(parsedGuilds), 3600);
               }
               setLoading(false);
             })
@@ -216,10 +229,10 @@ export default function Dashboard() {
       method: "POST",
       body: JSON.stringify({
         guildId: guild.id,
-        token: getCookie("token")
+        token: getCookie("token"),
       }),
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     })
       .then((res) => res.json())
