@@ -12,6 +12,146 @@
   color: white;
 }
 
+/* Modern settings grid layout */
+.settingsContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.settingsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 24px;
+  margin: 24px 0;
+}
+
+.settingsColumn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 24px;
+  backdrop-filter: blur(8px);
+  transition: all 0.3s ease;
+}
+
+.settingsColumn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+.sectionTitle {
+  color: #ffffff;
+  font-size: 1.2em;
+  font-weight: 600;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.settingItem {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease;
+}
+
+.settingItem:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.settingItem:last-child {
+  margin-bottom: 0;
+}
+
+/* Compact header section */
+.headerSection {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  backdrop-filter: blur(8px);
+}
+
+.headerGrid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 20px;
+  align-items: center;
+}
+
+.inviteLinkSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.inviteLinkRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Modern channels grid */
+.channelsSection {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  backdrop-filter: blur(8px);
+}
+
+.channelsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+/* Responsive design */
+@media screen and (max-width: 1024px) {
+  .settingsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .headerGrid {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  
+  .channelsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .page {
+    margin: 10px;
+    width: calc(100% - 40px);
+    padding: 0 15px;
+  }
+  
+  .settingsColumn {
+    padding: 20px;
+  }
+  
+  .headerSection,
+  .channelsSection {
+    padding: 20px;
+  }
+  
+  .settingsGrid {
+    gap: 16px;
+  }
+}
+
 .title {
   color: white;
 }
@@ -36,6 +176,12 @@
   font-size: 16px;
   padding: 5px 20px;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.regenerateInviteLink:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .deleteGroup {
@@ -58,6 +204,11 @@
   border-radius: 2em;
   padding: 5px;
   color: var(--secondary);
+  transition: all 0.2s ease;
+}
+
+.linkIcon:hover {
+  transform: scale(1.1);
 }
 
 .back {
@@ -80,6 +231,12 @@
   width: fit-content;
 }
 
+/* Update existing channels to work with grid */
+.channelsGrid .buttonContainer {
+  margin: 0;
+  width: 100%;
+}
+
 .moderators {
   min-width: 200px;
 }
@@ -92,6 +249,12 @@
   border-radius: 2em;
   margin: 10px 0;
   gap: 15px;
+  transition: all 0.2s ease;
+}
+
+.buttonContainer:hover {
+  background-color: rgba(128, 128, 128, 0.5);
+  transform: translateY(-1px);
 }
 
 .buttonContainer > div {
