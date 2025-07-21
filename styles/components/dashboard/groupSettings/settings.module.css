@@ -9,3 +9,84 @@
   border-radius: 0.5rem;
   background-color: white;
 }
+
+.filterRule {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 0.5rem;
+}
+
+.filterRuleSelect {
+  border: none;
+  background: white;
+  outline: none;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.filterRuleInput {
+  flex: 1;
+}
+
+.addRuleButton {
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  transition: background-color 0.2s;
+}
+
+.addRuleButton:hover {
+  background: #0056b3;
+}
+
+.removeRuleButton {
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background-color 0.2s;
+}
+
+.removeRuleButton:hover {
+  background: #c82333;
+}
+
+.filterHelp {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background-color: rgba(255, 255, 255, 0.03);
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  color: #aaa;
+}
+
+.filterHelp ul {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.emptyFilters {
+  padding: 1rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.emptyFilters p {
+  margin: 0;
+  color: #888;
+}

@@ -5,6 +5,7 @@ import LogMessages from "./settings/logMessages";
 import OptionsField from "./settings/optionField";
 import TextField from "./settings/textField";
 import CheckboxField from "./settings/checkboxField";
+import Filters from "./settings/filters";
 
 const Settings = ({}) => {
   const router = useRouter();
@@ -58,6 +59,8 @@ const Settings = ({}) => {
           groupId={groupId}
           guildId={guildId}
         />
+        <br></br>
+        <Filters groupId={groupId} guildId={guildId} />
       </>
     </HiddenMenu>
   );
