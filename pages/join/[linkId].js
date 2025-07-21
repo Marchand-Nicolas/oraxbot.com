@@ -58,7 +58,7 @@ export default function JoinGroup() {
       method: "POST",
       body: JSON.stringify({ linkId }),
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     })
       .then((res) => res.json())
@@ -70,7 +70,7 @@ export default function JoinGroup() {
         method: "POST",
         body: JSON.stringify({ guildId }),
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       })
         .then((res) => res.json())
@@ -86,7 +86,7 @@ export default function JoinGroup() {
           method: "POST",
           body: JSON.stringify({ token: code }),
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         })
           .then((res) => res.json())
@@ -173,10 +173,10 @@ export default function JoinGroup() {
                         linkId,
                         guildId,
                         channelId: channel.id,
-                        token: getCookie("token")
+                        token: getCookie("token"),
                       }),
                       headers: {
-                        'Content-Type': 'application/json',
+                        "Content-Type": "application/json",
                       },
                     })
                       .then((res) => res.json())
@@ -210,7 +210,7 @@ export default function JoinGroup() {
                       channels. By inviting Orax, it will be able to read all
                       the messages of your server.<br></br>
                       For security and privacy reasons, we suggest you to give
-                      him the permission to read the messages only in the
+                      it the permission to read the messages only in the
                       channels the bot is concerned with.
                     </p>
                   ),
