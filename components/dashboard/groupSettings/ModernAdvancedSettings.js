@@ -112,7 +112,7 @@ const ModernAdvancedSettings = () => {
         {/* Privacy & Sync Column */}
         <div className={styles.settingsColumn}>
           <h3 className={styles.sectionTitle}>Privacy & Synchronization</h3>
-          
+
           <div className={styles.settingItem}>
             <div className={advancedStyles.line}>
               <input
@@ -163,7 +163,10 @@ const ModernAdvancedSettings = () => {
               </label>
             </div>
             <div className={advancedStyles.illustrationContainer}>
-              <img src="/illustrations/userWarningMessage.png" alt="User warning message example" />
+              <img
+                src="/illustrations/userWarningMessage.png"
+                alt="User warning message example"
+              />
             </div>
           </div>
 
@@ -187,7 +190,7 @@ const ModernAdvancedSettings = () => {
         {/* Filters Column */}
         <div className={styles.settingsColumn}>
           <h3 className={styles.sectionTitle}>Message Filtering</h3>
-          
+
           <div className={styles.settingItem}>
             <Filters groupId={groupId} guildId={guildId} />
           </div>
@@ -196,9 +199,12 @@ const ModernAdvancedSettings = () => {
         {/* Group Management Column */}
         <div className={styles.settingsColumn}>
           <h3 className={styles.sectionTitle}>Group Management</h3>
-          
+
           <div className={styles.settingItem}>
-            <div className="line" style={{ gap: '12px', display: 'flex', flexWrap: 'wrap' }}>
+            <div
+              className="line"
+              style={{ gap: "12px", display: "flex", flexWrap: "wrap" }}
+            >
               <button
                 onClick={() =>
                   popup("Rename the group", <div></div>, "error", {
@@ -219,7 +225,8 @@ const ModernAdvancedSettings = () => {
                               groupId,
                               guildId,
                               newName:
-                                document.getElementById("renameGroupInput").value,
+                                document.getElementById("renameGroupInput")
+                                  .value,
                             }),
                             headers: {
                               "Content-Type": "application/json",
@@ -247,7 +254,7 @@ const ModernAdvancedSettings = () => {
               >
                 Rename the group
               </button>
-              
+
               <button
                 onClick={() =>
                   popup(
