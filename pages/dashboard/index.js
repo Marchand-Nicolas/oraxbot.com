@@ -12,7 +12,6 @@ import CreateGroupMenu from "../../components/dashboard/CreateGroupMenu";
 import Settings from "../../components/dashboard/Settings";
 import Loading from "../../components/Loading";
 import HiddenMenu from "../../components/ui/hiddenMenu";
-import { api, discordApi, ERROR_TYPES } from "../../utils/apiClient";
 import { notify } from "../../components/ui/NotificationSystem";
 import ErrorBoundary from "../../components/ui/ErrorBoundary";
 
