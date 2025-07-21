@@ -216,7 +216,7 @@ export default function JoinGroup() {
                   ),
                   icon: meteor,
                   action: function () {
-                    window.open(config.inviteLink + +"&guild_id=" + guildId);
+                    window.open(config.inviteLink + "&guild_id=" + guildId);
                   },
                 })
               }

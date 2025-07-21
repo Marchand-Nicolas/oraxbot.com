@@ -488,27 +488,6 @@ export default function Dashboard() {
             </strong>
           </button>
         )}
-        {/*guildDatas ? 
-                <>
-                    <button className={[styles.button, styles.buyButton, styles.done].join(" ")}>
-                        Purchased <strong>10$</strong>
-                    </button>
-                    <a href="https://discord.com/api/oauth2/authorize?client_id=991022601574973501&permissions=268823632&scope=applications.commands%20bot" target="_blank" rel="noreferrer">
-                        <button className={"button round " + styles.inviteBot}>
-                            Invite bot
-                        </button>
-                    </a>
-                </> :
-                <>
-                    <button onClick={() => render(<PaypalButton setPaymentProgress={setPaymentProgress} email={user.email} guildId={guild.id} discordUserId={user.id} />, document.getElementById("container"))} className={[styles.button, styles.buyButton].join(" ")}>
-                        Add bot <strong>10$</strong>
-                    </button>
-                    <a href="https://discord.com/api/oauth2/authorize?client_id=991022601574973501&permissions=268823632&scope=applications.commands%20bot" target="_blank" rel="noreferrer">
-                        <button className={[styles.button, styles.buyButton].join(" ")}>
-                            Try the bot for free <strong>0$</strong>
-                        </button>
-                    </a>
-                </>*/}
         <div id="container" key={guild.id + "_" + paymentProgress}></div>
         <br></br>
       </div>
