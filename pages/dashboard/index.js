@@ -12,6 +12,9 @@ import CreateGroupMenu from "../../components/dashboard/CreateGroupMenu";
 import Settings from "../../components/dashboard/Settings";
 import Loading from "../../components/Loading";
 import HiddenMenu from "../../components/ui/hiddenMenu";
+import { api, discordApi, ERROR_TYPES } from "../../utils/apiClient";
+import { notify } from "../../components/ui/NotificationSystem";
+import ErrorBoundary from "../../components/ui/ErrorBoundary";
 
 export default function Dashboard() {
   const serverIp = config.serverIp;
@@ -30,103 +33,140 @@ export default function Dashboard() {
   const [lastLoadedGuildId, setLastLoadedGuildId] = useState("");
 
   useEffect(() => {
-    let token = getCookie("token");
-    let cachedUserDatas = getCookie("cachedUserDatas");
-    let cachedGuilds = getCookie("cachedGuilds");
-    if (cachedGuilds && cachedUserDatas && token) {
-      setLoading(false);
-      setUser(JSON.parse(cachedUserDatas));
-      setGuilds(JSON.parse(cachedGuilds));
-    }
-    const params = new URLSearchParams(window.location.search);
-    const state = params.get("state");
-    if (!token || token === "undefined" || state) {
-      const code = params.get("code");
-      if (code) {
-        fetch(`${serverIp}login`, {
-          method: "POST",
-          body: `{ "token": "${code}" }`,
-        })
-          .then((res) => res.json())
-          .then((res) => {
-            if (!res.access_token || res.access_token === "undefined") {
-              window.location.href = "/dashboard";
-            } else {
-              setCookie("token", res.access_token, res.expires_in - 1000);
-              token = res.access_token;
+    const loadDashboard = async () => {
+      try {
+        let token = getCookie("token");
+        let cachedUserDatas = getCookie("cachedUserDatas");
+        let cachedGuilds = getCookie("cachedGuilds");
+        
+        // Load from cache if available
+        if (cachedGuilds && cachedUserDatas && token && token !== "undefined") {
+          try {
+            setUser(JSON.parse(cachedUserDatas));
+            setGuilds(JSON.parse(cachedGuilds));
+            setLoading(false);
+          } catch (error) {
+            console.warn("Failed to parse cached data:", error);
+            // Clear invalid cache
+            setCookie("cachedUserDatas", "", 0);
+            setCookie("cachedGuilds", "", 0);
+          }
+        }
+        
+        const params = new URLSearchParams(window.location.search);
+        const state = params.get("state");
+        
+        // Handle OAuth flow
+        if (!token || token === "undefined" || state) {
+          const code = params.get("code");
+          if (code) {
+            try {
+              const loginResponse = await api.post(`${serverIp}login`, { token: code }, {
+                showErrorNotifications: true,
+                successMessage: "Successfully logged in!"
+              });
+              
+              if (!loginResponse.access_token || loginResponse.access_token === "undefined") {
+                notify.error("Login Failed", "Invalid authentication response. Redirecting...");
+                setTimeout(() => window.location.href = "/dashboard", 2000);
+                return;
+              }
+              
+              setCookie("token", loginResponse.access_token, loginResponse.expires_in - 1000);
+              token = loginResponse.access_token;
+              
               if (state) {
                 window.location.href = state;
-                setInterval(() => {
-                  window.location.href = state;
-                }, 2000);
+                return;
               } else {
-                loadPage();
+                await loadUserData(token);
               }
+            } catch (error) {
+              notify.error("Login Failed", "Unable to complete authentication. Please try again.");
+              setTimeout(() => window.location.href = "/dashboard", 3000);
+              return;
             }
-          });
-      } else {
-        window.location.href = `https://discord.com/api/oauth2/authorize?client_id=812298057470967858&redirect_uri=${encodeURI(
-          process.env.NEXT_PUBLIC_WEBSITE_URL
-        )}%2Fdashboard&response_type=code&scope=identify%20guilds`;
-      }
-    } else {
-      loadPage();
-    }
-    async function loadPage() {
-      const userDatas = await (
-        await fetch("https://discordapp.com/api/users/@me", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            Accept: "application/json",
-            Authorization: "Bearer " + token,
-          },
-        })
-      ).json();
-      if (userDatas.retry_after) {
-        setTimeout(() => {
-          loadPage();
-        }, userDatas.retry_after + 50);
-      }
-      if (userDatas.message === "401: Unauthorized") {
-        setCookie("token", "", 0);
-        window.location.href = "/dashboard";
-      } else {
-        setCookie("cachedUserDatas", JSON.stringify(userDatas), 3600);
-        const guilds = await (
-          await fetch("https://discordapp.com/api/v6/users/@me/guilds", {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-              Accept: "application/json",
-              Authorization: "Bearer " + token,
-            },
-          })
-        ).json();
-        if (guilds.retry_after) {
-          setTimeout(() => {
-            loadPage();
-          }, guilds.retry_after + 50);
+          } else {
+            // Redirect to Discord OAuth
+            const redirectUri = encodeURI(process.env.NEXT_PUBLIC_WEBSITE_URL) + "%2Fdashboard";
+            window.location.href = `https://discord.com/api/oauth2/authorize?client_id=812298057470967858&redirect_uri=${redirectUri}&response_type=code&scope=identify%20guilds`;
+            return;
+          }
+        } else {
+          await loadUserData(token);
         }
-        if (guilds) {
-          const parsedGuilds = [];
-          for (let index = 0; index < guilds.length; index++) {
-            const guild = guilds[index];
-            if (guild.permissions_new & 0x0000000000000032) {
-              parsedGuilds.push({
+      } catch (error) {
+        console.error("Dashboard initialization error:", error);
+        notify.error("Initialization Failed", "Failed to load dashboard. Please refresh the page.");
+        setLoading(false);
+      }
+    };
+
+    async function loadUserData(token) {
+      let retryCount = 0;
+      const maxRetries = 3;
+      
+      while (retryCount < maxRetries) {
+        try {
+          // Get user data
+          const userData = await discordApi.getUser(token);
+          
+          if (userData.retry_after) {
+            await new Promise(resolve => setTimeout(resolve, userData.retry_after + 50));
+            retryCount++;
+            continue;
+          }
+          
+          if (userData.message === "401: Unauthorized") {
+            setCookie("token", "", 0);
+            window.location.href = "/dashboard";
+            return;
+          }
+          
+          setUser(userData);
+          setCookie("cachedUserDatas", JSON.stringify(userData), 3600);
+          
+          // Get guild data
+          const guildsData = await discordApi.getUserGuilds(token);
+          
+          if (guildsData.retry_after) {
+            await new Promise(resolve => setTimeout(resolve, guildsData.retry_after + 50));
+            retryCount++;
+            continue;
+          }
+          
+          if (Array.isArray(guildsData)) {
+            const parsedGuilds = guildsData
+              .filter(guild => guild.permissions_new & 0x0000000000000032)
+              .map(guild => ({
                 id: guild.id,
                 name: guild.name,
                 icon: guild.icon,
                 permissions_new: guild.permissions_new,
-              });
-            }
+              }));
+            
+            setGuilds(parsedGuilds);
+            setCookie("cachedGuilds", JSON.stringify(parsedGuilds), 3600);
           }
-          setCookie("cachedGuilds", JSON.stringify(parsedGuilds), 3600);
-          setGuilds(guilds);
+          
           setLoading(false);
+          return;
+        } catch (error) {
+          retryCount++;
+          if (retryCount >= maxRetries) {
+            console.error("Failed to load user data after retries:", error);
+            notify.error("Data Loading Failed", "Unable to load your Discord data. Please try refreshing the page.");
+            setLoading(false);
+            return;
+          }
+          
+          // Wait before retry
+          await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
         }
       }
     }
+
+    loadDashboard();
   }, []);
 
   function imgError(guildId) {
@@ -174,43 +214,50 @@ export default function Dashboard() {
   }
 
   useEffect(() => {
-    if (refreshGuildDatas) return setRefreshGuildDatas(false);
-    if (!guild) return;
-    if (!guild.id) return;
-    if (guild.id !== lastLoadedGuildId) {
-      setGuildDatas({});
-      setSettings({});
-    }
-    try {
-      fetch(`${serverIp}get_server_datas`, {
-        method: "POST",
-        body: `{ "guildId": "${guild.id}", "token": "${getCookie("token")}" }`,
-      })
-        .then((res) => res.json())
-        .then((res) => {
-          if (res.result) {
-            setGuildDatas(res);
-            setSettings(res.settings);
-            setLastLoadedGuildId(guild.id);
-          } else {
-            requestError();
-          }
+    const loadGuildData = async () => {
+      if (refreshGuildDatas) {
+        setRefreshGuildDatas(false);
+        return;
+      }
+      
+      if (!guild || !guild.id) return;
+      
+      if (guild.id !== lastLoadedGuildId) {
+        setGuildDatas({});
+        setSettings({});
+      }
+
+      try {
+        const data = await api.post(`${serverIp}get_server_datas`, {
+          guildId: guild.id,
+          token: getCookie("token")
+        }, {
+          showErrorNotifications: false, // We'll handle errors manually
         });
-    } catch (error) {
-      requestError();
-    }
-    function requestError() {
-      setGuildDatas({});
-      popup("Error", `An error occurred.`, "error", {
-        content: (
-          <p className="content">
-            It seems that part of our infrastructure is not operational. Please
-            come back later, otherwise some features will not work.
-          </p>
-        ),
-        icon: fire,
-      });
-    }
+
+        if (data.result) {
+          setGuildDatas(data);
+          setSettings(data.settings || {});
+          setLastLoadedGuildId(guild.id);
+        } else {
+          throw new Error(data.error || "Failed to load server data");
+        }
+      } catch (error) {
+        console.error("Failed to load guild data:", error);
+        setGuildDatas({});
+        setSettings({});
+        
+        notify.error(
+          "Server Data Error",
+          "Unable to load server configuration. Some features may not work properly.",
+          {
+            duration: 8000,
+          }
+        );
+      }
+    };
+
+    loadGuildData();
   }, [guild, paymentProgress, refreshGuildDatas]);
 
   return (
@@ -295,7 +342,7 @@ export default function Dashboard() {
         </a>
         <br></br>
         {guildDatas.bot ? (
-          <>
+          <ErrorBoundary>
             <button
               onClick={() =>
                 render(
@@ -325,30 +372,35 @@ export default function Dashboard() {
               </strong>
             </button>
             <br></br>
-            {guildDatas.ownedGroups.length ? (
-              <section className={styles.groupContainer}>
-                <h2>📺 Owned groups</h2>
-                {guildDatas.ownedGroups.map((group) => (
-                  <Link
-                    key={"ownedGroup_" + group.id}
-                    href={`/dashboard/ownedgroup/${group.id}?guild=${guild.id}&icon=${guild.icon}&groupName=${group.name}`}
-                  >
-                    <div className={styles.group}>{group.name}</div>
-                  </Link>
-                ))}
-              </section>
-            ) : (
-              <section className={styles.emptyGroupContainer}>
-                <h2>This server does not own any group</h2>
-              </section>
-            )}
-            <Settings
-              key={"settingsGuild_" + guildId}
-              guild={guild}
-              guildId={guildId}
-              settings={settings}
-              setSettings={setSettings}
-            />
+            <ErrorBoundary>
+              {guildDatas.ownedGroups && guildDatas.ownedGroups.length ? (
+                <section className={styles.groupContainer}>
+                  <h2>📺 Owned groups</h2>
+                  {guildDatas.ownedGroups.map((group) => (
+                    <Link
+                      key={"ownedGroup_" + group.id}
+                      href={`/dashboard/ownedgroup/${group.id}?guild=${guild.id}&icon=${guild.icon}&groupName=${group.name}`}
+                    >
+                      <div className={styles.group}>{group.name}</div>
+                    </Link>
+                  ))}
+                </section>
+              ) : (
+                <section className={styles.emptyGroupContainer}>
+                  <h2>This server does not own any group</h2>
+                </section>
+              )}
+            </ErrorBoundary>
+            <ErrorBoundary>
+              <Settings
+                key={"settingsGuild_" + guildId}
+                guild={guild}
+                guildId={guildId}
+                settings={settings}
+                setSettings={setSettings}
+              />
+            </ErrorBoundary>
+          </ErrorBoundary>
             <HiddenMenu title="🚫 Service limits">
               <section className={styles.section}>
                 <p className="hint">

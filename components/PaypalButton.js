@@ -10,6 +10,8 @@ import drop from "../public/icons/drop.svg";
 import Loading from "../components/Loading";
 import { render } from "react-dom";
 import config from "../utils/config";
+import { api } from "../utils/apiClient";
+import { notify } from "./ui/NotificationSystem";
 
 function Button(props) {
   const serverIp = config.serverIp;
@@ -54,14 +56,29 @@ function Button(props) {
        */
       render(<Loading />, document.getElementById("popup"));
       const orderId = data.orderID;
+      
       try {
-        const datas = await (
-          await fetch(`${serverIp}buy`, {
-            method: "POST",
-            body: `{ "email": "${props.email}", "guildId": "${props.guildId}", "orderId": "${orderId}", "discordUserId": "${props.discordUserId}" }`,
-          })
-        ).json();
-        if (!datas.result) return requestError();
+        const responseData = await api.post(`${serverIp}buy`, {
+          email: props.email,
+          guildId: props.guildId,
+          orderId: orderId,
+          discordUserId: props.discordUserId
+        }, {
+          showErrorNotifications: false, // Handle errors manually
+        });
+
+        if (!responseData.result) {
+          throw new Error("Payment processing failed");
+        }
+
+        notify.success(
+          "Payment Successful",
+          `Payment completed successfully! Order ID: ${orderId}`,
+          {
+            duration: 10000,
+          }
+        );
+        
         popup(
           "Success",
           `Payment completed, order ID : ${orderId}`,
@@ -75,12 +92,20 @@ function Button(props) {
             icon: drop,
           }
         );
+        
         props.setPaymentProgress(Math.random());
       } catch (error) {
-        console.log(error);
-        requestError();
-      }
-      function requestError() {
+        console.error("Payment processing error:", error);
+        
+        notify.error(
+          "Payment Error",
+          `Payment processing failed. Order ID: ${orderId}. Please contact support if you were charged.`,
+          {
+            duration: 15000,
+            autoClose: false,
+          }
+        );
+        
         popup("Error", `An error occurred. Order ID : ${orderId}`, "error", {
           content: (
             <p className="content">

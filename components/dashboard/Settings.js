@@ -4,6 +4,8 @@ import config from "../../utils/config.json";
 import { getCookie } from "../../utils/cookies";
 import { useEffect, useState } from "react";
 import Command from "./elements/Command";
+import { api } from "../../utils/apiClient";
+import { notify } from "../ui/NotificationSystem";
 
 export default function Settings({ guild, guildId, settings, setSettings }) {
   const [save, setSave] = useState(0);
@@ -35,19 +37,33 @@ export default function Settings({ guild, guildId, settings, setSettings }) {
   useEffect(() => {
     if (save === 0) return;
     if (save === 1) return setSave(2);
-    setSaved(false);
-    let timeout = setTimeout(() => {
-      fetch(`${config.serverIp}set_server_settings`, {
-        method: "POST",
-        body: `{ "token": "${getCookie(
-          "token"
-        )}", "guildId":"${guildId}", "settings": ${JSON.stringify(settings)} }`,
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.result) setSaved(true);
+    
+    const saveSettings = async () => {
+      setSaved(false);
+      
+      try {
+        const data = await api.post(`${config.serverIp}set_server_settings`, {
+          token: getCookie("token"),
+          guildId: guildId,
+          settings: settings
+        }, {
+          showErrorNotifications: false, // Handle errors manually
         });
-    }, 500);
+
+        if (data.result) {
+          setSaved(true);
+          setTimeout(() => setSaved(false), 3000); // Hide success message after 3 seconds
+        } else {
+          throw new Error(data.error || "Failed to save settings");
+        }
+      } catch (error) {
+        console.error("Failed to save settings:", error);
+        notify.error("Settings Save Failed", "Unable to save your settings. Please try again.");
+        setErrorMessages("Failed to save settings");
+      }
+    };
+
+    let timeout = setTimeout(saveSettings, 500);
     return () => clearTimeout(timeout);
   }, [save, settings, guildId]);
 
