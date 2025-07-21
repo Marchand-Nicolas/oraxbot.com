@@ -141,7 +141,7 @@ class ErrorBoundary extends React.Component {
               Try Again
             </button>
           </div>
-          {process.env.NODE_ENV === "development" && this.state.error && (
+          {this.state.error && (
             <details
               style={{
                 marginTop: "2rem",
@@ -161,7 +161,7 @@ class ErrorBoundary extends React.Component {
                   fontWeight: "600",
                 }}
               >
-                Error Details (Development Only)
+                Error Details
               </summary>
               <pre
                 style={{

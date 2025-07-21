@@ -23,7 +23,7 @@ function MyApp({ Component, pageProps }) {
       initializeGlobalErrorHandling();
     }
   }, []);
-  
+
   return (
     <ErrorBoundary>
       <Component {...pageProps} />
