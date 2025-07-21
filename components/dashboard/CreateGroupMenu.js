@@ -14,32 +14,25 @@ export default function CreateGroupMenu(props) {
   const [channels, setChannels] = useState([]);
 
   useEffect(() => {
-    const loadChannels = async () => {
-      if (!props.guildId) {
-        console.warn("No guildId provided to CreateGroupMenu");
-        return;
-      }
-
-      try {
-        const data = await api.post(`${serverIp}get_guild_channels`, {
-          guildId: props.guildId
-        }, {
-          showErrorNotifications: false, // Handle errors manually
+    if (props.guildId) {
+      fetch(`${serverIp}get_guild_channels`, {
+        method: "POST",
+        body: `{ "guildId": "${props.guildId}" }`,
+      })
+        .then((res) => res.json())
+        .then((res) => {
+          setChannels(res.result);
+        })
+        .catch((error) => {
+          notify.error(
+            "Channel Loading Failed",
+            "Unable to load server channels. Please try again."
+          );
+          setChannels([]);
         });
-
-        if (data.result && Array.isArray(data.result)) {
-          setChannels(data.result);
-        } else {
-          throw new Error("Invalid channel data received");
-        }
-      } catch (error) {
-        console.error("Failed to load channels:", error);
-        notify.error("Channel Loading Failed", "Unable to load server channels. Please try again.");
-        setChannels([]);
-      }
-    };
-
-    loadChannels();
+    } else {
+      console.warn("No guildId provided to CreateGroupMenu");
+    }
   }, [props.guildId, serverIp]);
 
   return (
@@ -79,11 +72,10 @@ export default function CreateGroupMenu(props) {
           </button>
           <button
             className="default"
-            onClick={async () => {
+            onClick={() => {
               const groupName = document.getElementById("groupName").value;
               const selectedChannelId =
                 document.getElementById("selectChannel").value;
-              
               if (!groupName) {
                 notify.error("Validation Error", "Please enter a group name");
                 return;
@@ -92,41 +84,47 @@ export default function CreateGroupMenu(props) {
                 notify.error("Validation Error", "Please select a channel");
                 return;
               }
-
-              try {
-                const data = await api.post(`${serverIp}create_group`, {
-                  guildId: props.guildId,
-                  channelId: selectedChannelId,
-                  groupName: groupName
-                }, {
-                  showErrorNotifications: false, // Handle errors manually
-                });
-
-                if (data.error) {
-                  let errorMessage;
-                  switch (data.error) {
-                    case 1:
-                      errorMessage = 'You must give the "Manage Webhooks" permission to the bot';
-                      break;
-                    case 2:
-                      errorMessage = "A single server cannot have more than 10 groups";
-                      break;
-                    default:
-                      errorMessage = `Unknown error; Error code: ${data.error}${
-                        data.customError ? "; Custom error: " + data.customError : ""
-                      }`;
-                      break;
+              fetch(`${serverIp}create_group`, {
+                method: "POST",
+                body: `{ "guildId": "${props.guildId}", "channelId": "${selectedChannelId}", "groupName": "${groupName}" }`,
+              })
+                .then((res) => res.json())
+                .then((data) => {
+                  if (data.error) {
+                    let errorMessage;
+                    switch (data.error) {
+                      case 1:
+                        errorMessage =
+                          'You must give the "Manage Webhooks" permission to the bot';
+                        break;
+                      case 2:
+                        errorMessage =
+                          "A single server cannot have more than 10 groups";
+                        break;
+                      default:
+                        errorMessage = `Unknown error; Error code: ${
+                          data.error
+                        }${
+                          data.customError
+                            ? "; Custom error: " + data.customError
+                            : ""
+                        }`;
+                        break;
+                    }
+                    notify.error("Group Creation Failed", errorMessage);
+                  } else {
+                    notify.success("Success", "Group created successfully!");
+                    unmountComponentAtNode(document.getElementById("menu"));
+                    props.setRefreshGuildDatas(true);
                   }
-                  notify.error("Group Creation Failed", errorMessage);
-                } else {
-                  notify.success("Success", "Group created successfully!");
-                  unmountComponentAtNode(document.getElementById("menu"));
-                  props.setRefreshGuildDatas(true);
-                }
-              } catch (error) {
-                console.error("Failed to create group:", error);
-                notify.error("Group Creation Failed", "Unable to create group. Please try again.");
-              }
+                })
+                .catch((error) => {
+                  console.error("Failed to create group:", error);
+                  notify.error(
+                    "Group Creation Failed",
+                    "Unable to create group. Please try again."
+                  );
+                });
             }}
           >
             Create
