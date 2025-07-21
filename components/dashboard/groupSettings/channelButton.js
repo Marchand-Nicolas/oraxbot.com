@@ -64,9 +64,15 @@ export default ChannelButton;
 const unlinkChannel = (groupId, channelId, guildId, setChannels) => {
   fetch(`${config.serverIp}unlink_channel`, {
     method: "POST",
-    body: `{ "token": "${getCookie(
-      "token"
-    )}", "groupId":${groupId}, "channelId": "${channelId}", "guildId":"${guildId}" }`,
+    body: JSON.stringify({
+      token: getCookie("token"),
+      groupId,
+      channelId,
+      guildId
+    }),
+    headers: {
+      'Content-Type': 'application/json',
+    },
   })
     .then((res) => res.json())
     .then((datas) => {

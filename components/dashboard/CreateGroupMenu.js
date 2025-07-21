@@ -13,7 +13,10 @@ export default function CreateGroupMenu(props) {
     if (props.guildId) {
       fetch(`${serverIp}get_guild_channels`, {
         method: "POST",
-        body: `{ "guildId": "${props.guildId}" }`,
+        body: JSON.stringify({ guildId: props.guildId }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       })
         .then((res) => res.json())
         .then((res) => {
@@ -87,7 +90,14 @@ export default function CreateGroupMenu(props) {
               }
               fetch(`${serverIp}create_group`, {
                 method: "POST",
-                body: `{ "guildId": "${props.guildId}", "channelId": "${selectedChannelId}", "groupName": "${groupName}" }`,
+                body: JSON.stringify({
+                  guildId: props.guildId,
+                  channelId: selectedChannelId,
+                  groupName: groupName
+                }),
+                headers: {
+                  'Content-Type': 'application/json',
+                },
               })
                 .then((res) => res.json())
                 .then((data) => {

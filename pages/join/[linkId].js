@@ -56,7 +56,10 @@ export default function JoinGroup() {
   useEffect(() => {
     fetch(`${config.serverIp}preview_group`, {
       method: "POST",
-      body: `{ "linkId": "${linkId}" }`,
+      body: JSON.stringify({ linkId }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
     })
       .then((res) => res.json())
       .then((res) => {
@@ -65,7 +68,10 @@ export default function JoinGroup() {
     if (guildId) {
       fetch(`${config.serverIp}get_guild_channels`, {
         method: "POST",
-        body: `{ "guildId": "${guildId}" }`,
+        body: JSON.stringify({ guildId }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       })
         .then((res) => res.json())
         .then((res) => {
@@ -78,7 +84,10 @@ export default function JoinGroup() {
       if (code) {
         fetch(`${config.serverIp}login`, {
           method: "POST",
-          body: `{ "token": "${code}" }`,
+          body: JSON.stringify({ token: code }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
         })
           .then((res) => res.json())
           .then((res) => {
@@ -160,9 +169,15 @@ export default function JoinGroup() {
                   onClick={() => {
                     fetch(`${config.apiV2}join_group_with_link`, {
                       method: "POST",
-                      body: `{ "linkId": "${linkId}", "guildId": "${guildId}", "channelId": "${
-                        channel.id
-                      }", "token": "${getCookie("token")}" }`,
+                      body: JSON.stringify({
+                        linkId,
+                        guildId,
+                        channelId: channel.id,
+                        token: getCookie("token")
+                      }),
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
                     })
                       .then((res) => res.json())
                       .then((res) => {

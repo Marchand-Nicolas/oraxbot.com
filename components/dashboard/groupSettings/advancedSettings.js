@@ -16,9 +16,16 @@ const updateDisableUserWarningMessage = (
 ) => {
   fetch(`${config.apiV2}set_group_settings_field`, {
     method: "POST",
-    body: `{ "token": "${getCookie(
-      "token"
-    )}", "groupId": ${groupId}, "guildId":"${guildId}", "fieldValue": ${disableUserWarningMessage}, "fieldName": "disableUserWarningMessage" }`,
+    body: JSON.stringify({
+      token: getCookie("token"),
+      groupId,
+      guildId,
+      fieldValue: disableUserWarningMessage,
+      fieldName: "disableUserWarningMessage"
+    }),
+    headers: {
+      'Content-Type': 'application/json',
+    },
   })
     .then((res) => res.json())
     .then((datas) => {
@@ -38,9 +45,16 @@ const AdvancedSettings = () => {
   const updateDisableDeleteSync = (e, groupId, guildId, disableDeleteSync) => {
     fetch(`${config.apiV2}set_group_settings_field`, {
       method: "POST",
-      body: `{ "token": "${getCookie(
-        "token"
-      )}", "groupId": ${groupId}, "guildId":"${guildId}", "fieldValue": ${disableDeleteSync}, "fieldName": "disableDeleteSync" }`,
+      body: JSON.stringify({
+        token: getCookie("token"),
+        groupId,
+        guildId,
+        fieldValue: disableDeleteSync,
+        fieldName: "disableDeleteSync"
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
     })
       .then((res) => res.json())
       .then((data) => {
@@ -52,9 +66,15 @@ const AdvancedSettings = () => {
     if (!groupId || !guildId) return;
     fetch(`${config.apiV2}get_group_settings_field`, {
       method: "POST",
-      body: `{ "token": "${getCookie(
-        "token"
-      )}", "groupId": ${groupId}, "guildId":"${guildId}", "fieldName": "disableUserWarningMessage" }`,
+      body: JSON.stringify({
+        token: getCookie("token"),
+        groupId,
+        guildId,
+        fieldName: "disableUserWarningMessage"
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
     })
       .then((res) => res.json())
       .then(
@@ -68,9 +88,15 @@ const AdvancedSettings = () => {
     if (!groupId || !guildId) return;
     fetch(`${config.apiV2}get_group_settings_field`, {
       method: "POST",
-      body: `{ "token": "${getCookie(
-        "token"
-      )}", "groupId": ${groupId}, "guildId":"${guildId}", "fieldName": "disableDeleteSync" }`,
+      body: JSON.stringify({
+        token: getCookie("token"),
+        groupId,
+        guildId,
+        fieldName: "disableDeleteSync"
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
     })
       .then((res) => res.json())
       .then(
@@ -161,11 +187,15 @@ const AdvancedSettings = () => {
                     action: function () {
                       fetch(`${config.apiV2}rename_interserv_group`, {
                         method: "POST",
-                        body: `{ "token": "${getCookie(
-                          "token"
-                        )}", "groupId": ${groupId}, "guildId":"${guildId}", "newName": "${
-                          document.getElementById("renameGroupInput").value
-                        }" }`,
+                        body: JSON.stringify({
+                          token: getCookie("token"),
+                          groupId,
+                          guildId,
+                          newName: document.getElementById("renameGroupInput").value
+                        }),
+                        headers: {
+                          'Content-Type': 'application/json',
+                        },
                       })
                         .then((res) => res.json())
                         .then((datas) => {
@@ -179,9 +209,14 @@ const AdvancedSettings = () => {
                 action: function () {
                   fetch(`${config.serverIp}delete_interserv_group`, {
                     method: "POST",
-                    body: `{ "token": "${getCookie(
-                      "token"
-                    )}", "groupId": ${groupId}, "guildId":"${guildId}" }`,
+                    body: JSON.stringify({
+                      token: getCookie("token"),
+                      groupId,
+                      guildId
+                    }),
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
                   })
                     .then((res) => res.json())
                     .then((datas) => {
@@ -216,9 +251,14 @@ const AdvancedSettings = () => {
                   action: function () {
                     fetch(`${config.serverIp}delete_interserv_group`, {
                       method: "POST",
-                      body: `{ "token": "${getCookie(
-                        "token"
-                      )}", "groupId": ${groupId}, "guildId":"${guildId}" }`,
+                      body: JSON.stringify({
+                        token: getCookie("token"),
+                        groupId,
+                        guildId
+                      }),
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
                     })
                       .then((res) => res.json())
                       .then((datas) => {

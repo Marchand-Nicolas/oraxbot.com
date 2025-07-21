@@ -47,7 +47,10 @@ export default function Dashboard() {
       if (code) {
         fetch(`${serverIp}login`, {
           method: "POST",
-          body: `{ "token": "${code}" }`,
+          body: JSON.stringify({ token: code }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
         })
           .then((res) => res.json())
           .then((res) => {
@@ -211,7 +214,13 @@ export default function Dashboard() {
     }
     fetch(`${serverIp}get_server_datas`, {
       method: "POST",
-      body: `{ "guildId": "${guild.id}", "token": "${getCookie("token")}" }`,
+      body: JSON.stringify({
+        guildId: guild.id,
+        token: getCookie("token")
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
     })
       .then((res) => res.json())
       .then((res) => {
