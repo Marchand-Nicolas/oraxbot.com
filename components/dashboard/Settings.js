@@ -1,4 +1,3 @@
-import dashboardStyles from "../../styles/Dashboard.module.css";
 import styles from "../../styles/components/dashboard/Settings.module.css";
 import config from "../../utils/config.json";
 import { getCookie } from "../../utils/cookies";
@@ -37,18 +36,19 @@ export default function Settings({ guild, guildId, settings, setSettings }) {
   useEffect(() => {
     if (save === 0) return;
     if (save === 1) return setSave(2);
-    
+
     const saveSettings = async () => {
       setSaved(false);
-      
+
       try {
-        const data = await api.post(`${config.serverIp}set_server_settings`, {
-          token: getCookie("token"),
-          guildId: guildId,
-          settings: settings
-        }, {
-          showErrorNotifications: false, // Handle errors manually
-        });
+        const data = await fetch(`${config.serverIp}set_server_settings`, {
+          method: "POST",
+          body: JSON.stringify({
+            token: getCookie("token"),
+            guildId: guildId,
+            settings: settings,
+          }),
+        }).then((res) => res.json());
 
         if (data.result) {
           setSaved(true);
@@ -58,7 +58,10 @@ export default function Settings({ guild, guildId, settings, setSettings }) {
         }
       } catch (error) {
         console.error("Failed to save settings:", error);
-        notify.error("Settings Save Failed", "Unable to save your settings. Please try again.");
+        notify.error(
+          "Settings Save Failed",
+          "Unable to save your settings. Please try again."
+        );
         setErrorMessages("Failed to save settings");
       }
     };

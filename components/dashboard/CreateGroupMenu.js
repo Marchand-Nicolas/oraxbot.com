@@ -2,11 +2,7 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import styles from "../../styles/components/dashboard/CreateGroupMenu.module.css";
 import config from "../../utils/config";
-import popup from "../../utils/popup";
 import { unmountComponentAtNode } from "react-dom";
-import meteor from "../../public/icons/meteor.svg";
-import drop from "../../public/icons/drop.svg";
-import { api } from "../../utils/apiClient";
 import { notify } from "../ui/NotificationSystem";
 
 export default function CreateGroupMenu(props) {
@@ -39,7 +35,12 @@ export default function CreateGroupMenu(props) {
     <div className={"popup"}>
       <div className="container">
         <div>
-          <Image src="/icons/drop.svg" height={50} width={50} />
+          <Image
+            alt="decoration"
+            src="/icons/drop.svg"
+            height={50}
+            width={50}
+          />
           <h2 style={{ marginLeft: "15px" }}>Create a new group</h2>
         </div>
         <br></br>
