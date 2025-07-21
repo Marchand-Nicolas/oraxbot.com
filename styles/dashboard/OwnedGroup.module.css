@@ -10,6 +10,7 @@
   border: 1px solid rgba(255, 255, 255, 0.18);
   background: rgba(0, 0, 0, 0.45);
   color: white;
+  overflow-y: hidden;
 }
 
 /* Modern settings grid layout */
@@ -56,6 +57,9 @@
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.05);
   transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .settingItem:hover {
@@ -133,9 +137,11 @@
 
 @media screen and (max-width: 768px) {
   .page {
-    margin: 10px;
-    width: calc(100% - 40px);
-    padding: 0 15px;
+    margin: 0;
+    width: calc(100vw - 30px);
+    padding: 5px 15px;
+    border: none;
+    border-radius: 0;
   }
 
   .settingsColumn {

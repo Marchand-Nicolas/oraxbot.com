@@ -32,10 +32,10 @@ export default function OwnedGroup() {
         body: JSON.stringify({
           token: getCookie("token"),
           groupId,
-          guildId
+          guildId,
         }),
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       })
         .then((res) => res.json())
@@ -86,13 +86,13 @@ export default function OwnedGroup() {
                 </Link>
                 <h1 className={styles.title}>{groupName}</h1>
               </div>
-              
+
               {loading ? (
                 <Skeleton height="60px" width="100%" />
               ) : (
                 <div className={styles.inviteLinkSection}>
                   <div className={styles.inviteLinkRow}>
-                    <p style={{ margin: 0, fontWeight: '600' }}>Invite link:</p>
+                    <p style={{ margin: 0, fontWeight: "600" }}>Invite link:</p>
                     <a
                       className={styles.inviteLink}
                       href={link ? link : "#"}
@@ -124,7 +124,7 @@ export default function OwnedGroup() {
                 </div>
               )}
             </div>
-            
+
             {!loading && (
               <button
                 onClick={() =>
@@ -156,7 +156,9 @@ export default function OwnedGroup() {
         {/* Channels Section */}
         {(channels.length || loading) && (
           <div className={styles.channelsSection}>
-            <h2 style={{ margin: '0 0 16px 0', color: '#ffffff' }}>Linked channels</h2>
+            <h2 style={{ margin: "0 0 16px 0", color: "#ffffff" }}>
+              Linked channels
+            </h2>
             {loading ? (
               <div className={styles.channelsGrid}>
                 {Array.from({ length: 6 }).map((_, index) => (
@@ -187,11 +189,14 @@ export default function OwnedGroup() {
         {/* Empty State for No Channels */}
         {!channels.length && !loading && (
           <div className={styles.channelsSection}>
-            <div className={dashboardStyles.emptyGroupContainer} style={{ textAlign: 'center', padding: '40px' }}>
-              <h2 style={{ color: '#ffffff', marginBottom: '16px' }}>
+            <div
+              className={dashboardStyles.emptyGroupContainer}
+              style={{ textAlign: "center", padding: "40px" }}
+            >
+              <h2 style={{ color: "#ffffff", marginBottom: "16px" }}>
                 No channels linked to this group
               </h2>
-              <p style={{ color: '#cccccc', margin: 0 }}>
+              <p style={{ color: "#cccccc", margin: 0 }}>
                 Use or share the invite link to start adding more channels
               </p>
             </div>
