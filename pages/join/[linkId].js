@@ -131,7 +131,7 @@ export default function JoinGroup() {
             loadPage();
           }, guilds.retry_after);
         } else {
-          setGuilds(guilds);
+          if (guilds?.length > 0) setGuilds(guilds);
         }
       }
     }
