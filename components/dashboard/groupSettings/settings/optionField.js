@@ -9,23 +9,31 @@ const OptionsField = ({
   description = "",
   groupId,
   guildId,
+  channelId,
   apiEndpoint = `${config.apiV2}get_group_settings_field`,
   saveEndpoint = `${config.apiV2}set_group_settings_field`,
   options = [],
 }) => {
   const [fieldValue, setFieldValue] = useState("");
   const [availableOptions, setAvailableOptions] = useState(options);
+  const effectiveGetEndpoint = channelId
+    ? `${config.apiV2}get_channel_settings_field`
+    : apiEndpoint;
+  const effectiveSetEndpoint = channelId
+    ? `${config.apiV2}set_channel_settings_field`
+    : saveEndpoint;
 
   useEffect(() => {
-    if (!groupId || !guildId || !fieldName) return;
+    if (!guildId || !fieldName) return;
 
     // Fetch initial field value
-    fetch(apiEndpoint, {
+    fetch(effectiveGetEndpoint, {
       method: "POST",
       body: JSON.stringify({
         token: getCookie("token"),
         groupId,
         guildId,
+        channelId,
         fieldName,
       }),
     })
@@ -47,16 +55,25 @@ const OptionsField = ({
           setAvailableOptions(res.result || []);
         });
     }
-  }, [groupId, guildId, fieldName, options, apiEndpoint]);
+  }, [
+    groupId,
+    guildId,
+    channelId,
+    fieldName,
+    options,
+    apiEndpoint,
+    effectiveGetEndpoint,
+  ]);
 
   const handleChange = (value) => {
     setFieldValue(value);
-    fetch(saveEndpoint, {
+    fetch(effectiveSetEndpoint, {
       method: "POST",
       body: JSON.stringify({
         token: getCookie("token"),
         groupId,
         guildId,
+        channelId,
         fieldName,
         fieldValue: value,
       }),
@@ -69,10 +86,9 @@ const OptionsField = ({
         <strong>{label}</strong>
       </label>
       {description && (
-        <>
-          <br />
-          <label>{description}</label>
-        </>
+        <label className="hint" style={{ display: "block", marginTop: 4 }}>
+          {description}
+        </label>
       )}
       <select
         className={styles.selectInput}
