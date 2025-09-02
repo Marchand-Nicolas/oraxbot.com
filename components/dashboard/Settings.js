@@ -7,8 +7,6 @@ import { notify } from "../ui/NotificationSystem";
 
 export default function Settings({ guild, guildId, settings, setSettings }) {
   const [save, setSave] = useState(0);
-  const [errorMessages, setErrorMessages] = useState("");
-  const [saved, setSaved] = useState(false);
 
   const updateSettings = async (e, field) => {
     let newValue = e.target.selectedIndex;
@@ -22,8 +20,7 @@ export default function Settings({ guild, guildId, settings, setSettings }) {
           const element = inviteLink;
           newValue = newValue.split("https://discord.gg/").join("");
           if (newValue.length > 15 || newValue.length < 4)
-            return setErrorMessages("Invalid link");
-          setErrorMessages("");
+            return notify.error("Invalid link");
           element.value = newValue;
         }
         break;
@@ -37,8 +34,6 @@ export default function Settings({ guild, guildId, settings, setSettings }) {
     if (save === 1) return setSave(2);
 
     const saveSettings = async () => {
-      setSaved(false);
-
       try {
         const data = await fetch(`${config.serverIp}set_server_settings`, {
           method: "POST",
@@ -49,10 +44,7 @@ export default function Settings({ guild, guildId, settings, setSettings }) {
           }),
         }).then((res) => res.json());
 
-        if (data.result) {
-          setSaved(true);
-          setTimeout(() => setSaved(false), 3000); // Hide success message after 3 seconds
-        } else {
+        if (!data.result) {
           throw new Error(data.error || "Failed to save settings");
         }
       } catch (error) {
@@ -61,12 +53,9 @@ export default function Settings({ guild, guildId, settings, setSettings }) {
           "Settings Save Failed",
           "Unable to save your settings. Please try again."
         );
-        setErrorMessages("Failed to save settings");
       }
     };
-
-    let timeout = setTimeout(saveSettings, 500);
-    return () => clearTimeout(timeout);
+    saveSettings();
   }, [save, settings, guildId]);
 
   return (
@@ -119,11 +108,6 @@ export default function Settings({ guild, guildId, settings, setSettings }) {
             />
           </div>
         </>
-      ) : null}
-      {errorMessages.length > 0 ? (
-        <p className="message error">{errorMessages}</p>
-      ) : saved ? (
-        <p className="message success">Saved</p>
       ) : null}
     </>
   );
