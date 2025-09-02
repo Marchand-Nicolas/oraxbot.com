@@ -223,7 +223,7 @@ export default function Dashboard() {
       setGuildDatas({});
       setSettings({});
     }
-    fetch(`${serverIp}get_server_datas`, {
+    fetch(`${config.apiV2}get_server_data`, {
       method: "POST",
       body: JSON.stringify({
         guildId: guild.id,

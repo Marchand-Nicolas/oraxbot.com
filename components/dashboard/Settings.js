@@ -34,7 +34,7 @@ export default function Settings({ guild, guildId, settings, setSettings }) {
 
     const saveSettings = async () => {
       try {
-        const data = await fetch(`${config.serverIp}set_server_settings`, {
+        const data = await fetch(`${config.apiV2}set_server_settings`, {
           method: "POST",
           body: JSON.stringify({
             token: getCookie("token"),
@@ -102,6 +102,19 @@ export default function Settings({ guild, guildId, settings, setSettings }) {
               defaultValue={settings.public_link ? settings.public_link : ""}
               onChange={(e) => {
                 updateSettings(e, "public_link");
+              }}
+              className={["input", styles.parameterInput].join(" ")}
+            />
+          </div>
+          <div className={[styles.parameter, "line"].join(" ")}>
+            <p className={styles.parameterName}>Public name</p>
+            <input
+              id="publicName"
+              type="text"
+              placeholder={guild.name || ""}
+              defaultValue={settings.public_name || ""}
+              onChange={(e) => {
+                updateSettings(e, "public_name");
               }}
               className={["input", styles.parameterInput].join(" ")}
             />
