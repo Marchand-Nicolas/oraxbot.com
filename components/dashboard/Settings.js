@@ -19,8 +19,7 @@ export default function Settings({ guild, guildId, settings, setSettings }) {
         if (field === "public_link") {
           const element = inviteLink;
           newValue = newValue.split("https://discord.gg/").join("");
-          if (newValue.length > 15 || newValue.length < 4)
-            return notify.error("Invalid link");
+          if (newValue.length > 200) return notify.error("Invalid link");
           element.value = newValue;
         }
         break;
