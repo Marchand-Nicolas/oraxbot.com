@@ -271,6 +271,12 @@
   margin-left: auto;
 }
 
+.channelButtons a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .buttonContainer p {
   margin: 0;
 }
