@@ -106,13 +106,13 @@ export default function Home() {
             </div>
           </Link>
           <a
-            href="https://www.patreon.com/user?u=111388918"
+            href="https://ko-fi.com/nicolasmarchand"
             target="_blank"
             rel="noreferrer"
             className={styles.card}
           >
-            <h2>❤️ Patreon &rarr;</h2>
-            <p>Support my hard work with my recently launched Patreon ✨</p>
+            <h2>❤️ Donate &rarr;</h2>
+            <p>Support my hard work with my recently launched Ko-fi ✨</p>
           </a>
           <a
             href="https://discord.gg/PJumX8FjRV"

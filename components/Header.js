@@ -33,7 +33,7 @@ export default function Footer() {
         </Link>
       )}
       <a
-        href="https://www.patreon.com/user?u=111388918"
+        href="https://ko-fi.com/nicolasmarchand"
         target="_blank"
         rel="noreferrer"
       >
