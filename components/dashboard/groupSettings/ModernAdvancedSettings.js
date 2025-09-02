@@ -8,6 +8,7 @@ import { getCookie } from "../../../utils/cookies";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import Filters from "./settings/filters";
+import TextField from "./settings/textField";
 
 const updateDisableUserWarningMessage = (
   e,
@@ -168,6 +169,17 @@ const ModernAdvancedSettings = () => {
                 alt="User warning message example"
               />
             </div>
+          </div>
+
+          <div className={styles.settingItem}>
+            <TextField
+              label="Custom warning message"
+              description="Override the default user warning text shown in synced channels."
+              fieldName="customWarningMessage"
+              groupId={groupId}
+              guildId={guildId}
+              placeholder="e.g., Messages here may be shared across servers."
+            />
           </div>
 
           <div className={styles.settingItem}>
