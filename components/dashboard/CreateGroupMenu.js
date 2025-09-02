@@ -2,7 +2,7 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import styles from "../../styles/components/dashboard/CreateGroupMenu.module.css";
 import config from "../../utils/config";
-import { unmountComponentAtNode } from "react-dom";
+import { unmountRoot } from "../../utils/reactRoot";
 import { notify } from "../ui/NotificationSystem";
 
 export default function CreateGroupMenu(props) {
@@ -15,7 +15,7 @@ export default function CreateGroupMenu(props) {
         method: "POST",
         body: JSON.stringify({ guildId: props.guildId }),
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       })
         .then((res) => res.json())
@@ -69,7 +69,7 @@ export default function CreateGroupMenu(props) {
           <button
             className={[styles.cancelButton, "default"].join(" ")}
             onClick={() => {
-              unmountComponentAtNode(document.getElementById("menu"));
+              unmountRoot(document.getElementById("menu"));
             }}
           >
             Cancel
@@ -93,10 +93,10 @@ export default function CreateGroupMenu(props) {
                 body: JSON.stringify({
                   guildId: props.guildId,
                   channelId: selectedChannelId,
-                  groupName: groupName
+                  groupName: groupName,
                 }),
                 headers: {
-                  'Content-Type': 'application/json',
+                  "Content-Type": "application/json",
                 },
               })
                 .then((res) => res.json())
@@ -125,7 +125,7 @@ export default function CreateGroupMenu(props) {
                     notify.error("Group Creation Failed", errorMessage);
                   } else {
                     notify.success("Success", "Group created successfully!");
-                    unmountComponentAtNode(document.getElementById("menu"));
+                    unmountRoot(document.getElementById("menu"));
                     props.setRefreshGuildDatas(true);
                   }
                 })

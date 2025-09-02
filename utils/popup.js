@@ -1,16 +1,16 @@
-import { render, unmountComponentAtNode } from "react-dom";
+import { renderWithRoot, unmountRoot } from "./reactRoot";
 import Image from "next/image";
 
 export default function popup(title, description, type, datas = {}) {
   if (typeof window === "undefined") return;
   const popupContainer = document.getElementById("popup");
-  render(
+  renderWithRoot(
     <div className={["popup", type].join(" ")}>
       <div className="container">
         {datas.close && (
           <svg
             className="close"
-            onClick={() => unmountComponentAtNode(popupContainer)}
+            onClick={() => unmountRoot(popupContainer)}
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth={1.5}
@@ -51,7 +51,7 @@ export default function popup(title, description, type, datas = {}) {
                 key={"button_" + i}
                 onClick={() => {
                   if (button.action) button.action();
-                  unmountComponentAtNode(popupContainer);
+                  unmountRoot(popupContainer);
                 }}
               >
                 {button.name}
@@ -63,7 +63,7 @@ export default function popup(title, description, type, datas = {}) {
             className="default"
             onClick={() => {
               if (datas.action) datas.action();
-              unmountComponentAtNode(popupContainer);
+              unmountRoot(popupContainer);
             }}
           >
             {datas.customButtonName ? datas.customButtonName : "Okay"}

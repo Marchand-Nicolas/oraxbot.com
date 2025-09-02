@@ -3,10 +3,8 @@ import config from "../../utils/config";
 import { useState, useEffect } from "react";
 import { getCookie, setCookie } from "../../utils/cookies";
 import Link from "next/link";
-import PaypalButton from "../../components/PaypalButton";
-import { render } from "react-dom";
+import { renderWithRoot } from "../../utils/reactRoot";
 import popup from "../../utils/popup";
-import fire from "../../public/icons/fire.svg";
 import meteor from "../../public/icons/meteor.svg";
 import CreateGroupMenu from "../../components/dashboard/CreateGroupMenu";
 import Settings from "../../components/dashboard/Settings";
@@ -348,7 +346,7 @@ export default function Dashboard() {
             <ErrorBoundary>
               <button
                 onClick={() =>
-                  render(
+                  renderWithRoot(
                     <CreateGroupMenu
                       guildId={guildId}
                       setRefreshGuildDatas={setRefreshGuildDatas}
