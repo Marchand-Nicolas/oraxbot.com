@@ -191,6 +191,8 @@
   padding: 15px !important;
   border-radius: 1.4em;
   opacity: 1;
+  max-width: calc(100% - 30px);
+  max-height: calc(100% - 30px);
 }
 
 .exampleContainer.reverse .glassCard:hover,
