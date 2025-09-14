@@ -19,11 +19,11 @@ const ModernSettings = () => {
         {/* Basic Configuration Column */}
         <div className={styles.settingsColumn}>
           <h3 className={styles.sectionTitle}>Basic Configuration</h3>
-          
+
           <div className={styles.settingItem}>
             <CustomUsernames groupId={groupId} guildId={guildId} />
           </div>
-          
+
           <div className={styles.settingItem}>
             <OptionsField
               label="Replies style"
@@ -37,7 +37,7 @@ const ModernSettings = () => {
               ]}
             />
           </div>
-          
+
           <div className={styles.settingItem}>
             <CheckboxField
               label="Allow @everyone and @here"
@@ -47,12 +47,22 @@ const ModernSettings = () => {
               guildId={guildId}
             />
           </div>
+
+          <div className={styles.settingItem}>
+            <CheckboxField
+              label="Sync role mentions across servers"
+              description="Allow @Role pings to notify matching roles across linked servers (names must exactly match)."
+              fieldName="syncMentions"
+              groupId={groupId}
+              guildId={guildId}
+            />
+          </div>
         </div>
 
         {/* Moderation Column */}
         <div className={styles.settingsColumn}>
           <h3 className={styles.sectionTitle}>Moderation & Security</h3>
-          
+
           <div className={styles.settingItem}>
             <TextField
               label="Moderators"
@@ -64,7 +74,7 @@ const ModernSettings = () => {
               parser={(value) => value.replace(" ", ",")}
             />
           </div>
-          
+
           <div className={styles.settingItem}>
             <TextField
               label="Blacklist"
@@ -76,7 +86,7 @@ const ModernSettings = () => {
               parser={(value) => value.replace(" ", ",")}
             />
           </div>
-          
+
           <div className={styles.settingItem}>
             <LogMessages groupId={groupId} guildId={guildId} />
           </div>
