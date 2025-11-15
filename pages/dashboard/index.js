@@ -309,7 +309,7 @@ export default function Dashboard() {
       <div className={styles.page}>
         <h1 className={styles.title}>{guild.name}</h1>
         <a
-          href="https://discord.gg/PJumX8FjRV"
+          href="https://discord.gg/e3pBtbum4A"
           target="_blank"
           rel="noreferrer"
         >

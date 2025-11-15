@@ -115,7 +115,7 @@ export default function Home() {
             <p>Support my hard work with my recently launched Ko-fi ✨</p>
           </a>
           <a
-            href="https://discord.gg/PJumX8FjRV"
+            href="https://discord.gg/e3pBtbum4A"
             target="_blank"
             rel="noreferrer"
             className={`${styles.card} ${styles.soft}`}
