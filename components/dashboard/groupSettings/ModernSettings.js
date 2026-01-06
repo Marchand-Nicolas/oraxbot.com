@@ -34,6 +34,7 @@ const ModernSettings = () => {
                 { name: "Embed", value: "embed" },
                 { name: "Quote (Discord's legacy)", value: "quote" },
                 { name: "Quote without jump button", value: "quoteNoButton" },
+                { name: "Embed without jump button", value: "embedNoButton" },
               ]}
             />
           </div>
