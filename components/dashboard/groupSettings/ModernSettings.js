@@ -5,6 +5,7 @@ import LogMessages from "./settings/logMessages";
 import OptionsField from "./settings/optionField";
 import TextField from "./settings/textField";
 import CheckboxField from "./settings/checkboxField";
+import TextareaField from "./settings/textareaField";
 
 const ModernSettings = () => {
   const router = useRouter();
@@ -85,6 +86,18 @@ const ModernSettings = () => {
               guildId={guildId}
               placeholder="Enter words separated by commas..."
               parser={(value) => value.replace(" ", ",")}
+            />
+          </div>
+
+          <div className={styles.settingItem}>
+            <TextareaField
+              label="Interserv rules"
+              description='These rules are displayed to users with the "/rules" command.'
+              fieldName="rules"
+              groupId={groupId}
+              guildId={guildId}
+              placeholder="Write the interserv rules here..."
+              rows={8}
             />
           </div>
 
