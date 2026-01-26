@@ -76,12 +76,14 @@ const Filters = ({ groupId, guildId }) => {
     saveFilterRules(updatedRules);
   };
 
-  const updateRule = (ruleId, field, value) => {
-    const updatedRules = filterRules.map(rule => 
-      rule.id === ruleId ? { ...rule, [field]: value } : rule
-    );
-    setFilterRules(updatedRules);
-    saveFilterRules(updatedRules);
+  const updateRule = (ruleId, patch) => {
+    setFilterRules((prevRules) => {
+      const updatedRules = prevRules.map((rule) =>
+        rule.id === ruleId ? { ...rule, ...patch } : rule
+      );
+      saveFilterRules(updatedRules);
+      return updatedRules;
+    });
   };
 
   if (isLoading) {
@@ -115,17 +117,26 @@ const Filters = ({ groupId, guildId }) => {
             <div key={rule.id} className={styles.filterRule}>
               <select
                 value={rule.type}
-                onChange={(e) => updateRule(rule.id, "type", e.target.value)}
+                onChange={(e) => {
+                  const newType = e.target.value;
+                  updateRule(
+                    rule.id,
+                    newType !== rule.type
+                      ? { type: newType, value: "" }
+                      : { type: newType }
+                  );
+                }}
                 className={styles.filterRuleSelect}
                 style={{ width: "120px" }}
               >
                 <option value="keyword">Keyword</option>
                 <option value="media">Media</option>
+                <option value="author">Author</option>
               </select>
 
               <select
                 value={rule.condition}
-                onChange={(e) => updateRule(rule.id, "condition", e.target.value)}
+                onChange={(e) => updateRule(rule.id, { condition: e.target.value })}
                 className={styles.filterRuleSelect}
                 style={{ width: "100px" }}
               >
@@ -137,13 +148,25 @@ const Filters = ({ groupId, guildId }) => {
                 <TextInput
                   placeholder="Enter keywords (comma separated)"
                   value={rule.value}
-                  onChange={(e) => updateRule(rule.id, "value", e.target.value)}
+                  onChange={(e) => updateRule(rule.id, { value: e.target.value })}
                   className={styles.filterRuleInput}
                 />
+              ) : rule.type === "author" ? (
+                <select
+                  value={rule.value}
+                  onChange={(e) => updateRule(rule.id, { value: e.target.value })}
+                  className={styles.filterRuleSelect}
+                  style={{ flex: 1 }}
+                >
+                  <option value="">Select author type</option>
+                  <option value="human">Human</option>
+                  <option value="webhook">Webhook</option>
+                  <option value="bot">Bot</option>
+                </select>
               ) : (
                 <select
                   value={rule.value}
-                  onChange={(e) => updateRule(rule.id, "value", e.target.value)}
+                  onChange={(e) => updateRule(rule.id, { value: e.target.value })}
                   className={styles.filterRuleSelect}
                   style={{ flex: 1 }}
                 >
@@ -182,6 +205,7 @@ const Filters = ({ groupId, guildId }) => {
             <li><strong>Exclude rules:</strong> Messages matching these rules will never be forwarded</li>
             <li><strong>Keywords:</strong> Comma-separated words to match in message content</li>
             <li><strong>Media:</strong> Filter based on message attachments and content type</li>
+            <li><strong>Author:</strong> Filter based on the message author type (human, webhook, or bot)</li>
           </ul>
         </div>
       )}
