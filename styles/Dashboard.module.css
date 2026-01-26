@@ -192,7 +192,9 @@
   padding: 0.5em 1em;
   cursor: pointer;
   margin: 0.4em 0;
-  transition: transform 0.2s ease, background-color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
   animation: in 0.2s ease;
 }
 

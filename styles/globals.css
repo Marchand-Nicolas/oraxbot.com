@@ -1,7 +1,6 @@
 @import url(https://fonts.googleapis.com/css?family=Roboto:400,100,100italic,300,300ita‌​lic,400italic,500,500italic,700,700italic,900italic,900);
 
 :root {
-  --scroll_percent: 0.5;
   --border-radius: 0.5rem;
   --primary: #8151fc;
   --secondary: #5865f2;
@@ -123,29 +122,6 @@ a * {
 * {
   scrollbar-width: auto;
   scrollbar-color: #24a0ff #ffffff;
-}
-
-*::-webkit-scrollbar {
-  width: 12px;
-  background-color: white;
-  background: linear-gradient(
-    0deg,
-    rgb(0, 161, 232) 0%,
-    rgba(255, 255, 255, 0) calc(var(--scroll_percent) * 100% - 90%),
-    rgba(255, 255, 255, 0) calc(var(--scroll_percent) * 100% + 90%),
-    #8151fc 100%
-  );
-}
-
-*::-webkit-scrollbar-thumb {
-  background: rgb(0, 161, 232);
-  background: linear-gradient(
-    0deg,
-    rgba(255, 255, 255, 0) 0%,
-    rgb(0, 161, 232) min(calc(100% - var(--scroll_percent) * 100%), 30%),
-    #8151fc max(calc(100% - var(--scroll_percent) * 100%), 70%),
-    rgba(255, 255, 255, 0) 100%
-  );
 }
 
 *::selection {
