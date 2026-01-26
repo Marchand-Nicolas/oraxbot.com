@@ -116,11 +116,12 @@
 }
 
 .button {
-  background: linear-gradient(37deg, rgb(0, 161, 232) 0%, #8151fc 100%);
-  border: none;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(0, 161, 232, 0.2);
+  backdrop-filter: blur(4px);
   color: white;
   padding: 10px 20px 10px 60px;
-  border-radius: 4px;
+  border-radius: 5px;
   font-weight: bold;
   font-size: 14px;
   cursor: pointer;
@@ -130,6 +131,26 @@
   max-width: 400px;
   display: block;
   text-align: center;
+  min-width: 200px;
+  overflow: hidden;
+}
+
+/* Sword-shine hover animation */
+.button::before {
+  content: "";
+  position: absolute;
+  top: -50px;
+  left: -50px;
+  width: 50px;
+  height: 200px;
+  background: white;
+  transform: rotate(-45deg);
+  opacity: 0;
+  transition: 0.4s;
+}
+.button:hover::before {
+  left: calc(100% + 60px);
+  opacity: 1;
 }
 
 .button strong,
@@ -139,19 +160,23 @@
   top: 0;
   bottom: 0;
   padding: 10px;
-  background-color: rgb(255, 255, 255);
-  color: rgb(0, 161, 232);
+  color: white;
   border-top-left-radius: 4px;
   border-bottom-left-radius: 4px;
   width: 25px;
 }
-
-.button.buyButton.done {
-  background: linear-gradient(37deg, rgb(0, 161, 232) 0%, #8151fc 50%);
+.button strong {
+  background-color: rgb(0, 161, 232);
 }
 
 .button svg {
   padding: 5px 10px;
+}
+
+.actionsContainer {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .inviteBot {

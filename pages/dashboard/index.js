@@ -44,7 +44,7 @@ export default function Dashboard() {
         setTimeout(() => {
           notify.error(
             "Error parsing cached data",
-            "An error occurred while parsing cached data. Please try refreshing the page."
+            "An error occurred while parsing cached data. Please try refreshing the page.",
           );
         }, 1000);
         setUser(undefined);
@@ -68,7 +68,7 @@ export default function Dashboard() {
             if (!res.access_token || res.access_token === "undefined") {
               notify.error(
                 "Login Failed",
-                "Invalid authentication response. Redirecting..."
+                "Invalid authentication response. Redirecting...",
               );
               setTimeout(() => (window.location.href = "/dashboard"), 2000);
               return;
@@ -85,7 +85,7 @@ export default function Dashboard() {
           .catch((error) => {
             notify.error(
               "Login Failed",
-              "Unable to complete authentication. Please try again."
+              "Unable to complete authentication. Please try again.",
             );
             setTimeout(() => (window.location.href = "/dashboard"), 3000);
           });
@@ -156,7 +156,7 @@ export default function Dashboard() {
             .catch((error) => {
               notify.error(
                 "Data Loading Failed",
-                "Unable to load your Discord data. Please try refreshing the page."
+                "Unable to load your Discord data. Please try refreshing the page.",
               );
               setLoading(false);
             });
@@ -164,7 +164,7 @@ export default function Dashboard() {
         .catch((error) => {
           notify.error(
             "Data Loading Failed",
-            "Unable to load your Discord data. Please try refreshing the page."
+            "Unable to load your Discord data. Please try refreshing the page.",
           );
           setLoading(false);
         });
@@ -245,7 +245,7 @@ export default function Dashboard() {
           notify.error(
             "Server Data Error",
             "Unable to load server configuration. Some features may not work properly.",
-            { duration: 8000 }
+            { duration: 8000 },
           );
         }
       })
@@ -255,7 +255,7 @@ export default function Dashboard() {
         notify.error(
           "Server Data Error",
           "Unable to load server configuration. Some features may not work properly.",
-          { duration: 8000 }
+          { duration: 8000 },
         );
       });
   }, [guild, paymentProgress, refreshGuildDatas]);
@@ -296,7 +296,7 @@ export default function Dashboard() {
                     />
                   </div>
                 </Link>
-              ) : null
+              ) : null,
             )
           : [...Array(3)].map((o, index) => (
               <div key={"nav_guild_" + index} className={styles.navGuild}>
@@ -308,33 +308,55 @@ export default function Dashboard() {
       </nav>
       <div className={styles.page}>
         <h1 className={styles.title}>{guild.name}</h1>
-        <a
-          href="https://discord.gg/e3pBtbum4A"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <button className={styles.button}>
-            Support{" "}
-            <strong>
-              <svg
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
+        <div className={styles.actionsContainer}>
+          <a
+            href="https://discord.gg/e3pBtbum4A"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <button className={styles.button}>
+              Support{" "}
+              <strong>
+                <svg
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M16.712 4.33a9.027 9.027 0 011.652 1.306c.51.51.944 1.064 1.306 1.652M16.712 4.33l-3.448 4.138m3.448-4.138a9.014 9.014 0 00-9.424 0M19.67 7.288l-4.138 3.448m4.138-3.448a9.014 9.014 0 010 9.424m-4.138-5.976a3.736 3.736 0 00-.88-1.388 3.737 3.737 0 00-1.388-.88m2.268 2.268a3.765 3.765 0 010 2.528m-2.268-4.796a3.765 3.765 0 00-2.528 0m4.796 4.796c-.181.506-.475.982-.88 1.388a3.736 3.736 0 01-1.388.88m2.268-2.268l4.138 3.448m0 0a9.027 9.027 0 01-1.306 1.652c-.51.51-1.064.944-1.652 1.306m0 0l-3.448-4.138m3.448 4.138a9.014 9.014 0 01-9.424 0m5.976-4.138a3.765 3.765 0 01-2.528 0m0 0a3.736 3.736 0 01-1.388-.88 3.737 3.737 0 01-.88-1.388m2.268 2.268L7.288 19.67m0 0a9.024 9.024 0 01-1.652-1.306 9.027 9.027 0 01-1.306-1.652m0 0l4.138-3.448M4.33 16.712a9.014 9.014 0 010-9.424m4.138 5.976a3.765 3.765 0 010-2.528m0 0c.181-.506.475-.982.88-1.388a3.736 3.736 0 011.388-.88m-2.268 2.268L4.33 7.288m6.406 1.18L7.288 4.33m0 0a9.024 9.024 0 00-1.652 1.306A9.025 9.025 0 004.33 7.288"
+                  />
+                </svg>
+              </strong>
+            </button>
+          </a>
+          {guildDatas.bot ? (
+            <>
+              <a
+                href="https://ko-fi.com/nicolasmarchand"
+                target="_blank"
+                rel="noreferrer"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M16.712 4.33a9.027 9.027 0 011.652 1.306c.51.51.944 1.064 1.306 1.652M16.712 4.33l-3.448 4.138m3.448-4.138a9.014 9.014 0 00-9.424 0M19.67 7.288l-4.138 3.448m4.138-3.448a9.014 9.014 0 010 9.424m-4.138-5.976a3.736 3.736 0 00-.88-1.388 3.737 3.737 0 00-1.388-.88m2.268 2.268a3.765 3.765 0 010 2.528m-2.268-4.796a3.765 3.765 0 00-2.528 0m4.796 4.796c-.181.506-.475.982-.88 1.388a3.736 3.736 0 01-1.388.88m2.268-2.268l4.138 3.448m0 0a9.027 9.027 0 01-1.306 1.652c-.51.51-1.064.944-1.652 1.306m0 0l-3.448-4.138m3.448 4.138a9.014 9.014 0 01-9.424 0m5.976-4.138a3.765 3.765 0 01-2.528 0m0 0a3.736 3.736 0 01-1.388-.88 3.737 3.737 0 01-.88-1.388m2.268 2.268L7.288 19.67m0 0a9.024 9.024 0 01-1.652-1.306 9.027 9.027 0 01-1.306-1.652m0 0l4.138-3.448M4.33 16.712a9.014 9.014 0 010-9.424m4.138 5.976a3.765 3.765 0 010-2.528m0 0c.181-.506.475-.982.88-1.388a3.736 3.736 0 011.388-.88m-2.268 2.268L4.33 7.288m6.406 1.18L7.288 4.33m0 0a9.024 9.024 0 00-1.652 1.306A9.025 9.025 0 004.33 7.288"
-                />
-              </svg>
-            </strong>
-          </button>
-        </a>
-        <br></br>
-        {guildDatas.bot ? (
-          <>
-            <ErrorBoundary>
+                <button className={styles.button}>
+                  Donate ❤️{" "}
+                  <strong>
+                    <svg
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0 1 12 15a9.065 9.065 0 0 0-6.23-.693L5 14.5m14.8.8 1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0 1 12 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5"
+                      />
+                    </svg>
+                  </strong>
+                </button>
+              </a>
               <button
                 onClick={() =>
                   renderWithRoot(
@@ -342,7 +364,7 @@ export default function Dashboard() {
                       guildId={guildId}
                       setRefreshGuildDatas={setRefreshGuildDatas}
                     />,
-                    document.getElementById("menu")
+                    document.getElementById("menu"),
                   )
                 }
                 className={styles.button}
@@ -363,35 +385,78 @@ export default function Dashboard() {
                   </svg>
                 </strong>
               </button>
-              <br></br>
-              <ErrorBoundary>
-                {guildDatas.ownedGroups && guildDatas.ownedGroups.length ? (
-                  <section className={styles.groupContainer}>
-                    <h2>📺 Owned groups</h2>
-                    {guildDatas.ownedGroups.map((group) => (
-                      <Link
-                        key={"ownedGroup_" + group.id}
-                        href={`/dashboard/ownedgroup/${group.id}?guild=${guild.id}&icon=${guild.icon}&groupName=${group.name}`}
-                      >
-                        <div className={styles.group}>{group.name}</div>
-                      </Link>
-                    ))}
-                  </section>
-                ) : (
-                  <section className={styles.emptyGroupContainer}>
-                    <h2>This server does not own any group</h2>
-                  </section>
-                )}
-              </ErrorBoundary>
-              <ErrorBoundary>
-                <Settings
-                  key={"settingsGuild_" + guildId}
-                  guild={guild}
-                  guildId={guildId}
-                  settings={settings}
-                  setSettings={setSettings}
-                />
-              </ErrorBoundary>
+            </>
+          ) : (
+            <button
+              onClick={() =>
+                popup("Invite the bot", `Warning`, "warning", {
+                  content: (
+                    <p className="content">
+                      It is necessary for Orax to access the content of the
+                      messages in order to synchronize them between the
+                      channels. By inviting Orax, it will be able to read all
+                      the messages of your server.<br></br>
+                      For security and privacy reasons, we suggest you to give
+                      it the permission to read the messages only in the
+                      channels the bot is concerned with.
+                    </p>
+                  ),
+                  icon: meteor,
+                  action: function () {
+                    window.open(config.inviteLink + "&guild_id=" + guild.id);
+                  },
+                })
+              }
+              className={styles.button}
+            >
+              Add bot
+              <strong>
+                <svg
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </strong>
+            </button>
+          )}
+        </div>
+        {guildDatas.bot ? (
+          <>
+            <br></br>
+            <ErrorBoundary>
+              {guildDatas.ownedGroups && guildDatas.ownedGroups.length ? (
+                <section className={styles.groupContainer}>
+                  <h2>📺 Owned groups</h2>
+                  {guildDatas.ownedGroups.map((group) => (
+                    <Link
+                      key={"ownedGroup_" + group.id}
+                      href={`/dashboard/ownedgroup/${group.id}?guild=${guild.id}&icon=${guild.icon}&groupName=${group.name}`}
+                    >
+                      <div className={styles.group}>{group.name}</div>
+                    </Link>
+                  ))}
+                </section>
+              ) : (
+                <section className={styles.emptyGroupContainer}>
+                  <h2>This server does not own any group</h2>
+                </section>
+              )}
+            </ErrorBoundary>
+            <ErrorBoundary>
+              <Settings
+                key={"settingsGuild_" + guildId}
+                guild={guild}
+                guildId={guildId}
+                settings={settings}
+                setSettings={setSettings}
+              />
             </ErrorBoundary>
             <HiddenMenu title="🚫 Service limits">
               <section className={styles.section}>
@@ -437,46 +502,7 @@ export default function Dashboard() {
             </HiddenMenu>
             {/*guildDatas.connectedGroups ? null : <section className={styles.emptyGroupContainer}><h2>This server isn't connected to any group</h2></section>*/}
           </>
-        ) : (
-          <button
-            onClick={() =>
-              popup("Invite the bot", `Warning`, "warning", {
-                content: (
-                  <p className="content">
-                    It is necessary for Orax to access the content of the
-                    messages in order to synchronize them between the channels.
-                    By inviting Orax, it will be able to read all the messages
-                    of your server.<br></br>
-                    For security and privacy reasons, we suggest you to give it
-                    the permission to read the messages only in the channels the
-                    bot is concerned with.
-                  </p>
-                ),
-                icon: meteor,
-                action: function () {
-                  window.open(config.inviteLink + "&guild_id=" + guild.id);
-                },
-              })
-            }
-            className={styles.button}
-          >
-            Add bot
-            <strong>
-              <svg
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            </strong>
-          </button>
-        )}
+        ) : null}
         <div id="container" key={guild.id + "_" + paymentProgress}></div>
         <br></br>
       </div>

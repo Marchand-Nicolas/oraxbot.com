@@ -43,7 +43,7 @@ export default function OwnedGroup() {
           console.log(datas);
           if (datas.result) {
             setLink(
-              process.env.NEXT_PUBLIC_WEBSITE_URL + "/join/" + datas.link
+              process.env.NEXT_PUBLIC_WEBSITE_URL + "/join/" + datas.link,
             );
             setChannels(datas.channels);
             setLoading(false);
@@ -131,7 +131,7 @@ export default function OwnedGroup() {
                   fetch(`${config.serverIp}generate_interserv_group_link`, {
                     method: "POST",
                     body: `{ "token": "${getCookie(
-                      "token"
+                      "token",
                     )}", "groupId": ${groupId}, "guildId":"${guildId}" }`,
                   })
                     .then((res) => res.json())
@@ -140,7 +140,7 @@ export default function OwnedGroup() {
                         setLink(
                           process.env.NEXT_PUBLIC_WEBSITE_URL +
                             "/join/" +
-                            datas.link
+                            datas.link,
                         );
                       }
                     })
@@ -221,6 +221,23 @@ export default function OwnedGroup() {
         <div className={styles.settingsContainer}>
           <ActivityGraph />
         </div>
+        <footer className={styles.footer}>
+          <a
+            href="https://discord.gg/e3pBtbum4A"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Suggest a feature
+          </a>
+          <span> • </span>
+          <a
+            href="https://ko-fi.com/nicolasmarchand"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Donate
+          </a>
+        </footer>
       </div>
     </>
   );

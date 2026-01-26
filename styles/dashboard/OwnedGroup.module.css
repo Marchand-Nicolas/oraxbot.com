@@ -322,3 +322,11 @@
     margin-left: 0;
   }
 }
+
+.footer {
+  margin-bottom: 1rem;
+}
+
+.footer a {
+  text-decoration: underline;
+}
