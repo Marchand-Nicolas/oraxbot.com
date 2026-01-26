@@ -88,7 +88,7 @@ export default function OwnedGroup() {
               </div>
 
               {loading ? (
-                <Skeleton height="60px" width="100%" />
+                <Skeleton height="50px" width="100%" />
               ) : (
                 <div className={styles.inviteLinkSection}>
                   <div className={styles.inviteLinkRow}>
@@ -161,11 +161,11 @@ export default function OwnedGroup() {
             </h2>
             {loading ? (
               <div className={styles.channelsGrid}>
-                {Array.from({ length: 6 }).map((_, index) => (
+                {Array.from({ length: 9 }).map((_, index) => (
                   <Skeleton
                     key={"skeleton_" + index}
-                    height="60px"
-                    width="100%"
+                    height="31px"
+                    width="200px"
                   />
                 ))}
               </div>
@@ -206,7 +206,13 @@ export default function OwnedGroup() {
         {/* Settings Sections */}
         {loading ? (
           <div className={styles.settingsContainer}>
-            <Skeleton height="300px" width="100%" />
+            <Skeleton
+              height="500px"
+              width="calc(50% - 10px)"
+              marginRight="20px"
+            />
+            <Skeleton height="500px" width="calc(50% - 10px)" />
+            <br />
             <br />
             <Skeleton height="200px" width="100%" />
           </div>
