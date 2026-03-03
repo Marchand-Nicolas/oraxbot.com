@@ -791,7 +791,9 @@ export default function Explore() {
                   <textarea
                     className={styles.joinTextarea}
                     value={joinDescription}
-                    onChange={(event) => setJoinDescription(event.target.value)}
+                    onChange={(event) =>
+                      setJoinDescription(event.target.value.slice(0, 1500))
+                    }
                     placeholder="Introduce your server and describe your goals."
                     rows={6}
                   />
