@@ -273,7 +273,7 @@
   position: relative;
   width: 100%;
   max-width: 960px;
-  max-height: 90vh;
+  max-height: 90%;
   background: rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(12px);
   border-radius: 1.25rem;
