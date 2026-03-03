@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import BetaTag from "../components/ui/BetaTag";
 import styles from "../styles/Explore.module.css";
 import config from "../utils/config.json";
 import { getCookie, setCookie } from "../utils/cookies";
@@ -435,7 +436,10 @@ export default function Explore() {
       <Header />
       <main className={styles.main}>
         <section className={styles.header}>
-          <h1 className={styles.title}>Explore public groups</h1>
+          <h1 className={styles.title}>
+            Explore public groups
+            <BetaTag />
+          </h1>
           <p className={styles.subtitle}>
             Discover interserver groups created by the community and join the
             ones that match your interests.
