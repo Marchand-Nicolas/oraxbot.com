@@ -211,9 +211,15 @@
   white-space: pre-wrap;
 }
 
-.groupClose {
-  align-self: flex-end;
+.groupActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.6rem;
   margin-top: 0.5rem;
+}
+
+.groupClose {
   background: transparent;
   border: none;
   color: #6b7280;
@@ -223,6 +229,31 @@
 
 .groupClose:hover {
   color: #111827;
+}
+
+.groupJoinButton {
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  color: #ffffff;
+  background: linear-gradient(37deg, rgb(0, 161, 232) 0%, #8151fc 100%);
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.groupJoinButton:hover:enabled {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(31, 38, 135, 0.3);
+}
+
+.groupJoinButton:disabled {
+  cursor: default;
+  opacity: 0.8;
 }
 
 .publishOverlay {
@@ -239,6 +270,7 @@
 }
 
 .publishPanel {
+  position: relative;
   width: 100%;
   max-width: 960px;
   max-height: 90vh;
@@ -250,6 +282,34 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+}
+
+.panelCloseButton {
+  position: absolute;
+  top: 0.9rem;
+  right: 1rem;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #e5e7eb;
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.panelCloseButton:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  transform: scale(1.03);
 }
 
 .publishHeader {
@@ -358,18 +418,58 @@
   color: #ffffff;
 }
 
-.publishClose {
-  align-self: flex-end;
-  margin-top: 0.25rem;
-  background: transparent;
-  border: none;
-  color: #cdd0d6;
-  cursor: pointer;
-  font-size: 0.9rem;
+.joinTextarea {
+  width: 100%;
+  min-height: 130px;
+  resize: vertical;
+  border-radius: 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.03);
+  color: #e5e7eb;
+  padding: 0.9rem 1rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
 
-.publishClose:hover {
+.joinTextarea:focus {
+  outline: none;
+  border-color: #8151fc;
+  box-shadow: 0 0 0 3px rgba(129, 81, 252, 0.2);
+}
+
+.joinActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.joinSubmitButton {
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.7rem 1.1rem;
+  background: linear-gradient(37deg, rgb(0, 161, 232) 0%, #8151fc 100%);
   color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    opacity 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.joinSubmitButton:hover:enabled {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+}
+
+.joinSubmitButton:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+
+.success {
+  margin-top: 0.6rem;
+  color: #78f2a8;
+  text-align: left;
 }
 
 @media (max-width: 640px) {

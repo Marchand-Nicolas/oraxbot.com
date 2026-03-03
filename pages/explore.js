@@ -38,6 +38,17 @@ export default function Explore() {
   const [publishStep, setPublishStep] = useState(1); // 1 = select guild, 2 = select group
   const [viewGroup, setViewGroup] = useState(null);
 
+  const [isJoinMenuOpen, setIsJoinMenuOpen] = useState(false);
+  const [joinStep, setJoinStep] = useState(1); // 1 = guild, 2 = channel, 3 = proposal
+  const [joinGroupId, setJoinGroupId] = useState("");
+  const [joinSelectedGuildId, setJoinSelectedGuildId] = useState("");
+  const [joinChannels, setJoinChannels] = useState([]);
+  const [joinSelectedChannelId, setJoinSelectedChannelId] = useState("");
+  const [joinDescription, setJoinDescription] = useState("");
+  const [isJoinSubmitting, setIsJoinSubmitting] = useState(false);
+  const [joinError, setJoinError] = useState("");
+  const [joinSuccess, setJoinSuccess] = useState("");
+
   const observerRef = useRef(null);
   const sentinelRef = useRef(null);
 
@@ -166,14 +177,17 @@ export default function Explore() {
 
     setIsAuthLoading(true);
     try {
-      const res = await fetch("https://discordapp.com/api/v6/users/@me/guilds", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Accept: "application/json",
-          Authorization: "Bearer " + token,
+      const res = await fetch(
+        "https://discordapp.com/api/v6/users/@me/guilds",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Accept: "application/json",
+            Authorization: "Bearer " + token,
+          },
         },
-      });
+      );
       const userGuilds = await res.json();
 
       if (userGuilds?.message === "401: Unauthorized") {
@@ -209,6 +223,67 @@ export default function Explore() {
       setIsAuthLoading(false);
     }
   }, [ensureDiscordAuth]);
+
+  const openJoinMenu = useCallback(
+    async (groupId) => {
+      if (!groupId) return;
+
+      const token = await ensureDiscordAuth();
+      if (!token) return;
+
+      setIsAuthLoading(true);
+      try {
+        const res = await fetch(
+          "https://discordapp.com/api/v6/users/@me/guilds",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+              Accept: "application/json",
+              Authorization: "Bearer " + token,
+            },
+          },
+        );
+        const userGuilds = await res.json();
+
+        if (userGuilds?.message === "401: Unauthorized") {
+          setCookie("token", "", 0);
+          const redirectUri =
+            encodeURI(process.env.NEXT_PUBLIC_WEBSITE_URL) + "%2Fexplore";
+          window.location.href = `https://discord.com/api/oauth2/authorize?client_id=812298057470967858&redirect_uri=${redirectUri}&response_type=code&scope=identify%20guilds&state=${encodeURIComponent(
+            window.location.href,
+          )}`;
+          return;
+        }
+
+        if (userGuilds?.retry_after) {
+          setTimeout(() => {
+            openJoinMenu(groupId);
+          }, userGuilds.retry_after + 50);
+          return;
+        }
+
+        if (Array.isArray(userGuilds)) {
+          setGuilds(userGuilds);
+        } else {
+          setGuilds([]);
+        }
+
+        setJoinGroupId(groupId);
+        setJoinSelectedGuildId("");
+        setJoinChannels([]);
+        setJoinSelectedChannelId("");
+        setJoinDescription("");
+        setJoinError("");
+        setJoinSuccess("");
+        setJoinStep(1);
+        setIsJoinMenuOpen(true);
+      } finally {
+        setIsAuthLoading(false);
+      }
+    },
+    [ensureDiscordAuth],
+  );
 
   useEffect(() => {
     async function loadOwnedGroups() {
@@ -249,6 +324,43 @@ export default function Explore() {
     }
   }, [isPublishMenuOpen, publishStep, selectedGuildId]);
 
+  useEffect(() => {
+    async function loadGuildChannels() {
+      if (!joinSelectedGuildId) {
+        setJoinChannels([]);
+        setJoinSelectedChannelId("");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${config.apiV2}get_guild_channels`, {
+          method: "POST",
+          body: JSON.stringify({ guildId: joinSelectedGuildId }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        const data = await res.json();
+
+        if (data && Array.isArray(data.result)) {
+          setJoinChannels(data.result);
+          setJoinSelectedChannelId(data.result[0]?.id || "");
+        } else {
+          setJoinChannels([]);
+          setJoinSelectedChannelId("");
+        }
+      } catch (e) {
+        console.error("Failed to load guild channels for join:", e);
+        setJoinChannels([]);
+        setJoinSelectedChannelId("");
+      }
+    }
+
+    if (isJoinMenuOpen && joinStep === 2) {
+      loadGuildChannels();
+    }
+  }, [isJoinMenuOpen, joinStep, joinSelectedGuildId]);
+
   const handleConfirmPublishGroup = (groupId) => {
     const idToUse = groupId || selectedGroupId;
     if (!idToUse) return;
@@ -257,6 +369,65 @@ export default function Explore() {
         ? `?guild=${encodeURIComponent(selectedGuildId)}`
         : "";
     router.push(`/explore/publish/${idToUse}${query}`);
+  };
+
+  const handleSubmitJoinProposal = async () => {
+    if (!joinGroupId || !joinSelectedGuildId || !joinSelectedChannelId) {
+      setJoinError("Please select a server and a channel first.");
+      return;
+    }
+
+    setIsJoinSubmitting(true);
+    setJoinError("");
+    setJoinSuccess("");
+
+    try {
+      const body = {
+        group_id: joinGroupId,
+        guild_id: joinSelectedGuildId,
+        channel_id: joinSelectedChannelId,
+        description: joinDescription,
+      };
+
+      const res = await fetch(`${config.apiV2}explore_join_group`, {
+        method: "POST",
+        body: JSON.stringify(body),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await res.json();
+      if (!res.ok || data?.error) {
+        throw new Error(data?.error || "Failed to send proposal");
+      }
+
+      setJoinSuccess("Your proposal has been sent successfully.");
+      setJoinStep(3);
+    } catch (e) {
+      console.error(e);
+      setJoinError(
+        "Failed to send your proposal. Please check your choices and try again.",
+      );
+    } finally {
+      setIsJoinSubmitting(false);
+    }
+  };
+
+  const closePublishMenu = () => {
+    setIsPublishMenuOpen(false);
+  };
+
+  const closeJoinMenu = () => {
+    setIsJoinMenuOpen(false);
+    setJoinStep(1);
+    setJoinGroupId("");
+    setJoinSelectedGuildId("");
+    setJoinChannels([]);
+    setJoinSelectedChannelId("");
+    setJoinDescription("");
+    setJoinError("");
+    setJoinSuccess("");
   };
 
   return (
@@ -366,13 +537,26 @@ export default function Explore() {
                   </p>
                 )}
               </div>
-              <button
-                type="button"
-                className={styles.groupClose}
-                onClick={() => setViewGroup(null)}
-              >
-                Close
-              </button>
+              <div className={styles.groupActions}>
+                <button
+                  type="button"
+                  className={styles.groupClose}
+                  onClick={() => setViewGroup(null)}
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  className={styles.groupJoinButton}
+                  onClick={() => {
+                    openJoinMenu(viewGroup.id);
+                    setViewGroup(null);
+                  }}
+                  disabled={isAuthLoading}
+                >
+                  {isAuthLoading ? "Connecting..." : "Join group"}
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -380,6 +564,15 @@ export default function Explore() {
         {isPublishMenuOpen && (
           <div className={styles.publishOverlay}>
             <div className={styles.publishPanel}>
+              <button
+                type="button"
+                className={styles.panelCloseButton}
+                onClick={closePublishMenu}
+                aria-label="Close publish menu"
+              >
+                ×
+              </button>
+
               {publishStep === 1 && (
                 <>
                   <div className={styles.publishHeader}>
@@ -422,13 +615,6 @@ export default function Explore() {
                       </p>
                     )}
                   </div>
-                  <button
-                    type="button"
-                    className={styles.publishClose}
-                    onClick={() => setIsPublishMenuOpen(false)}
-                  >
-                    Close
-                  </button>
                 </>
               )}
 
@@ -469,13 +655,162 @@ export default function Explore() {
                       </p>
                     )}
                   </div>
-                  <button
-                    type="button"
-                    className={styles.publishClose}
-                    onClick={() => setIsPublishMenuOpen(false)}
-                  >
-                    Close
-                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
+        {isJoinMenuOpen && (
+          <div className={styles.publishOverlay}>
+            <div className={styles.publishPanel}>
+              <button
+                type="button"
+                className={styles.panelCloseButton}
+                onClick={closeJoinMenu}
+                aria-label="Close join menu"
+              >
+                ×
+              </button>
+
+              {joinStep === 1 && (
+                <>
+                  <div className={styles.publishHeader}>
+                    <h2>Select a server</h2>
+                    <p>Choose the Discord server that will join this group.</p>
+                  </div>
+                  <div className={styles.guildGrid}>
+                    {guilds.map((g) =>
+                      checkAdminPerms(g) ? (
+                        <button
+                          key={g.id}
+                          type="button"
+                          className={styles.guildCard}
+                          onClick={() => {
+                            setJoinSelectedGuildId(g.id);
+                            setJoinStep(2);
+                            setJoinError("");
+                          }}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={
+                              g.icon
+                                ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png?size=128`
+                                : "/assets/default_guild_icon.jpg"
+                            }
+                            alt={g.name}
+                            className={styles.guildIcon}
+                          />
+                          <span className={styles.guildName}>{g.name}</span>
+                        </button>
+                      ) : null,
+                    )}
+                    {guilds.length === 0 && (
+                      <p className={styles.empty}>
+                        No servers found. Make sure you are logged in with the
+                        correct Discord account.
+                      </p>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {joinStep === 2 && (
+                <>
+                  <div className={styles.publishHeader}>
+                    <button
+                      type="button"
+                      className={styles.backButton}
+                      onClick={() => {
+                        setJoinStep(1);
+                        setJoinSelectedGuildId("");
+                        setJoinChannels([]);
+                        setJoinSelectedChannelId("");
+                        setJoinError("");
+                      }}
+                    >
+                      ← Back
+                    </button>
+                    <h2>Select a channel</h2>
+                    <p>
+                      Choose the channel where your proposal should be sent.
+                    </p>
+                  </div>
+
+                  <div className={styles.groupList}>
+                    {joinChannels.map((channel) => (
+                      <button
+                        key={channel.id}
+                        type="button"
+                        className={styles.groupItem}
+                        onClick={() => {
+                          setJoinSelectedChannelId(channel.id);
+                          setJoinStep(3);
+                          setJoinError("");
+                        }}
+                      >
+                        <span className={styles.groupName}>
+                          #{channel.name}
+                        </span>
+                      </button>
+                    ))}
+                    {joinChannels.length === 0 && (
+                      <p className={styles.empty}>
+                        No available channels found for this server.
+                      </p>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {joinStep === 3 && (
+                <>
+                  <div className={styles.publishHeader}>
+                    <button
+                      type="button"
+                      className={styles.backButton}
+                      onClick={() => {
+                        setJoinStep(2);
+                        setJoinError("");
+                      }}
+                    >
+                      ← Back
+                    </button>
+                    <h2>Write your proposal</h2>
+                    <p>
+                      Explain why this server wants to join this interserver
+                      group.
+                    </p>
+                  </div>
+
+                  <textarea
+                    className={styles.joinTextarea}
+                    value={joinDescription}
+                    onChange={(event) => setJoinDescription(event.target.value)}
+                    placeholder="Introduce your server and describe your goals."
+                    rows={6}
+                  />
+
+                  {joinError && <p className={styles.error}>{joinError}</p>}
+                  {joinSuccess && (
+                    <p className={styles.success}>{joinSuccess}</p>
+                  )}
+
+                  {!joinSuccess && (
+                    <div className={styles.joinActions}>
+                      <button
+                        type="button"
+                        className={styles.joinSubmitButton}
+                        onClick={handleSubmitJoinProposal}
+                        disabled={isJoinSubmitting || !joinSelectedChannelId}
+                      >
+                        {isJoinSubmitting
+                          ? "Sending proposal..."
+                          : "Send proposal"}
+                      </button>
+                    </div>
+                  )}
                 </>
               )}
             </div>
