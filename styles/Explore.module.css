@@ -274,7 +274,8 @@
   width: 100%;
   max-width: 960px;
   max-height: 90vh;
-  background: rgba(15, 15, 24, 0.95);
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(12px);
   border-radius: 1.25rem;
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7);
@@ -419,7 +420,7 @@
 }
 
 .joinTextarea {
-  width: 100%;
+  width: calc(100% - 2rem);
   min-height: 130px;
   resize: vertical;
   border-radius: 0.9rem;
