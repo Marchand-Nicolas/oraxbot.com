@@ -409,12 +409,12 @@ export default function Dashboard() {
                   content: (
                     <p className="content">
                       It is necessary for Orax to access the content of the
-                      messages in order to synchronize them between the
-                      channels. By inviting Orax, it will be able to read all
-                      the messages of your server.<br></br>
+                      messages in order to synchronize them between channels. By
+                      inviting Orax, it will be able to read all the messages of
+                      your server.<br></br>
                       For security and privacy reasons, we suggest you to give
                       it the permission to read the messages only in the
-                      channels the bot is concerned with.
+                      channels it is used in.
                     </p>
                   ),
                   icon: meteor,

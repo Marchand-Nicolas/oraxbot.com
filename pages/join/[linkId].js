@@ -101,9 +101,9 @@ export default function JoinGroup() {
           });
       } else {
         window.location.href = `https://discord.com/api/oauth2/authorize?client_id=812298057470967858&redirect_uri=${encodeURI(
-          process.env.NEXT_PUBLIC_WEBSITE_URL
+          process.env.NEXT_PUBLIC_WEBSITE_URL,
         )}%2Fdashboard&response_type=code&scope=identify%20guilds&state=${encodeURIComponent(
-          window.location.href
+          window.location.href,
         )}`;
       }
     } else {
@@ -186,7 +186,7 @@ export default function JoinGroup() {
                           popup(
                             "Success",
                             "You have successfully joined the group !",
-                            "success"
+                            "success",
                           );
                           router.push(`/dashboard?guild=${guildId}`);
                         }
@@ -206,12 +206,12 @@ export default function JoinGroup() {
                   content: (
                     <p className="content">
                       It is necessary for Orax to access the content of the
-                      messages in order to synchronize them between the
-                      channels. By inviting Orax, it will be able to read all
-                      the messages of your server.<br></br>
+                      messages in order to synchronize them between channels. By
+                      inviting Orax, it will be able to read all the messages of
+                      your server.<br></br>
                       For security and privacy reasons, we suggest you to give
                       it the permission to read the messages only in the
-                      channels the bot is concerned with.
+                      channels it is used in.
                     </p>
                   ),
                   icon: meteor,
@@ -274,13 +274,13 @@ export default function JoinGroup() {
                           </p>
                         </div>
                       </Link>
-                    ) : null
+                    ) : null,
                   )
                 : [...Array(3)].map((o, index) => (
                     <div key={"nav_guild_" + index} className={styles.navGuild}>
                       <div
                         className={[styles.guildIcon, styles.placeHolder].join(
-                          " "
+                          " ",
                         )}
                       />
                     </div>
