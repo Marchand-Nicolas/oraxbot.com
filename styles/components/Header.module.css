@@ -14,13 +14,14 @@
   right: 0;
   z-index: 10;
   transition: all 0.3s ease-in-out;
+  justify-content: space-between;
 }
 
 .nav a {
   display: flex;
   justify-content: left;
   align-items: center;
-  flex-grow: 1;
+  width: fit-content;
 }
 
 .nav span {
@@ -29,11 +30,10 @@
 
 .title {
   font-size: 1.3rem;
-  margin-left: 12px;
   color: rgb(30, 55, 48);
 }
 .goHomeIcon {
-  width: 50px;
+  width: 24px;
   margin-right: 10px;
 }
 
