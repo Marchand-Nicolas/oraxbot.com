@@ -13,6 +13,7 @@ import HiddenMenu from "../../components/ui/hiddenMenu";
 import { notify } from "../../components/ui/NotificationSystem";
 import ErrorBoundary from "../../components/ui/ErrorBoundary";
 import { getStorage, setStorage } from "../../utils/storage";
+import { checkAdminPerms } from "../../utils/permissions";
 
 export default function Dashboard() {
   const serverIp = config.serverIp;
@@ -191,12 +192,6 @@ export default function Dashboard() {
       ? guilds?.find((g) => g.permissions_new & 0x0000000000000032)?.id
       : "");
   let guild = guilds?.find ? guilds?.find((guild) => guild.id === guildId) : "";
-
-  function checkAdminPerms(guild) {
-    // Check if user has admin permission on this guild (https://discord.com/developers/docs/topics/permissions)
-    const permissions = guild.permissions_new.toString(16);
-    return permissions & 0x0000000000000032;
-  }
 
   if (!guild) {
     if (guilds.length > 0) {

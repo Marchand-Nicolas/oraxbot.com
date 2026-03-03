@@ -44,6 +44,7 @@
   margin-right: 10px;
   cursor: pointer;
   font-weight: 500;
+  color: var(--text-color);
 }
 
 .goHomeContainer:hover .goHomeIcon {
@@ -60,4 +61,5 @@
   margin-left: auto;
   margin-right: 1rem;
   cursor: pointer;
+  color: var(--text-color);
 }
