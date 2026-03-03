@@ -6,13 +6,18 @@ import config from "../../../utils/config.json";
 
 export default function PublishGroup() {
   const router = useRouter();
-  const { groupId } = router.query;
+  const { groupId, guild: guildFromQuery } = router.query;
+  const guildId = Array.isArray(guildFromQuery)
+    ? guildFromQuery[0]
+    : guildFromQuery;
 
   const [form, setForm] = useState({
     description: "",
     image_url: "",
+    alerts_channel_id: "",
     published: true,
   });
+  const [channels, setChannels] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
@@ -33,7 +38,10 @@ export default function PublishGroup() {
           ...prev,
           description: g.description || "",
           image_url: g.image_url || "",
-          published: g.published ? g.published === 1 || g.published === true : prev.published,
+          alerts_channel_id: g.alerts_channel_id || "",
+          published: g.published
+            ? g.published === 1 || g.published === true
+            : prev.published,
         }));
       } catch (e) {
         console.error("Failed to load existing explore group data", e);
@@ -42,6 +50,33 @@ export default function PublishGroup() {
 
     loadExistingData();
   }, [groupId]);
+
+  useEffect(() => {
+    if (!guildId) return;
+
+    async function loadChannels() {
+      try {
+        const res = await fetch(`${config.serverIp}get_guild_channels`, {
+          method: "POST",
+          body: JSON.stringify({ guildId }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        const data = await res.json();
+        if (data && Array.isArray(data.result)) {
+          setChannels(data.result);
+        } else {
+          setChannels([]);
+        }
+      } catch (e) {
+        console.error("Failed to load channels for publish group", e);
+        setChannels([]);
+      }
+    }
+
+    loadChannels();
+  }, [guildId]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -64,6 +99,7 @@ export default function PublishGroup() {
         group_id: groupId,
         description: form.description || null,
         image_url: form.image_url || null,
+        alerts_channel_id: form.alerts_channel_id || null,
         published: form.published ? 1 : 0,
       };
 
@@ -121,6 +157,27 @@ export default function PublishGroup() {
               onChange={handleChange}
               placeholder="https://example.com/your-banner.png"
             />
+          </label>
+
+          <label className={styles.field}>
+            <span>Proposals channel</span>
+            <select
+              className="textInput normal"
+              name="alerts_channel_id"
+              value={form.alerts_channel_id}
+              onChange={handleChange}
+            >
+              <option value="">Select a channel</option>
+              {channels.map((channel) => (
+                <option key={channel.id} value={channel.id}>
+                  {channel.name}
+                </option>
+              ))}
+            </select>
+            <small className={styles.hint}>
+              This is the Discord channel where servers willing to join your
+              group will send their proposals.
+            </small>
           </label>
 
           <label className={styles.checkboxField}>

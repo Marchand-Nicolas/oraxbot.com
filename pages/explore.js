@@ -252,7 +252,11 @@ export default function Explore() {
   const handleConfirmPublishGroup = (groupId) => {
     const idToUse = groupId || selectedGroupId;
     if (!idToUse) return;
-    router.push(`/explore/publish/${idToUse}`);
+    const query =
+      selectedGuildId && selectedGuildId !== ""
+        ? `?guild=${encodeURIComponent(selectedGuildId)}`
+        : "";
+    router.push(`/explore/publish/${idToUse}${query}`);
   };
 
   return (

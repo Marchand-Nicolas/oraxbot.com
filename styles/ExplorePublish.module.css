@@ -87,6 +87,11 @@
   font-size: 0.9rem;
 }
 
+.hint {
+  font-size: 0.8rem;
+  color: #cdd0d6;
+}
+
 .actions {
   display: flex;
   justify-content: flex-end;
