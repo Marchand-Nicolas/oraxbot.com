@@ -51,8 +51,16 @@ a * {
   gap: 10px;
 }
 
+.line.gap-1 {
+  gap: 1rem;
+}
+
 .line.wrap {
   flex-wrap: wrap;
+}
+
+.underline {
+  text-decoration: underline;
 }
 
 .link {
@@ -302,11 +310,9 @@ a * {
 
 .information {
   padding: 15px;
-  background: rgba(255, 255, 255, 0.25);
-  box-shadow: 0 8px 32px 0 rgba(75, 75, 75, 0.37);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(30, 30, 30, 0.37);
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(131, 130, 130, 0.18);
   color: white;
 }

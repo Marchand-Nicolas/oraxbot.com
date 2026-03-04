@@ -450,18 +450,27 @@ export default function Dashboard() {
               {guildDatas.ownedGroups && guildDatas.ownedGroups.length ? (
                 <section className={styles.groupContainer}>
                   <h2>📺 Owned groups</h2>
-                  {guildDatas.ownedGroups.map((group) => (
-                    <Link
-                      key={"ownedGroup_" + group.id}
-                      href={`/dashboard/ownedgroup/${group.id}?guild=${guild.id}&icon=${guild.icon}&groupName=${group.name}`}
-                    >
-                      <div className={styles.group}>{group.name}</div>
-                    </Link>
-                  ))}
+                  <div className="line wrap gap-1">
+                    {guildDatas.ownedGroups.map((group) => (
+                      <Link
+                        key={"ownedGroup_" + group.id}
+                        href={`/dashboard/ownedgroup/${group.id}?guild=${guild.id}&icon=${guild.icon}&groupName=${group.name}`}
+                      >
+                        <div className={styles.group}>{group.name}</div>
+                      </Link>
+                    ))}
+                  </div>
                 </section>
               ) : (
                 <section className={styles.emptyGroupContainer}>
-                  <h2>This server does not own any group</h2>
+                  <h2>
+                    This server does not own any group. You can either create
+                    one or explore groups{" "}
+                    <Link className="underline" href="/explore">
+                      here
+                    </Link>
+                    .
+                  </h2>
                 </section>
               )}
             </ErrorBoundary>
