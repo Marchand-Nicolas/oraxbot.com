@@ -20,6 +20,7 @@ export default function Dashboard() {
   const [user, setUser] = useState(undefined);
   const [guilds, setGuilds] = useState([]);
   const [guildDatas, setGuildDatas] = useState({});
+  const [batchGuildDatas, setBatchGuildDatas] = useState({});
   const [settings, setSettings] = useState({
     lang: 0,
     public: false,
@@ -172,6 +173,39 @@ export default function Dashboard() {
     }
   }, []);
 
+  useEffect(() => {
+    if (guilds.length === 0) return;
+
+    const token = getCookie("token");
+    if (!token) return;
+
+    // Fetch batch data for all guilds
+    fetch(`${config.apiV2}get_servers_data_batch`, {
+      method: "POST",
+      body: JSON.stringify({
+        guildIds: guilds.map((g) => g.id),
+        token: token,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.result && res.servers) {
+          // Convert array to object keyed by guildId
+          const serversById = res.servers.reduce((acc, server) => {
+            acc[server.guildId] = server;
+            return acc;
+          }, {});
+          setBatchGuildDatas(serversById);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching batch server data:", error);
+      });
+  }, [guilds]);
+
   function imgError(guildId) {
     const guildElement = document.getElementById("guild_" + guildId);
     const img = guildElement.querySelector("img");
@@ -218,23 +252,42 @@ export default function Dashboard() {
       setGuildDatas({});
       setSettings({});
     }
-    fetch(`${config.apiV2}get_server_data`, {
-      method: "POST",
-      body: JSON.stringify({
-        guildId: guild.id,
-        token: getCookie("token"),
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((res) => res.json())
-      .then((res) => {
-        if (res.result) {
-          setGuildDatas(res);
-          setSettings(res.settings);
-          setLastLoadedGuildId(guild.id);
-        } else {
+
+    // Use batch data if available
+    if (batchGuildDatas[guild.id]) {
+      const serverData = batchGuildDatas[guild.id];
+      setGuildDatas(serverData);
+      setSettings(serverData.settings);
+      setLastLoadedGuildId(guild.id);
+    } else {
+      // Fallback to individual request if batch data is not available
+      fetch(`${config.apiV2}get_server_data`, {
+        method: "POST",
+        body: JSON.stringify({
+          guildId: guild.id,
+          token: getCookie("token"),
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+        .then((res) => res.json())
+        .then((res) => {
+          if (res.result) {
+            setGuildDatas(res);
+            setSettings(res.settings);
+            setLastLoadedGuildId(guild.id);
+          } else {
+            setGuildDatas({});
+            setSettings({});
+            notify.error(
+              "Server Data Error",
+              "Unable to load server configuration. Some features may not work properly.",
+              { duration: 8000 },
+            );
+          }
+        })
+        .catch((error) => {
           setGuildDatas({});
           setSettings({});
           notify.error(
@@ -242,18 +295,9 @@ export default function Dashboard() {
             "Unable to load server configuration. Some features may not work properly.",
             { duration: 8000 },
           );
-        }
-      })
-      .catch((error) => {
-        setGuildDatas({});
-        setSettings({});
-        notify.error(
-          "Server Data Error",
-          "Unable to load server configuration. Some features may not work properly.",
-          { duration: 8000 },
-        );
-      });
-  }, [guild, paymentProgress, refreshGuildDatas]);
+        });
+    }
+  }, [guild, paymentProgress, refreshGuildDatas, batchGuildDatas]);
 
   return (
     <>
@@ -267,32 +311,38 @@ export default function Dashboard() {
       />
       <nav className={styles.navbar}>
         {guilds.length > 0
-          ? guilds.map((g) =>
-              checkAdminPerms(g) ? (
-                <Link key={"nav_guild_" + g.id} href={"?guild=" + g.id}>
-                  <div
-                    id={"guild_" + g.id}
-                    className={[
-                      styles.navGuild,
-                      !document.getElementById("guild_" + g.id) && "loading",
-                      guild.id === g.id ? styles.selected : null,
-                    ].join(" ")}
-                  >
-                    <img
-                      className={styles.guildIcon}
-                      onLoad={() => endImgLoading(g.id)}
-                      onError={() => imgError(g.id)}
-                      src={
-                        g.icon
-                          ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.webp?size=96`
-                          : "/assets/default_guild_icon.jpg"
-                      }
-                      alt={g.name + " (guild icon)"}
-                    />
-                  </div>
-                </Link>
-              ) : null,
-            )
+          ? guilds
+              .sort((a, b) => {
+                const aHasBot = batchGuildDatas[a.id]?.bot ? 1 : 0;
+                const bHasBot = batchGuildDatas[b.id]?.bot ? 1 : 0;
+                return bHasBot - aHasBot;
+              })
+              .map((g) =>
+                checkAdminPerms(g) ? (
+                  <Link key={"nav_guild_" + g.id} href={"?guild=" + g.id}>
+                    <div
+                      id={"guild_" + g.id}
+                      className={[
+                        styles.navGuild,
+                        !document.getElementById("guild_" + g.id) && "loading",
+                        guild.id === g.id ? styles.selected : null,
+                      ].join(" ")}
+                    >
+                      <img
+                        className={styles.guildIcon}
+                        onLoad={() => endImgLoading(g.id)}
+                        onError={() => imgError(g.id)}
+                        src={
+                          g.icon
+                            ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.webp?size=96`
+                            : "/assets/default_guild_icon.jpg"
+                        }
+                        alt={g.name + " (guild icon)"}
+                      />
+                    </div>
+                  </Link>
+                ) : null,
+              )
           : [...Array(3)].map((o, index) => (
               <div key={"nav_guild_" + index} className={styles.navGuild}>
                 <div
