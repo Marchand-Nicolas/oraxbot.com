@@ -40,6 +40,7 @@ const ModernAdvancedSettings = () => {
   const [disableUserWarningMessage, setDisableUserWarningMessage] =
     useState(false);
   const [disableDeleteSync, setDisableDeleteSync] = useState(false);
+  const [announcements, setAnnouncements] = useState(true);
   const params = new URLSearchParams(router.asPath.split("?")[1]);
   const guildId = params.get("guild");
   const { groupId } = router.query;
@@ -61,6 +62,26 @@ const ModernAdvancedSettings = () => {
       .then((res) => res.json())
       .then((data) => {
         if (data.success) setDisableDeleteSync(disableDeleteSync);
+      });
+  };
+
+  const updateAnnouncements = (e, groupId, guildId, announcements) => {
+    fetch(`${config.apiV2}set_group_settings_field`, {
+      method: "POST",
+      body: JSON.stringify({
+        token: getCookie("token"),
+        groupId,
+        guildId,
+        fieldValue: announcements,
+        fieldName: "announcements",
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) setAnnouncements(announcements);
       });
   };
 
@@ -103,6 +124,26 @@ const ModernAdvancedSettings = () => {
       .then((res) => res.json())
       .then(
         (data) => data.success && setDisableDeleteSync(!!data.disableDeleteSync)
+      );
+  }, [groupId, guildId]);
+
+  useEffect(() => {
+    if (!groupId || !guildId) return;
+    fetch(`${config.apiV2}get_group_settings_field`, {
+      method: "POST",
+      body: JSON.stringify({
+        token: getCookie("token"),
+        groupId,
+        guildId,
+        fieldName: "announcements",
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => res.json())
+      .then(
+        (data) => data.success && setAnnouncements(data.announcements !== false)
       );
   }, [groupId, guildId]);
 
@@ -211,6 +252,23 @@ const ModernAdvancedSettings = () => {
         {/* Group Management Column */}
         <div className={styles.settingsColumn}>
           <h3 className={styles.sectionTitle}>Group Management</h3>
+
+          <div className={styles.settingItem}>
+            <div className={advancedStyles.line}>
+              <input
+                checked={announcements}
+                onChange={(e) =>
+                  updateAnnouncements(e, groupId, guildId, e.target.checked)
+                }
+                type="checkbox"
+                id="announcements"
+              />
+              <label htmlFor="announcements">Announcements</label>
+            </div>
+            <p className={styles.settingDescription}>
+              Receive announcements on specific occasions or to summarize changes when there has been a lot of activity. We respect your inbox - at most one announcement per month.
+            </p>
+          </div>
 
           <div className={styles.settingItem}>
             <div
