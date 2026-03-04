@@ -111,6 +111,11 @@
   border-radius: 1.2em;
 }
 
+.navbar .navGuild.hasGroups .guildIcon {
+  border: 3px solid #43b581;
+  box-sizing: border-box;
+}
+
 .navbar .placeHolder {
   background: linear-gradient(37deg, rgb(177, 177, 177) 0%, #bea5ff 100%);
 }
