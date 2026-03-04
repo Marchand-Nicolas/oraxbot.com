@@ -326,7 +326,9 @@ export default function Dashboard() {
                         styles.navGuild,
                         !document.getElementById("guild_" + g.id) && "loading",
                         guild.id === g.id ? styles.selected : null,
-                        batchGuildDatas[g.id]?.ownedGroups?.length > 0 ? styles.hasGroups : null,
+                        batchGuildDatas[g.id]?.ownedGroups?.length > 0
+                          ? styles.hasGroups
+                          : null,
                       ].join(" ")}
                     >
                       <img
