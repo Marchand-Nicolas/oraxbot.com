@@ -14,7 +14,7 @@ const updateDisableUserWarningMessage = (
   e,
   groupId,
   guildId,
-  disableUserWarningMessage
+  disableUserWarningMessage,
 ) => {
   fetch(`${config.apiV2}set_group_settings_field`, {
     method: "POST",
@@ -103,7 +103,7 @@ const ModernAdvancedSettings = () => {
       .then(
         (data) =>
           data.success &&
-          setDisableUserWarningMessage(!!data.disableUserWarningMessage)
+          setDisableUserWarningMessage(!!data.disableUserWarningMessage),
       );
   }, [groupId, guildId]);
 
@@ -123,7 +123,8 @@ const ModernAdvancedSettings = () => {
     })
       .then((res) => res.json())
       .then(
-        (data) => data.success && setDisableDeleteSync(!!data.disableDeleteSync)
+        (data) =>
+          data.success && setDisableDeleteSync(!!data.disableDeleteSync),
       );
   }, [groupId, guildId]);
 
@@ -142,9 +143,7 @@ const ModernAdvancedSettings = () => {
       },
     })
       .then((res) => res.json())
-      .then(
-        (data) => data.success && setAnnouncements(data.announcements !== false)
-      );
+      .then((data) => data.success && setAnnouncements(!!data.announcements));
   }, [groupId, guildId]);
 
   return (
@@ -188,12 +187,12 @@ const ModernAdvancedSettings = () => {
                                 e,
                                 groupId,
                                 guildId,
-                                true
+                                true,
                               );
                             },
                           },
                         ],
-                      }
+                      },
                     );
                   }
                 }}
@@ -266,7 +265,9 @@ const ModernAdvancedSettings = () => {
               <label htmlFor="announcements">Announcements</label>
             </div>
             <p className={styles.settingDescription}>
-              Receive announcements on specific occasions or to summarize changes when there has been a lot of activity. We respect your inbox - at most one announcement per month.
+              Receive announcements on specific occasions or to summarize
+              changes when there has been a lot of activity. We respect your
+              inbox - at most one announcement per month.
             </p>
           </div>
 
@@ -354,7 +355,7 @@ const ModernAdvancedSettings = () => {
                             }
                           });
                       },
-                    }
+                    },
                   )
                 }
                 className="button round dangerous"
