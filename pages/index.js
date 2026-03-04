@@ -99,11 +99,9 @@ export default function Home() {
       </Link>
       <section id="informations" className={styles.main}>
         <div className={styles.grid}>
-          <Link href="/dashboard">
-            <div className={styles.card}>
-              <h2>Dashboard &rarr;</h2>
-              <p>Setup the bot</p>
-            </div>
+          <Link className={styles.card} href="/dashboard">
+            <h2>Dashboard &rarr;</h2>
+            <p>Setup the bot</p>
           </Link>
           <a
             href="https://ko-fi.com/nicolasmarchand"
@@ -123,11 +121,9 @@ export default function Home() {
             <h2>Support server &rarr;</h2>
             <p>Any questions? A problem? A suggestion? Contact us</p>
           </a>
-          <Link href="/tos">
-            <div className={`${styles.card} ${styles.soft}`}>
-              <h2>TOS &rarr;</h2>
-              <p>Terms of service</p>
-            </div>
+          <Link href="/tos" className={`${styles.card} ${styles.soft}`}>
+            <h2>TOS &rarr;</h2>
+            <p>Terms of service</p>
           </Link>
         </div>
       </section>
