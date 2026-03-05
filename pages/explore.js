@@ -63,6 +63,7 @@ export default function Explore() {
   const [globalVoteSuccess, setGlobalVoteSuccess] = useState("");
   const [voteCooldownSeconds, setVoteCooldownSeconds] = useState(0);
   const [pendingVoteGroupId, setPendingVoteGroupId] = useState("");
+  const [voteCooldownRefresh, setVoteCooldownRefresh] = useState(0);
 
   const observerRef = useRef(null);
   const sentinelRef = useRef(null);
@@ -232,7 +233,7 @@ export default function Explore() {
         setVoteCooldownSeconds(24 * 60 * 60);
       } catch (e) {
         console.error(e);
-        setVoteError("Failed to submit your vote. Please try again.");
+        setVoteError(e);
       } finally {
         setIsVoting(false);
       }
@@ -350,6 +351,7 @@ export default function Explore() {
         }
 
         setCookie("token", data.access_token, data.expires_in - 1000);
+        setVoteCooldownRefresh((previous) => previous + 1);
         await handleVoteGroup(groupId, data.access_token);
       } catch (e) {
         console.error(e);
@@ -539,7 +541,7 @@ export default function Explore() {
     return () => {
       cancelled = true;
     };
-  }, [viewGroup?.id]);
+  }, [viewGroup?.id, voteCooldownRefresh]);
 
   // --- Publish flow: Discord auth + guilds / groups selection ---
 
@@ -571,6 +573,7 @@ export default function Explore() {
           return null;
         }
         setCookie("token", data.access_token, data.expires_in - 1000);
+        setVoteCooldownRefresh((previous) => previous + 1);
         token = data.access_token;
         if (state && typeof state === "string" && state.startsWith("vote,")) {
           return token;
