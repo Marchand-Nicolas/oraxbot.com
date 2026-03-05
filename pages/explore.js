@@ -61,6 +61,7 @@ export default function Explore() {
   const [voteSuccess, setVoteSuccess] = useState("");
   const [globalVoteSuccess, setGlobalVoteSuccess] = useState("");
   const [voteCooldownSeconds, setVoteCooldownSeconds] = useState(0);
+  const [pendingVoteGroupId, setPendingVoteGroupId] = useState("");
 
   const observerRef = useRef(null);
   const sentinelRef = useRef(null);
@@ -223,9 +224,10 @@ export default function Explore() {
   useEffect(() => {
     if (!router.isReady || voteAuthHandledRef.current) return;
 
-    const codeParam = router.query.code;
-    const stateParam = router.query.state;
-    if (typeof codeParam !== "string" || typeof stateParam !== "string") {
+    const params = new URLSearchParams(window.location.search);
+    const codeParam = params.get("code");
+    const stateParam = params.get("state");
+    if (!codeParam || !stateParam) {
       return;
     }
 
@@ -255,9 +257,16 @@ export default function Explore() {
         }
 
         setCookie("token", data.access_token, data.expires_in - 1000);
-        await router.replace("/explore", undefined, { shallow: true });
-
         await handleVoteGroup(groupId, data.access_token);
+
+        setPendingVoteGroupId(groupId);
+        await router.replace(
+          `/explore?group=${encodeURIComponent(groupId)}`,
+          undefined,
+          {
+            shallow: true,
+          },
+        );
 
         const groupToOpen = groups.find((group) => group.id === groupId);
         if (groupToOpen) {
@@ -274,15 +283,18 @@ export default function Explore() {
     }
 
     handleVoteAuthCallback();
-  }, [
-    router,
-    router.isReady,
-    router.query.code,
-    router.query.state,
-    handleVoteGroup,
-    groups,
-    lockScroll,
-  ]);
+  }, [router, router.isReady, handleVoteGroup, groups, lockScroll]);
+
+  useEffect(() => {
+    if (!pendingVoteGroupId || groups.length === 0) return;
+
+    const groupToOpen = groups.find((group) => group.id === pendingVoteGroupId);
+    if (!groupToOpen) return;
+
+    setViewGroup(groupToOpen);
+    lockScroll();
+    setPendingVoteGroupId("");
+  }, [pendingVoteGroupId, groups, lockScroll]);
 
   // Handle ?group=<group_id> URL parameter
   useEffect(() => {
@@ -1001,10 +1013,14 @@ export default function Explore() {
                 <button
                   type="button"
                   className={`${styles.groupVoteButton} ${
-                    voteCooldownSeconds > 0 ? styles.groupVoteButtonDisabled : ""
+                    voteCooldownSeconds > 0
+                      ? styles.groupVoteButtonDisabled
+                      : ""
                   }`}
                   onClick={() => handleVoteGroup(viewGroup.id)}
-                  disabled={isVoting || isAuthLoading || voteCooldownSeconds > 0}
+                  disabled={
+                    isVoting || isAuthLoading || voteCooldownSeconds > 0
+                  }
                 >
                   {isVoting
                     ? "Voting..."
