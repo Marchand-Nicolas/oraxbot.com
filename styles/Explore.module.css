@@ -174,7 +174,7 @@
 .groupPanel {
   width: 100%;
   max-width: 800px;
-  max-height: 90vh;
+  max-height: 90%;
   background: #0d1322;
   border-radius: 1.25rem;
   border: 1px solid rgba(148, 163, 184, 0.2);
@@ -184,6 +184,7 @@
   flex-direction: column;
   gap: 1rem;
   overflow: hidden;
+  overflow: auto;
 }
 
 .groupImage {
@@ -194,7 +195,6 @@
 }
 
 .groupContent {
-  overflow: auto;
   padding-right: 0.25rem;
   display: flex;
   flex-direction: column;
@@ -338,6 +338,45 @@
   justify-content: flex-end;
   gap: 0.6rem;
   margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.groupCloseMobile,
+.groupCloseDesktop {
+  background: transparent;
+  border: none;
+  color: #a7b2c4;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-left: auto;
+}
+
+.groupCloseMobile {
+  display: none;
+}
+
+.groupCloseMobile:hover,
+.groupCloseDesktop:hover {
+  color: #f8fafc;
+}
+
+@media (max-width: 550px) {
+  .groupActions {
+    justify-content: center;
+    flex-direction: column-reverse;
+  }
+  .groupActions > button {
+    margin: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+  .groupActions .groupCloseDesktop {
+    display: none;
+  }
+  .groupActions .groupCloseMobile {
+    display: flex;
+  }
 }
 
 .groupVoteButton {
@@ -398,19 +437,6 @@
   width: 1rem;
   height: 1rem;
   flex-shrink: 0;
-}
-
-.groupClose {
-  background: transparent;
-  border: none;
-  color: #a7b2c4;
-  cursor: pointer;
-  font-size: 0.9rem;
-  margin-left: auto;
-}
-
-.groupClose:hover {
-  color: #f8fafc;
 }
 
 .groupJoinButton {

@@ -1163,6 +1163,13 @@ export default function Explore() {
               <div className={styles.groupActions}>
                 <button
                   type="button"
+                  className={styles.groupCloseMobile}
+                  onClick={closeViewGroup}
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
                   className={`${styles.groupVoteButton} ${
                     voteCooldownSeconds > 0
                       ? styles.groupVoteButtonDisabled
@@ -1203,8 +1210,9 @@ export default function Explore() {
                 </button>
                 <button
                   type="button"
-                  className={styles.groupClose}
+                  className={styles.groupCloseDesktop}
                   onClick={closeViewGroup}
+                  id="desktop"
                 >
                   Close
                 </button>
