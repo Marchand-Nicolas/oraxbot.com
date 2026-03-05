@@ -1039,126 +1039,133 @@ export default function Explore() {
               className={styles.groupPanel}
               onClick={(e) => e.stopPropagation()}
             >
-              {viewGroup.image_url && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={viewGroup.image_url}
-                  alt={viewGroup.name}
-                  className={styles.groupImage}
-                />
-              )}
-              <div className={styles.groupContent}>
-                <h2 className={styles.groupTitle}>{viewGroup.name}</h2>
-                {(viewGroup.server_count || viewGroup.member_count) && (
-                  <p className={styles.groupMeta}>
-                    {viewGroup.server_count ? (
-                      <span>{viewGroup.server_count} servers</span>
-                    ) : null}
-                    {viewGroup.server_count && viewGroup.member_count ? (
-                      <span className={styles.dot}>•</span>
-                    ) : null}
-                    {viewGroup.member_count ? (
-                      <span>{viewGroup.member_count} members</span>
-                    ) : null}
-                  </p>
+              <div className={styles.groupDetails}>
+                {viewGroup.image_url && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={viewGroup.image_url}
+                    alt={viewGroup.name}
+                    className={styles.groupImage}
+                  />
                 )}
-                {viewGroup.description && (
-                  <p className={styles.groupDescriptionFull}>
-                    {viewGroup.description}
-                  </p>
-                )}
-
-                <div className={styles.publicServersSection}>
-                  <h3 className={styles.publicServersTitle}>Servers</h3>
-
-                  {isViewGroupServersLoading && (
-                    <p className={styles.publicServersLoading}>
-                      Loading servers...
+                <div className={styles.groupContent}>
+                  <h2 className={styles.groupTitle}>{viewGroup.name}</h2>
+                  {(viewGroup.server_count || viewGroup.member_count) && (
+                    <p className={styles.groupMeta}>
+                      {viewGroup.server_count ? (
+                        <span>{viewGroup.server_count} servers</span>
+                      ) : null}
+                      {viewGroup.server_count && viewGroup.member_count ? (
+                        <span className={styles.dot}>•</span>
+                      ) : null}
+                      {viewGroup.member_count ? (
+                        <span>{viewGroup.member_count} members</span>
+                      ) : null}
+                    </p>
+                  )}
+                  {viewGroup.description && (
+                    <p className={styles.groupDescriptionFull}>
+                      {viewGroup.description}
                     </p>
                   )}
 
-                  {!isViewGroupServersLoading && viewGroupServersError && (
-                    <p className={styles.publicServersError}>
-                      {viewGroupServersError}
-                    </p>
-                  )}
+                  <div className={styles.publicServersSection}>
+                    <h3 className={styles.publicServersTitle}>Servers</h3>
 
-                  {!isViewGroupServersLoading &&
-                    !viewGroupServersError &&
-                    viewGroupServers.length === 0 && (
-                      <p className={styles.publicServersEmpty}>
-                        No servers are listed in this group yet.
+                    {isViewGroupServersLoading && (
+                      <p className={styles.publicServersLoading}>
+                        Loading servers...
                       </p>
                     )}
 
-                  {!isViewGroupServersLoading &&
-                    !viewGroupServersError &&
-                    viewGroupServers.length > 0 && (
-                      <div className={styles.publicServersList}>
-                        {viewGroupServers.map((server) => {
-                          const inviteUrl = server.invite
-                            ? server.invite.startsWith("http")
-                              ? server.invite
-                              : `https://discord.gg/${server.invite}`
-                            : null;
-                          const displayName =
-                            server.displayName ||
-                            server.guildName ||
-                            "Unknown server";
-
-                          return (
-                            <div
-                              key={
-                                server.guildId || `${displayName}-${inviteUrl}`
-                              }
-                              className={styles.publicServerCard}
-                            >
-                              {server.icon ? (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img
-                                  src={`https://cdn.discordapp.com/icons/${server.guildId}/${server.icon}.webp?size=160&quality=lossless`}
-                                  alt={displayName}
-                                  className={styles.publicServerIcon}
-                                />
-                              ) : (
-                                <div
-                                  className={styles.publicServerFallbackIcon}
-                                >
-                                  {(displayName || "?").charAt(0).toUpperCase()}
-                                </div>
-                              )}
-
-                              <div className={styles.publicServerInfo}>
-                                <p className={styles.publicServerName}>
-                                  {displayName}
-                                </p>
-                                {server.guildName &&
-                                  server.guildName !== displayName && (
-                                    <p className={styles.publicServerGuildName}>
-                                      {server.guildName}
-                                    </p>
-                                  )}
-                              </div>
-
-                              {inviteUrl ? (
-                                <a
-                                  href={inviteUrl}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className={styles.publicServerInvite}
-                                >
-                                  Join
-                                </a>
-                              ) : (
-                                <span className={styles.publicServerNoInvite}>
-                                  No invite
-                                </span>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
+                    {!isViewGroupServersLoading && viewGroupServersError && (
+                      <p className={styles.publicServersError}>
+                        {viewGroupServersError}
+                      </p>
                     )}
+
+                    {!isViewGroupServersLoading &&
+                      !viewGroupServersError &&
+                      viewGroupServers.length === 0 && (
+                        <p className={styles.publicServersEmpty}>
+                          No servers are listed in this group yet.
+                        </p>
+                      )}
+
+                    {!isViewGroupServersLoading &&
+                      !viewGroupServersError &&
+                      viewGroupServers.length > 0 && (
+                        <div className={styles.publicServersList}>
+                          {viewGroupServers.map((server) => {
+                            const inviteUrl = server.invite
+                              ? server.invite.startsWith("http")
+                                ? server.invite
+                                : `https://discord.gg/${server.invite}`
+                              : null;
+                            const displayName =
+                              server.displayName ||
+                              server.guildName ||
+                              "Unknown server";
+
+                            return (
+                              <div
+                                key={
+                                  server.guildId ||
+                                  `${displayName}-${inviteUrl}`
+                                }
+                                className={styles.publicServerCard}
+                              >
+                                {server.icon ? (
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img
+                                    src={`https://cdn.discordapp.com/icons/${server.guildId}/${server.icon}.webp?size=160&quality=lossless`}
+                                    alt={displayName}
+                                    className={styles.publicServerIcon}
+                                  />
+                                ) : (
+                                  <div
+                                    className={styles.publicServerFallbackIcon}
+                                  >
+                                    {(displayName || "?")
+                                      .charAt(0)
+                                      .toUpperCase()}
+                                  </div>
+                                )}
+
+                                <div className={styles.publicServerInfo}>
+                                  <p className={styles.publicServerName}>
+                                    {displayName}
+                                  </p>
+                                  {server.guildName &&
+                                    server.guildName !== displayName && (
+                                      <p
+                                        className={styles.publicServerGuildName}
+                                      >
+                                        {server.guildName}
+                                      </p>
+                                    )}
+                                </div>
+
+                                {inviteUrl ? (
+                                  <a
+                                    href={inviteUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className={styles.publicServerInvite}
+                                  >
+                                    Join
+                                  </a>
+                                ) : (
+                                  <span className={styles.publicServerNoInvite}>
+                                    No invite
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                  </div>
                 </div>
               </div>
               {(voteError || voteSuccess) && (
