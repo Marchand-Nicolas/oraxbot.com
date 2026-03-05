@@ -3,11 +3,8 @@
   flex: 1;
   padding: 0.8rem;
   align-items: center;
-  background: white;
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
   position: fixed;
   left: 0;
   top: 0;
@@ -15,6 +12,30 @@
   z-index: 10;
   transition: all 0.3s ease-in-out;
   justify-content: space-between;
+}
+
+body:has(.navDark) {
+  background-color: black;
+}
+
+.navLight {
+  background: white;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.navDark {
+  background: rgba(7, 11, 20, 0.95);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.navDark .title {
+  color: #f8fafc;
+}
+
+.navDark .donate {
+  color: #e5e7eb;
 }
 
 .nav a {

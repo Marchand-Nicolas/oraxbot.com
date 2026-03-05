@@ -2,9 +2,20 @@
   display: flex;
   flex: 1;
   padding: 2rem 0;
-  border-top: 1px solid #eaeaea;
   justify-content: center;
   align-items: center;
+}
+
+.footerLight {
+  border-top: 1px solid #eaeaea;
+  background: white;
+  color: #111827;
+}
+
+.footerDark {
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+  background: #070b14;
+  color: #e5e7eb;
 }
 
 .footer a {

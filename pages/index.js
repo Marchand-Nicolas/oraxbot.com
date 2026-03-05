@@ -3,19 +3,8 @@ import Footer from "../components/Footer";
 import Header from "../components/Header";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect } from "react";
 
 export default function Home() {
-  useEffect(() => {
-    const nav = document.querySelector("nav");
-
-    window.addEventListener("scroll", () => {
-      if (window.scrollY > 100)
-        nav.style.background = "rgba(255, 255, 255, 0.2)";
-      else nav.style.background = "white";
-    });
-  }, []);
-
   return (
     <>
       <Header />

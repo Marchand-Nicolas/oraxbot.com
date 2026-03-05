@@ -2,6 +2,7 @@ import "../styles/globals.css";
 import ErrorBoundary from "../components/ui/ErrorBoundary";
 import { useEffect } from "react";
 import dynamic from "next/dynamic";
+import { ScrollProvider } from "../utils/ScrollContext";
 
 const NotificationSystem = dynamic(
   () => import("../components/ui/NotificationSystem"),
@@ -19,8 +20,10 @@ function MyApp({ Component, pageProps }) {
 
   return (
     <ErrorBoundary>
-      <Component {...pageProps} />
-      <NotificationSystem />
+      <ScrollProvider>
+        <Component {...pageProps} />
+        <NotificationSystem />
+      </ScrollProvider>
     </ErrorBoundary>
   );
 }

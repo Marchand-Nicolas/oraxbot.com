@@ -4,6 +4,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  background:
+    radial-gradient(circle at top right, rgba(56, 189, 248, 0.18), transparent 38%),
+    radial-gradient(circle at top left, rgba(129, 81, 252, 0.2), transparent 42%),
+    #070b14;
+  color: #e5e7eb;
 }
 
 .header {
@@ -23,7 +28,7 @@
 .subtitle {
   margin: 0;
   font-size: 1.1rem;
-  color: var(--text-color);
+  color: #aab5c8;
 }
 
 .publishButton {
@@ -62,10 +67,10 @@
 }
 
 .card {
-  background: rgba(255, 255, 255, 0.03);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  background: rgba(13, 18, 30, 0.8);
+  box-shadow: 0 12px 32px 0 rgba(1, 4, 12, 0.5);
   border-radius: var(--border-radius);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(148, 163, 184, 0.25);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -78,8 +83,8 @@
 
 .card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 16px 40px 0 rgba(31, 38, 135, 0.5);
-  border-color: #8151fc55;
+  box-shadow: 0 18px 40px 0 rgba(1, 4, 12, 0.68);
+  border-color: #8151fca3;
 }
 
 .cardImage {
@@ -98,20 +103,20 @@
 .cardTitle {
   margin: 0;
   font-size: 1.25rem;
-  color: var(--text-color);
+  color: #f3f4f6;
 }
 
 .cardDescription {
   margin: 0;
   font-size: 0.95rem;
   line-height: 1.5;
-  color: #cdd0d6;
+  color: #c6d0de;
 }
 
 .cardMeta {
   margin: 0;
   font-size: 0.85rem;
-  color: #8f9093;
+  color: #94a3b8;
   display: flex;
   align-items: center;
   gap: 0.35rem;
@@ -124,7 +129,7 @@
 .empty {
   grid-column: 1 / -1;
   text-align: center;
-  color: #cdd0d6;
+  color: #a7b2c4;
 }
 
 .error {
@@ -137,7 +142,7 @@
 .end {
   margin-top: 1rem;
   text-align: center;
-  color: #cdd0d6;
+  color: #a7b2c4;
 }
 
 .sentinel {
@@ -148,7 +153,7 @@
 .groupOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(3, 6, 12, 0.75);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   z-index: 9998;
@@ -162,10 +167,10 @@
   width: 100%;
   max-width: 800px;
   max-height: 90vh;
-  background: #ffffff;
+  background: #0d1322;
   border-radius: 1.25rem;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
   padding: 1.75rem 2rem 1.5rem;
   display: flex;
   flex-direction: column;
@@ -191,13 +196,13 @@
 .groupTitle {
   margin: 0;
   font-size: 1.6rem;
-  color: #111827;
+  color: #f8fafc;
 }
 
 .groupMeta {
   margin: 0;
   font-size: 0.95rem;
-  color: #6b7280;
+  color: #9ba8ba;
   display: flex;
   align-items: center;
   gap: 0.35rem;
@@ -207,27 +212,27 @@
   margin: 0;
   font-size: 0.95rem;
   line-height: 1.6;
-  color: #4b5563;
+  color: #c7d1de;
   white-space: pre-wrap;
 }
 
 .publicServersSection {
   margin-top: 0.35rem;
-  border-top: 1px solid rgba(17, 24, 39, 0.08);
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
   padding-top: 0.9rem;
 }
 
 .publicServersTitle {
   margin: 0 0 0.65rem 0;
   font-size: 1rem;
-  color: #111827;
+  color: #f8fafc;
 }
 
 .publicServersLoading,
 .publicServersEmpty {
   margin: 0;
   font-size: 0.9rem;
-  color: #6b7280;
+  color: #9ba8ba;
 }
 
 .publicServersError {
@@ -250,9 +255,9 @@
   align-items: center;
   gap: 0.65rem;
   padding: 0.55rem 0.65rem;
-  border: 1px solid rgba(17, 24, 39, 0.1);
+  border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 0.7rem;
-  background: rgba(248, 250, 252, 0.9);
+  background: rgba(15, 23, 42, 0.62);
 }
 
 .publicServerIcon,
@@ -288,13 +293,13 @@
 }
 
 .publicServerName {
-  color: #111827;
+  color: #f3f4f6;
   font-weight: 600;
   font-size: 0.92rem;
 }
 
 .publicServerGuildName {
-  color: #6b7280;
+  color: #9ba8ba;
   font-size: 0.8rem;
 }
 
@@ -306,7 +311,7 @@
 }
 
 .publicServerInvite {
-  color: #4f46e5;
+  color: #8ba3ff;
   text-decoration: none;
   font-weight: 600;
 }
@@ -316,7 +321,7 @@
 }
 
 .publicServerNoInvite {
-  color: #9ca3af;
+  color: #8392a8;
 }
 
 .groupActions {
@@ -330,13 +335,13 @@
 .groupClose {
   background: transparent;
   border: none;
-  color: #6b7280;
+  color: #a7b2c4;
   cursor: pointer;
   font-size: 0.9rem;
 }
 
 .groupClose:hover {
-  color: #111827;
+  color: #f8fafc;
 }
 
 .groupJoinButton {

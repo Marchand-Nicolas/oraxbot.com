@@ -8,6 +8,7 @@
   background-size: cover;
   transition: background-image 0.2s ease-in-out;
 }
+
 .background::after {
   content: "";
   position: absolute;
@@ -16,6 +17,7 @@
   right: 0;
   bottom: 0;
   backdrop-filter: blur(100px);
+  background-color: rgba(0, 0, 0, 0.3);
 }
 
 .page {

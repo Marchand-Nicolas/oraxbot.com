@@ -7,6 +7,7 @@ import config from "../utils/config.json";
 import { getCookie, setCookie } from "../utils/cookies";
 import { useRouter } from "next/router";
 import { checkAdminPerms } from "../utils/permissions";
+import { useScroll } from "../utils/ScrollContext";
 
 // Expected API response shape from `${config.apiV2}explore/published_groups?page=`:
 // {
@@ -24,6 +25,7 @@ import { checkAdminPerms } from "../utils/permissions";
 
 export default function Explore() {
   const router = useRouter();
+  const { lockScroll, unlockScroll } = useScroll();
   const [groups, setGroups] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -180,6 +182,7 @@ export default function Explore() {
     const token = await ensureDiscordAuth();
     if (!token) return;
 
+    lockScroll();
     setIsAuthLoading(true);
     try {
       const res = await fetch(
@@ -227,7 +230,7 @@ export default function Explore() {
     } finally {
       setIsAuthLoading(false);
     }
-  }, [ensureDiscordAuth]);
+  }, [ensureDiscordAuth, lockScroll]);
 
   const openJoinMenu = useCallback(
     async (groupId) => {
@@ -236,6 +239,7 @@ export default function Explore() {
       const token = await ensureDiscordAuth();
       if (!token) return;
 
+      lockScroll();
       setIsAuthLoading(true);
       try {
         const res = await fetch(
@@ -287,9 +291,8 @@ export default function Explore() {
         setIsAuthLoading(false);
       }
     },
-    [ensureDiscordAuth],
+    [ensureDiscordAuth, lockScroll],
   );
-
   useEffect(() => {
     async function loadOwnedGroups() {
       if (!selectedGuildId) {
@@ -329,6 +332,11 @@ export default function Explore() {
     }
   }, [isPublishMenuOpen, publishStep, selectedGuildId]);
 
+  const closePublishMenu = () => {
+    setIsPublishMenuOpen(false);
+    unlockScroll();
+  };
+
   useEffect(() => {
     async function loadGuildChannels() {
       if (!joinSelectedGuildId) {
@@ -366,14 +374,34 @@ export default function Explore() {
     }
   }, [isJoinMenuOpen, joinStep, joinSelectedGuildId]);
 
+  const closeJoinMenu = () => {
+    setIsJoinMenuOpen(false);
+    setJoinStep(1);
+    setJoinGroupId("");
+    setJoinSelectedGuildId("");
+    setJoinChannels([]);
+    setJoinSelectedChannelId("");
+    setJoinDescription("");
+    setJoinError("");
+    setJoinSuccess("");
+    unlockScroll();
+  };
+
+  const closeViewGroup = () => {
+    setViewGroup(null);
+    unlockScroll();
+  };
+
   useEffect(() => {
     if (!viewGroup?.id) {
       setViewGroupServers([]);
       setViewGroupServersError("");
       setIsViewGroupServersLoading(false);
+      unlockScroll();
       return;
     }
 
+    lockScroll();
     let cancelled = false;
 
     async function loadViewGroupServers() {
@@ -415,7 +443,7 @@ export default function Explore() {
     return () => {
       cancelled = true;
     };
-  }, [viewGroup]);
+  }, [viewGroup, lockScroll, unlockScroll]);
 
   const handleConfirmPublishGroup = (groupId) => {
     const idToUse = groupId || selectedGroupId;
@@ -470,25 +498,9 @@ export default function Explore() {
     }
   };
 
-  const closePublishMenu = () => {
-    setIsPublishMenuOpen(false);
-  };
-
-  const closeJoinMenu = () => {
-    setIsJoinMenuOpen(false);
-    setJoinStep(1);
-    setJoinGroupId("");
-    setJoinSelectedGuildId("");
-    setJoinChannels([]);
-    setJoinSelectedChannelId("");
-    setJoinDescription("");
-    setJoinError("");
-    setJoinSuccess("");
-  };
-
   return (
     <>
-      <Header />
+      <Header theme="dark" />
       <main className={styles.main}>
         <section className={styles.header}>
           <h1 className={styles.title}>
@@ -560,10 +572,7 @@ export default function Explore() {
         )}
 
         {viewGroup && (
-          <div
-            className={styles.groupOverlay}
-            onClick={() => setViewGroup(null)}
-          >
+          <div className={styles.groupOverlay} onClick={closeViewGroup}>
             <div
               className={styles.groupPanel}
               onClick={(e) => e.stopPropagation()}
@@ -616,7 +625,7 @@ export default function Explore() {
                     !viewGroupServersError &&
                     viewGroupServers.length === 0 && (
                       <p className={styles.publicServersEmpty}>
-                        No public servers are listed in this group yet.
+                        No servers are listed in this group yet.
                       </p>
                     )}
 
@@ -694,7 +703,7 @@ export default function Explore() {
                 <button
                   type="button"
                   className={styles.groupClose}
-                  onClick={() => setViewGroup(null)}
+                  onClick={closeViewGroup}
                 >
                   Close
                 </button>
@@ -703,7 +712,7 @@ export default function Explore() {
                   className={styles.groupJoinButton}
                   onClick={() => {
                     openJoinMenu(viewGroup.id);
-                    setViewGroup(null);
+                    closeViewGroup();
                   }}
                   disabled={isAuthLoading}
                 >
@@ -972,7 +981,7 @@ export default function Explore() {
           </div>
         )}
       </main>
-      <Footer />
+      <Footer theme="dark" />
     </>
   );
 }

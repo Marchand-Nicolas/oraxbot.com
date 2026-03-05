@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
 import styles from "../../../styles/ExplorePublish.module.css";
 import config from "../../../utils/config.json";
@@ -127,6 +128,7 @@ export default function PublishGroup() {
 
   return (
     <>
+      <Header theme="dark" />
       <main className={styles.main}>
         <section className={styles.header}>
           <h1 className={styles.title}>Publish your group</h1>
@@ -148,7 +150,7 @@ export default function PublishGroup() {
           </label>
 
           <label className={styles.field}>
-            <span>Image URL</span>
+            <span>Image URL (GIFs supported)</span>
             <input
               className="textInput normal"
               type="url"
@@ -205,7 +207,7 @@ export default function PublishGroup() {
           </div>
         </form>
       </main>
-      <Footer />
+      <Footer theme="dark" />
     </>
   );
 }
