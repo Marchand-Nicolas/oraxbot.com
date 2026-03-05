@@ -23,7 +23,9 @@ export default function NavBar({ theme = "light" }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [theme]);
   return (
-    <nav className={`${styles.nav} ${theme === "dark" ? styles.navDark : styles.navLight}`}>
+    <nav
+      className={`${styles.nav} ${theme === "dark" ? styles.navDark : styles.navLight}`}
+    >
       <Link href="/" className="line">
         <Image src="/logo.png" alt="Captcha logo" width={50} height={50} />
         <strong className={styles.title}>Orax bot</strong>
