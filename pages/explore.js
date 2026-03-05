@@ -233,7 +233,11 @@ export default function Explore() {
         setVoteCooldownSeconds(24 * 60 * 60);
       } catch (e) {
         console.error(e);
-        setVoteError(e);
+        setVoteError(
+          e instanceof Error && e.message
+            ? e.message
+            : "Failed to submit your vote. Please try again.",
+        );
       } finally {
         setIsVoting(false);
       }
