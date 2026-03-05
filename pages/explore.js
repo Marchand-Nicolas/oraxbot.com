@@ -67,6 +67,81 @@ export default function Explore() {
   const sentinelRef = useRef(null);
   const voteAuthHandledRef = useRef(false);
 
+  const upsertGroup = useCallback((groupToUpsert) => {
+    if (!groupToUpsert?.id) return;
+
+    setGroups((prev) => {
+      const normalizedId = String(groupToUpsert.id);
+      const existingIndex = prev.findIndex(
+        (group) => String(group.id) === normalizedId,
+      );
+
+      if (existingIndex === -1) {
+        return [{ ...groupToUpsert, id: normalizedId }, ...prev];
+      }
+
+      const next = [...prev];
+      next[existingIndex] = {
+        ...next[existingIndex],
+        ...groupToUpsert,
+        id: normalizedId,
+      };
+      return next;
+    });
+  }, []);
+
+  const fetchExploreGroupById = useCallback(
+    async (groupId) => {
+      if (!groupId) return null;
+
+      try {
+        const res = await fetch(
+          `${config.apiV2}explore_get_group?group_id=${encodeURIComponent(
+            groupId,
+          )}`,
+        );
+
+        if (!res.ok) return null;
+
+        const data = await res.json();
+        if (!data?.result || !data?.group) return null;
+
+        const normalizedGroup = {
+          ...data.group,
+          id: String(data.group.id ?? groupId),
+        };
+
+        upsertGroup(normalizedGroup);
+        return normalizedGroup;
+      } catch (e) {
+        console.error("Failed to load explore group by id:", e);
+        return null;
+      }
+    },
+    [upsertGroup],
+  );
+
+  const openGroupMenuById = useCallback(
+    async (groupId) => {
+      if (!groupId) return false;
+
+      let groupToOpen = groups.find(
+        (group) => String(group.id) === String(groupId),
+      );
+      if (!groupToOpen) {
+        groupToOpen = await fetchExploreGroupById(groupId);
+      }
+
+      if (!groupToOpen) return false;
+
+      setViewGroup(groupToOpen);
+      lockScroll();
+      setOpenedMenuFromLink(true);
+      return true;
+    },
+    [groups, fetchExploreGroupById, lockScroll],
+  );
+
   const redirectToDiscordAuth = useCallback((stateValue) => {
     const redirectUri = encodeURI(
       `${process.env.NEXT_PUBLIC_WEBSITE_URL}/explore`,
@@ -242,6 +317,19 @@ export default function Explore() {
       setIsAuthLoading(true);
       setVoteError("");
 
+      const opened = await openGroupMenuById(groupId);
+      if (!opened) {
+        setPendingVoteGroupId(groupId);
+      }
+
+      await router.replace(
+        `/explore?group=${encodeURIComponent(groupId)}`,
+        undefined,
+        {
+          shallow: true,
+        },
+      );
+
       try {
         const res = await fetch(`${config.serverIp}login`, {
           method: "POST",
@@ -258,43 +346,41 @@ export default function Explore() {
 
         setCookie("token", data.access_token, data.expires_in - 1000);
         await handleVoteGroup(groupId, data.access_token);
-
-        setPendingVoteGroupId(groupId);
-        await router.replace(
-          `/explore?group=${encodeURIComponent(groupId)}`,
-          undefined,
-          {
-            shallow: true,
-          },
-        );
-
-        const groupToOpen = groups.find((group) => group.id === groupId);
-        if (groupToOpen) {
-          setViewGroup(groupToOpen);
-          lockScroll();
-        }
       } catch (e) {
         console.error(e);
         setVoteError("Discord authentication failed. Please try voting again.");
-        router.replace("/explore", undefined, { shallow: true });
+        router.replace(`/explore?group=${encodeURIComponent(groupId)}`);
       } finally {
         setIsAuthLoading(false);
       }
     }
 
     handleVoteAuthCallback();
-  }, [router, router.isReady, handleVoteGroup, groups, lockScroll]);
+  }, [
+    router,
+    router.isReady,
+    handleVoteGroup,
+    openGroupMenuById,
+  ]);
 
   useEffect(() => {
-    if (!pendingVoteGroupId || groups.length === 0) return;
+    if (!pendingVoteGroupId) return;
 
-    const groupToOpen = groups.find((group) => group.id === pendingVoteGroupId);
-    if (!groupToOpen) return;
+    let cancelled = false;
 
-    setViewGroup(groupToOpen);
-    lockScroll();
-    setPendingVoteGroupId("");
-  }, [pendingVoteGroupId, groups, lockScroll]);
+    async function openPendingVoteGroup() {
+      const opened = await openGroupMenuById(pendingVoteGroupId);
+      if (cancelled || !opened) return;
+
+      setPendingVoteGroupId("");
+    }
+
+    openPendingVoteGroup();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [pendingVoteGroupId, openGroupMenuById]);
 
   // Handle ?group=<group_id> URL parameter
   useEffect(() => {
@@ -303,14 +389,34 @@ export default function Explore() {
     const groupId = router.query.group;
     if (!groupId) return;
 
-    // Find the group in the loaded groups
-    const group = groups.find((g) => g.id === groupId);
-    if (group) {
+    let cancelled = false;
+
+    async function openGroupFromQuery() {
+      let group = groups.find((g) => String(g.id) === String(groupId));
+      if (!group) {
+        group = await fetchExploreGroupById(groupId);
+      }
+
+      if (!group || cancelled) return;
+
       setViewGroup(group);
       lockScroll();
       setOpenedMenuFromLink(true);
     }
-  }, [router.isReady, router.query, groups, lockScroll, openedMenuFromLink]);
+
+    openGroupFromQuery();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    router.isReady,
+    router.query,
+    groups,
+    lockScroll,
+    openedMenuFromLink,
+    fetchExploreGroupById,
+  ]);
 
   useEffect(() => {
     if (!sentinelRef.current) return;
