@@ -341,7 +341,7 @@ export default function Explore() {
 
         const data = await res.json();
         if (!data.access_token || data.access_token === "undefined") {
-          throw new Error("Failed to authenticate with Discord");
+          throw new Error("Failed to authenticate with Discord", data);
         }
 
         setCookie("token", data.access_token, data.expires_in - 1000);
