@@ -38,6 +38,10 @@ export default function Explore() {
   const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [publishStep, setPublishStep] = useState(1); // 1 = select guild, 2 = select group
   const [viewGroup, setViewGroup] = useState(null);
+  const [viewGroupServers, setViewGroupServers] = useState([]);
+  const [isViewGroupServersLoading, setIsViewGroupServersLoading] =
+    useState(false);
+  const [viewGroupServersError, setViewGroupServersError] = useState("");
 
   const [isJoinMenuOpen, setIsJoinMenuOpen] = useState(false);
   const [joinStep, setJoinStep] = useState(1); // 1 = guild, 2 = channel, 3 = proposal
@@ -362,6 +366,57 @@ export default function Explore() {
     }
   }, [isJoinMenuOpen, joinStep, joinSelectedGuildId]);
 
+  useEffect(() => {
+    if (!viewGroup?.id) {
+      setViewGroupServers([]);
+      setViewGroupServersError("");
+      setIsViewGroupServersLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadViewGroupServers() {
+      setIsViewGroupServersLoading(true);
+      setViewGroupServersError("");
+
+      try {
+        const res = await fetch(
+          `${config.apiV2}get_group_public_servers?group_id=${encodeURIComponent(
+            viewGroup.id,
+          )}`,
+        );
+        const data = await res.json();
+
+        if (!res.ok || !data?.result) {
+          throw new Error("Failed to load public servers");
+        }
+
+        if (!cancelled) {
+          setViewGroupServers(Array.isArray(data.servers) ? data.servers : []);
+        }
+      } catch (e) {
+        console.error(e);
+        if (!cancelled) {
+          setViewGroupServers([]);
+          setViewGroupServersError(
+            "Failed to load public servers for this group.",
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setIsViewGroupServersLoading(false);
+        }
+      }
+    }
+
+    loadViewGroupServers();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [viewGroup]);
+
   const handleConfirmPublishGroup = (groupId) => {
     const idToUse = groupId || selectedGroupId;
     if (!idToUse) return;
@@ -540,6 +595,99 @@ export default function Explore() {
                     {viewGroup.description}
                   </p>
                 )}
+
+                <div className={styles.publicServersSection}>
+                  <h3 className={styles.publicServersTitle}>Servers</h3>
+
+                  {isViewGroupServersLoading && (
+                    <p className={styles.publicServersLoading}>
+                      Loading servers...
+                    </p>
+                  )}
+
+                  {!isViewGroupServersLoading && viewGroupServersError && (
+                    <p className={styles.publicServersError}>
+                      {viewGroupServersError}
+                    </p>
+                  )}
+
+                  {!isViewGroupServersLoading &&
+                    !viewGroupServersError &&
+                    viewGroupServers.length === 0 && (
+                      <p className={styles.publicServersEmpty}>
+                        No public servers are listed in this group yet.
+                      </p>
+                    )}
+
+                  {!isViewGroupServersLoading &&
+                    !viewGroupServersError &&
+                    viewGroupServers.length > 0 && (
+                      <div className={styles.publicServersList}>
+                        {viewGroupServers.map((server) => {
+                          const inviteUrl = server.invite
+                            ? server.invite.startsWith("http")
+                              ? server.invite
+                              : `https://discord.gg/${server.invite}`
+                            : null;
+                          const displayName =
+                            server.displayName ||
+                            server.guildName ||
+                            "Unknown server";
+
+                          return (
+                            <div
+                              key={
+                                server.guildId || `${displayName}-${inviteUrl}`
+                              }
+                              className={styles.publicServerCard}
+                            >
+                              {server.icon ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                  src={`https://cdn.discordapp.com/icons/${server.guildId}/${server.icon}.webp?size=160&quality=lossless`}
+                                  alt={displayName}
+                                  className={styles.publicServerIcon}
+                                />
+                              ) : (
+                                <div
+                                  className={styles.publicServerFallbackIcon}
+                                >
+                                  {(displayName || "?").charAt(0).toUpperCase()}
+                                </div>
+                              )}
+
+                              <div className={styles.publicServerInfo}>
+                                <p className={styles.publicServerName}>
+                                  {displayName}
+                                </p>
+                                {server.guildName &&
+                                  server.guildName !== displayName && (
+                                    <p className={styles.publicServerGuildName}>
+                                      {server.guildName}
+                                    </p>
+                                  )}
+                              </div>
+
+                              {inviteUrl ? (
+                                <a
+                                  href={inviteUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className={styles.publicServerInvite}
+                                >
+                                  Join
+                                </a>
+                              ) : (
+                                <span className={styles.publicServerNoInvite}>
+                                  No invite
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                </div>
               </div>
               <div className={styles.groupActions}>
                 <button
