@@ -340,12 +340,43 @@
   margin-top: 0.5rem;
 }
 
+.groupVoteButton {
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  color: #ffffff;
+  background: linear-gradient(37deg, #1f9d57 0%, #22c55e 100%);
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.groupVoteButton:hover:enabled {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(21, 128, 61, 0.35);
+}
+
+.groupVoteButton:disabled {
+  cursor: default;
+  opacity: 0.8;
+}
+
+.groupVoteButtonDisabled {
+  background: #64748b;
+  box-shadow: none;
+}
+
 .groupClose {
   background: transparent;
   border: none;
   color: #a7b2c4;
   cursor: pointer;
   font-size: 0.9rem;
+  margin-left: auto;
 }
 
 .groupClose:hover {
@@ -375,6 +406,26 @@
 .groupJoinButton:disabled {
   cursor: default;
   opacity: 0.8;
+}
+
+.voteSuccess,
+.voteError {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.voteSuccess {
+  color: #78f2a8;
+}
+
+.voteError {
+  color: #fc5151;
+}
+
+.globalVoteSuccess {
+  margin: 0.9rem 0 0;
+  color: #78f2a8;
+  text-align: center;
 }
 
 .publishOverlay {

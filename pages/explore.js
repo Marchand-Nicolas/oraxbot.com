@@ -56,9 +56,122 @@ export default function Explore() {
   const [joinError, setJoinError] = useState("");
   const [joinSuccess, setJoinSuccess] = useState("");
   const [openedMenuFromLink, setOpenedMenuFromLink] = useState(false);
+  const [isVoting, setIsVoting] = useState(false);
+  const [voteError, setVoteError] = useState("");
+  const [voteSuccess, setVoteSuccess] = useState("");
+  const [globalVoteSuccess, setGlobalVoteSuccess] = useState("");
+  const [voteCooldownSeconds, setVoteCooldownSeconds] = useState(0);
 
   const observerRef = useRef(null);
   const sentinelRef = useRef(null);
+  const voteAuthHandledRef = useRef(false);
+
+  const redirectToDiscordAuth = useCallback((stateValue) => {
+    const redirectUri = encodeURI(
+      `${process.env.NEXT_PUBLIC_WEBSITE_URL}/explore`,
+    );
+    window.location.href = `https://discord.com/api/oauth2/authorize?client_id=812298057470967858&redirect_uri=${redirectUri}&response_type=code&scope=identify%20guilds&state=${encodeURIComponent(
+      stateValue,
+    )}`;
+  }, []);
+
+  const formatVoteCountdown = useCallback((seconds) => {
+    const safeSeconds = Math.max(0, Number(seconds) || 0);
+    const hours = Math.floor(safeSeconds / 3600)
+      .toString()
+      .padStart(2, "0");
+    const minutes = Math.floor((safeSeconds % 3600) / 60)
+      .toString()
+      .padStart(2, "0");
+    const secs = Math.floor(safeSeconds % 60)
+      .toString()
+      .padStart(2, "0");
+    return `${hours}:${minutes}:${secs}`;
+  }, []);
+
+  const handleVoteGroup = useCallback(
+    async (groupId, tokenOverride = null) => {
+      if (!groupId) return;
+      if (voteCooldownSeconds > 0) return;
+
+      setIsVoting(true);
+      setVoteError("");
+      setVoteSuccess("");
+
+      const token = tokenOverride || getCookie("token");
+      if (!token || token === "undefined") {
+        setIsVoting(false);
+        redirectToDiscordAuth(`vote,${groupId}`);
+        return;
+      }
+
+      try {
+        const res = await fetch(`${config.apiV2}explore_vote`, {
+          method: "POST",
+          body: JSON.stringify({ token, group_id: groupId }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        const data = await res.json();
+        const hasInvalidToken =
+          data?.result === false &&
+          data?.error === 1 &&
+          data?.message === "Invalid auth token";
+
+        if (hasInvalidToken) {
+          setCookie("token", "", 0);
+          redirectToDiscordAuth(`vote,${groupId}`);
+          return;
+        }
+
+        if (!res.ok || data?.result === false) {
+          throw new Error(data?.message || "Failed to submit vote");
+        }
+
+        setGroups((prev) =>
+          prev.map((group) =>
+            group.id === groupId
+              ? {
+                  ...group,
+                  vote: (Number(group.vote) || 0) + 1,
+                }
+              : group,
+          ),
+        );
+        setViewGroup((prev) =>
+          prev && prev.id === groupId
+            ? {
+                ...prev,
+                vote: (Number(prev.vote) || 0) + 1,
+              }
+            : prev,
+        );
+
+        const successMessage = "Your vote has been recorded successfully.";
+        setVoteSuccess(successMessage);
+        setGlobalVoteSuccess(successMessage);
+        setVoteCooldownSeconds(24 * 60 * 60);
+      } catch (e) {
+        console.error(e);
+        setVoteError("Failed to submit your vote. Please try again.");
+      } finally {
+        setIsVoting(false);
+      }
+    },
+    [redirectToDiscordAuth, voteCooldownSeconds],
+  );
+
+  useEffect(() => {
+    if (voteCooldownSeconds <= 0) return;
+
+    const interval = setInterval(() => {
+      setVoteCooldownSeconds((previous) => (previous <= 1 ? 0 : previous - 1));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [voteCooldownSeconds]);
 
   const loadPage = useCallback(
     async (pageToLoad) => {
@@ -106,6 +219,71 @@ export default function Explore() {
     loadPage(1);
   }, [loadPage]);
 
+  // Handle OAuth callback for vote flow: ?code=...&state=vote,<group_id>
+  useEffect(() => {
+    if (!router.isReady || voteAuthHandledRef.current) return;
+
+    const codeParam = router.query.code;
+    const stateParam = router.query.state;
+    if (typeof codeParam !== "string" || typeof stateParam !== "string") {
+      return;
+    }
+
+    if (!stateParam.startsWith("vote,")) return;
+    const stateParts = stateParam.split(",");
+    const groupId = stateParts[1];
+    if (!groupId) return;
+
+    voteAuthHandledRef.current = true;
+
+    async function handleVoteAuthCallback() {
+      setIsAuthLoading(true);
+      setVoteError("");
+
+      try {
+        const res = await fetch(`${config.serverIp}login`, {
+          method: "POST",
+          body: JSON.stringify({ token: codeParam }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        const data = await res.json();
+        if (!data.access_token || data.access_token === "undefined") {
+          throw new Error("Failed to authenticate with Discord");
+        }
+
+        setCookie("token", data.access_token, data.expires_in - 1000);
+        await router.replace("/explore", undefined, { shallow: true });
+
+        await handleVoteGroup(groupId, data.access_token);
+
+        const groupToOpen = groups.find((group) => group.id === groupId);
+        if (groupToOpen) {
+          setViewGroup(groupToOpen);
+          lockScroll();
+        }
+      } catch (e) {
+        console.error(e);
+        setVoteError("Discord authentication failed. Please try voting again.");
+        router.replace("/explore", undefined, { shallow: true });
+      } finally {
+        setIsAuthLoading(false);
+      }
+    }
+
+    handleVoteAuthCallback();
+  }, [
+    router,
+    router.isReady,
+    router.query.code,
+    router.query.state,
+    handleVoteGroup,
+    groups,
+    lockScroll,
+  ]);
+
   // Handle ?group=<group_id> URL parameter
   useEffect(() => {
     if (!router.isReady || openedMenuFromLink) return;
@@ -148,6 +326,97 @@ export default function Explore() {
     };
   }, [page, hasMore, isLoading, loadPage]);
 
+  useEffect(() => {
+    if (!viewGroup?.id) {
+      setVoteCooldownSeconds(0);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadVoteCooldown() {
+      const token = getCookie("token");
+      if (!token || token === "undefined") {
+        setVoteCooldownSeconds(0);
+        return;
+      }
+
+      try {
+        const userRes = await fetch("https://discordapp.com/api/users/@me", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Accept: "application/json",
+            Authorization: "Bearer " + token,
+          },
+        });
+        const userData = await userRes.json();
+
+        if (userData?.retry_after) {
+          setTimeout(() => {
+            if (!cancelled) {
+              loadVoteCooldown();
+            }
+          }, userData.retry_after + 50);
+          return;
+        }
+
+        if (
+          !userRes.ok ||
+          userData?.message === "401: Unauthorized" ||
+          !userData?.id
+        ) {
+          setCookie("token", "", 0);
+          if (!cancelled) {
+            setVoteCooldownSeconds(0);
+          }
+          return;
+        }
+
+        const voteRes = await fetch(
+          `${config.apiV2}get_vote?group_id=${encodeURIComponent(
+            viewGroup.id,
+          )}&user_id=${encodeURIComponent(userData.id)}`,
+        );
+        const voteData = await voteRes.json();
+
+        if (!voteRes.ok || !voteData?.result || !voteData?.vote?.date) {
+          if (!cancelled) {
+            setVoteCooldownSeconds(0);
+          }
+          return;
+        }
+
+        const latestVoteTimestamp = new Date(voteData.vote.date).getTime();
+        if (!Number.isFinite(latestVoteTimestamp)) {
+          if (!cancelled) {
+            setVoteCooldownSeconds(0);
+          }
+          return;
+        }
+
+        const remainingSeconds = Math.ceil(
+          (latestVoteTimestamp + 24 * 60 * 60 * 1000 - Date.now()) / 1000,
+        );
+
+        if (!cancelled) {
+          setVoteCooldownSeconds(remainingSeconds > 0 ? remainingSeconds : 0);
+        }
+      } catch (e) {
+        console.error("Failed to load vote cooldown:", e);
+        if (!cancelled) {
+          setVoteCooldownSeconds(0);
+        }
+      }
+    }
+
+    loadVoteCooldown();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [viewGroup?.id]);
+
   // --- Publish flow: Discord auth + guilds / groups selection ---
 
   const ensureDiscordAuth = useCallback(async () => {
@@ -176,6 +445,9 @@ export default function Explore() {
         }
         setCookie("token", data.access_token, data.expires_in - 1000);
         token = data.access_token;
+        if (state && typeof state === "string" && state.startsWith("vote,")) {
+          return token;
+        }
         // Clean URL from code/state if needed
         if (state) {
           window.location.href = state;
@@ -186,14 +458,10 @@ export default function Explore() {
         setIsAuthLoading(false);
       }
     } else {
-      const redirectUri = encodeURI(
-        `${process.env.NEXT_PUBLIC_WEBSITE_URL}/explore`,
-      );
-      const fullState = encodeURIComponent(window.location.href);
-      window.location.href = `https://discord.com/api/oauth2/authorize?client_id=812298057470967858&redirect_uri=${redirectUri}&response_type=code&scope=identify%20guilds&state=${fullState}`;
+      redirectToDiscordAuth(window.location.href);
       return null;
     }
-  }, []);
+  }, [redirectToDiscordAuth]);
 
   const openPublishMenu = useCallback(async () => {
     const token = await ensureDiscordAuth();
@@ -218,11 +486,7 @@ export default function Explore() {
       if (userGuilds?.message === "401: Unauthorized") {
         // Reuse dashboard flow: clear token and trigger Discord OAuth
         setCookie("token", "", 0);
-        const redirectUri =
-          encodeURI(process.env.NEXT_PUBLIC_WEBSITE_URL) + "%2Fexplore";
-        window.location.href = `https://discord.com/api/oauth2/authorize?client_id=812298057470967858&redirect_uri=${redirectUri}&response_type=code&scope=identify%20guilds&state=${encodeURIComponent(
-          window.location.href,
-        )}`;
+        redirectToDiscordAuth(window.location.href);
         return;
       }
 
@@ -247,7 +511,7 @@ export default function Explore() {
     } finally {
       setIsAuthLoading(false);
     }
-  }, [ensureDiscordAuth, lockScroll]);
+  }, [ensureDiscordAuth, lockScroll, redirectToDiscordAuth]);
 
   const openJoinMenu = useCallback(
     async (groupId) => {
@@ -274,11 +538,7 @@ export default function Explore() {
 
         if (userGuilds?.message === "401: Unauthorized") {
           setCookie("token", "", 0);
-          const redirectUri =
-            encodeURI(process.env.NEXT_PUBLIC_WEBSITE_URL) + "%2Fexplore";
-          window.location.href = `https://discord.com/api/oauth2/authorize?client_id=812298057470967858&redirect_uri=${redirectUri}&response_type=code&scope=identify%20guilds&state=${encodeURIComponent(
-            window.location.href,
-          )}`;
+          redirectToDiscordAuth(window.location.href);
           return;
         }
 
@@ -308,7 +568,7 @@ export default function Explore() {
         setIsAuthLoading(false);
       }
     },
-    [ensureDiscordAuth, lockScroll],
+    [ensureDiscordAuth, lockScroll, redirectToDiscordAuth],
   );
   useEffect(() => {
     async function loadOwnedGroups() {
@@ -406,6 +666,9 @@ export default function Explore() {
 
   const closeViewGroup = () => {
     setViewGroup(null);
+    setVoteError("");
+    setVoteSuccess("");
+    setVoteCooldownSeconds(0);
     unlockScroll();
     // Remove the ?group= param from URL if present
     if (router.query.group) {
@@ -540,6 +803,9 @@ export default function Explore() {
           >
             {isAuthLoading ? "Connecting to Discord..." : "Publish your group"}
           </button>
+          {globalVoteSuccess && (
+            <p className={styles.globalVoteSuccess}>{globalVoteSuccess}</p>
+          )}
         </section>
 
         <section className={styles.grid}>
@@ -547,7 +813,11 @@ export default function Explore() {
             <article
               key={group.id}
               className={styles.card}
-              onClick={() => setViewGroup(group)}
+              onClick={() => {
+                setVoteError("");
+                setVoteSuccess("");
+                setViewGroup(group);
+              }}
             >
               {group.image_url && (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -720,7 +990,28 @@ export default function Explore() {
                     )}
                 </div>
               </div>
+              {(voteError || voteSuccess) && (
+                <p
+                  className={voteError ? styles.voteError : styles.voteSuccess}
+                >
+                  {voteError || voteSuccess}
+                </p>
+              )}
               <div className={styles.groupActions}>
+                <button
+                  type="button"
+                  className={`${styles.groupVoteButton} ${
+                    voteCooldownSeconds > 0 ? styles.groupVoteButtonDisabled : ""
+                  }`}
+                  onClick={() => handleVoteGroup(viewGroup.id)}
+                  disabled={isVoting || isAuthLoading || voteCooldownSeconds > 0}
+                >
+                  {isVoting
+                    ? "Voting..."
+                    : voteCooldownSeconds > 0
+                      ? `Vote in ${formatVoteCountdown(voteCooldownSeconds)} (${Number(viewGroup?.vote) || 0})`
+                      : `Vote (${Number(viewGroup?.vote) || 0})`}
+                </button>
                 <button
                   type="button"
                   className={styles.groupClose}
