@@ -533,13 +533,14 @@ export default function Explore() {
                       : group.description}
                   </p>
                 )}
-                {group.server_count && (
+                <div className="line">
                   <p className={styles.cardMeta}>
-                    {group.server_count ? (
-                      <span>{group.server_count} servers</span>
-                    ) : null}
+                    <span>{group.server_count} servers</span>
                   </p>
-                )}
+                  <p className={styles.cardMeta}>
+                    <span>{group.message_count} messages this month</span>
+                  </p>
+                </div>
               </div>
             </article>
           ))}
