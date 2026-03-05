@@ -69,6 +69,7 @@ export default function Explore() {
   const observerRef = useRef(null);
   const sentinelRef = useRef(null);
   const voteAuthHandledRef = useRef(false);
+  const menuAuthHandledRef = useRef(false);
 
   const upsertGroup = useCallback((groupToUpsert) => {
     if (!groupToUpsert?.id) return;
@@ -566,7 +567,7 @@ export default function Explore() {
 
   // --- Publish flow: Discord auth + guilds / groups selection ---
 
-  const ensureDiscordAuth = useCallback(async () => {
+  const ensureDiscordAuth = useCallback(async (authState) => {
     let token = getCookie("token");
     if (token && token !== "undefined") return token;
 
@@ -596,7 +597,13 @@ export default function Explore() {
         setCookie("token", data.access_token, data.expires_in - 1000);
         setVoteCooldownRefresh((previous) => previous + 1);
         token = data.access_token;
-        if (state && typeof state === "string" && state.startsWith("vote,")) {
+        if (
+          state &&
+          typeof state === "string" &&
+          (state.startsWith("vote,") ||
+            state === "publish" ||
+            state.startsWith("join,"))
+        ) {
           return token;
         }
         // Clean URL from code/state if needed
@@ -609,13 +616,16 @@ export default function Explore() {
         setIsAuthLoading(false);
       }
     } else {
-      redirectToDiscordAuth(window.location.href);
+      const fallbackState =
+        authState ||
+        (typeof window !== "undefined" ? window.location.href : "publish");
+      redirectToDiscordAuth(fallbackState);
       return null;
     }
   }, [redirectToDiscordAuth, exploreRedirectUri]);
 
-  const openPublishMenu = useCallback(async () => {
-    const token = await ensureDiscordAuth();
+  const openPublishMenu = useCallback(async (tokenOverride = null) => {
+    const token = tokenOverride || (await ensureDiscordAuth("publish"));
     if (!token) return;
 
     lockScroll();
@@ -637,13 +647,17 @@ export default function Explore() {
       if (userGuilds?.message === "401: Unauthorized") {
         // Reuse dashboard flow: clear token and trigger Discord OAuth
         setCookie("token", "", 0);
-        redirectToDiscordAuth(window.location.href);
+        if (tokenOverride) {
+          redirectToDiscordAuth("publish");
+        } else {
+          redirectToDiscordAuth("publish");
+        }
         return;
       }
 
       if (userGuilds?.retry_after) {
         setTimeout(() => {
-          openPublishMenu();
+          openPublishMenu(tokenOverride);
         }, userGuilds.retry_after + 50);
         return;
       }
@@ -665,10 +679,11 @@ export default function Explore() {
   }, [ensureDiscordAuth, lockScroll, redirectToDiscordAuth]);
 
   const openJoinMenu = useCallback(
-    async (groupId) => {
+    async (groupId, tokenOverride = null) => {
       if (!groupId) return;
 
-      const token = await ensureDiscordAuth();
+      const token =
+        tokenOverride || (await ensureDiscordAuth(`join,${groupId}`));
       if (!token) return;
 
       lockScroll();
@@ -689,13 +704,13 @@ export default function Explore() {
 
         if (userGuilds?.message === "401: Unauthorized") {
           setCookie("token", "", 0);
-          redirectToDiscordAuth(window.location.href);
+          redirectToDiscordAuth(`join,${groupId}`);
           return;
         }
 
         if (userGuilds?.retry_after) {
           setTimeout(() => {
-            openJoinMenu(groupId);
+            openJoinMenu(groupId, tokenOverride);
           }, userGuilds.retry_after + 50);
           return;
         }
@@ -721,6 +736,74 @@ export default function Explore() {
     },
     [ensureDiscordAuth, lockScroll, redirectToDiscordAuth],
   );
+
+  useEffect(() => {
+    if (!router.isReady || menuAuthHandledRef.current) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const codeParam = params.get("code");
+    const stateParam = params.get("state");
+    if (!codeParam || !stateParam) return;
+
+    const isPublishState = stateParam === "publish";
+    const isJoinState = stateParam.startsWith("join,");
+    if (!isPublishState && !isJoinState) return;
+
+    const stateParts = stateParam.split(",");
+    const joinGroupIdFromState = stateParts[1] || "";
+
+    menuAuthHandledRef.current = true;
+
+    async function handleMenuAuthCallback() {
+      setIsAuthLoading(true);
+      setJoinError("");
+
+      try {
+        const res = await fetch(`${config.apiV2}exchange_discord_oauth_code`, {
+          method: "POST",
+          body: JSON.stringify({
+            token: codeParam,
+            redirect_uri: exploreRedirectUri,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        const data = await res.json();
+        if (!data.access_token || data.access_token === "undefined") {
+          throw new Error("Failed to authenticate with Discord");
+        }
+
+        setCookie("token", data.access_token, data.expires_in - 1000);
+        setVoteCooldownRefresh((previous) => previous + 1);
+
+        await router.replace("/explore", undefined, { shallow: true });
+
+        if (isPublishState) {
+          await openPublishMenu(data.access_token);
+        } else if (isJoinState && joinGroupIdFromState) {
+          await openJoinMenu(joinGroupIdFromState, data.access_token);
+        }
+      } catch (e) {
+        console.error(e);
+        if (isJoinState) {
+          setJoinError("Discord authentication failed. Please try again.");
+        }
+        router.replace("/explore", undefined, { shallow: true });
+      } finally {
+        setIsAuthLoading(false);
+      }
+    }
+
+    handleMenuAuthCallback();
+  }, [
+    router,
+    router.isReady,
+    openPublishMenu,
+    openJoinMenu,
+    exploreRedirectUri,
+  ]);
   useEffect(() => {
     async function loadOwnedGroups() {
       if (!selectedGuildId) {
