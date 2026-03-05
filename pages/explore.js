@@ -55,6 +55,7 @@ export default function Explore() {
   const [isJoinSubmitting, setIsJoinSubmitting] = useState(false);
   const [joinError, setJoinError] = useState("");
   const [joinSuccess, setJoinSuccess] = useState("");
+  const [openedMenuFromLink, setOpenedMenuFromLink] = useState(false);
 
   const observerRef = useRef(null);
   const sentinelRef = useRef(null);
@@ -104,6 +105,22 @@ export default function Explore() {
   useEffect(() => {
     loadPage(1);
   }, [loadPage]);
+
+  // Handle ?group=<group_id> URL parameter
+  useEffect(() => {
+    if (!router.isReady || openedMenuFromLink) return;
+
+    const groupId = router.query.group;
+    if (!groupId) return;
+
+    // Find the group in the loaded groups
+    const group = groups.find((g) => g.id === groupId);
+    if (group) {
+      setViewGroup(group);
+      lockScroll();
+      setOpenedMenuFromLink(true);
+    }
+  }, [router.isReady, router.query, groups, lockScroll, openedMenuFromLink]);
 
   useEffect(() => {
     if (!sentinelRef.current) return;
@@ -390,6 +407,10 @@ export default function Explore() {
   const closeViewGroup = () => {
     setViewGroup(null);
     unlockScroll();
+    // Remove the ?group= param from URL if present
+    if (router.query.group) {
+      router.push("/explore", undefined, { shallow: true });
+    }
   };
 
   useEffect(() => {
