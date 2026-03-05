@@ -356,12 +356,7 @@ export default function Explore() {
     }
 
     handleVoteAuthCallback();
-  }, [
-    router,
-    router.isReady,
-    handleVoteGroup,
-    openGroupMenuById,
-  ]);
+  }, [router, router.isReady, handleVoteGroup, openGroupMenuById]);
 
   useEffect(() => {
     if (!pendingVoteGroupId) return;
