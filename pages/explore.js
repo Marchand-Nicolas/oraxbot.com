@@ -64,6 +64,7 @@ export default function Explore() {
   const [voteCooldownSeconds, setVoteCooldownSeconds] = useState(0);
   const [pendingVoteGroupId, setPendingVoteGroupId] = useState("");
   const [voteCooldownRefresh, setVoteCooldownRefresh] = useState(0);
+  const [shareMessage, setShareMessage] = useState("");
 
   const observerRef = useRef(null);
   const sentinelRef = useRef(null);
@@ -165,6 +166,22 @@ export default function Explore() {
       .toString()
       .padStart(2, "0");
     return `${hours}:${minutes}:${secs}`;
+  }, []);
+
+  const handleShareGroup = useCallback(async (groupId) => {
+    if (!groupId) return;
+
+    const groupUrl = `https://oraxbot.com/explore?group=${encodeURIComponent(
+      groupId,
+    )}`;
+
+    try {
+      await navigator.clipboard.writeText(groupUrl);
+      setShareMessage("Group link copied to clipboard.");
+    } catch (e) {
+      console.error("Failed to copy group link:", e);
+      setShareMessage("Failed to copy link. Please try again.");
+    }
   }, []);
 
   const handleVoteGroup = useCallback(
@@ -802,6 +819,7 @@ export default function Explore() {
     setViewGroup(null);
     setVoteError("");
     setVoteSuccess("");
+    setShareMessage("");
     setVoteCooldownSeconds(0);
     unlockScroll();
     // Remove the ?group= param from URL if present
@@ -1131,6 +1149,17 @@ export default function Explore() {
                   {voteError || voteSuccess}
                 </p>
               )}
+              {shareMessage && (
+                <p
+                  className={
+                    shareMessage.startsWith("Failed")
+                      ? styles.voteError
+                      : styles.voteSuccess
+                  }
+                >
+                  {shareMessage}
+                </p>
+              )}
               <div className={styles.groupActions}>
                 <button
                   type="button"
@@ -1149,6 +1178,28 @@ export default function Explore() {
                     : voteCooldownSeconds > 0
                       ? `Vote in ${formatVoteCountdown(voteCooldownSeconds)} (${Number(viewGroup?.vote) || 0})`
                       : `Vote (${Number(viewGroup?.vote) || 0})`}
+                </button>
+                <button
+                  type="button"
+                  className={styles.groupShareButton}
+                  onClick={() => handleShareGroup(viewGroup.id)}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className={styles.groupShareIcon}
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15m0-3-3-3m0 0-3 3m3-3V15"
+                    />
+                  </svg>
+                  Share
                 </button>
                 <button
                   type="button"

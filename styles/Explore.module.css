@@ -370,6 +370,36 @@
   box-shadow: none;
 }
 
+.groupShareButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  cursor: pointer;
+  color: #e5e7eb;
+  background: rgba(15, 23, 42, 0.7);
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.groupShareButton:hover {
+  transform: translateY(-1px);
+  border-color: #8151fca3;
+  background: rgba(129, 81, 252, 0.12);
+}
+
+.groupShareIcon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
 .groupClose {
   background: transparent;
   border: none;
