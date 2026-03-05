@@ -24,6 +24,7 @@ import { useScroll } from "../utils/ScrollContext";
 // }
 
 export default function Explore() {
+  const exploreRedirectUri = "https://oraxbot.com/explore";
   const router = useRouter();
   const { lockScroll, unlockScroll } = useScroll();
   const [groups, setGroups] = useState([]);
@@ -331,9 +332,12 @@ export default function Explore() {
       );
 
       try {
-        const res = await fetch(`${config.serverIp}login`, {
+        const res = await fetch(`${config.apiV2}exchange_discord_oauth_code`, {
           method: "POST",
-          body: JSON.stringify({ token: codeParam }),
+          body: JSON.stringify({
+            token: codeParam,
+            redirect_uri: exploreRedirectUri,
+          }),
           headers: {
             "Content-Type": "application/json",
           },
@@ -357,7 +361,13 @@ export default function Explore() {
     }
 
     handleVoteAuthCallback();
-  }, [router, router.isReady, handleVoteGroup, openGroupMenuById]);
+  }, [
+    router,
+    router.isReady,
+    handleVoteGroup,
+    openGroupMenuById,
+    exploreRedirectUri,
+  ]);
 
   useEffect(() => {
     if (!pendingVoteGroupId) return;
@@ -545,9 +555,12 @@ export default function Explore() {
 
     if (code) {
       try {
-        const res = await fetch(`${config.serverIp}login`, {
+        const res = await fetch(`${config.apiV2}exchange_discord_oauth_code`, {
           method: "POST",
-          body: JSON.stringify({ token: code }),
+          body: JSON.stringify({
+            token: code,
+            redirect_uri: exploreRedirectUri,
+          }),
           headers: {
             "Content-Type": "application/json",
           },
@@ -575,7 +588,7 @@ export default function Explore() {
       redirectToDiscordAuth(window.location.href);
       return null;
     }
-  }, [redirectToDiscordAuth]);
+  }, [redirectToDiscordAuth, exploreRedirectUri]);
 
   const openPublishMenu = useCallback(async () => {
     const token = await ensureDiscordAuth();
