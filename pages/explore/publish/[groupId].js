@@ -22,6 +22,8 @@ export default function PublishGroup() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const [imagePreviewStatus, setImagePreviewStatus] = useState("idle");
+  const [resolvedImageUrl, setResolvedImageUrl] = useState("");
 
   useEffect(() => {
     if (!groupId) return;
@@ -78,6 +80,43 @@ export default function PublishGroup() {
 
     loadChannels();
   }, [guildId]);
+
+  useEffect(() => {
+    const nextImageUrl = form.image_url.trim();
+
+    if (!nextImageUrl) {
+      setImagePreviewStatus("idle");
+      setResolvedImageUrl("");
+      return;
+    }
+
+    setImagePreviewStatus("loading");
+    setResolvedImageUrl("");
+
+    let cancelled = false;
+    const image = new Image();
+
+    image.onload = () => {
+      if (cancelled) return;
+      setResolvedImageUrl(nextImageUrl);
+      setImagePreviewStatus("loaded");
+    };
+
+    image.onerror = () => {
+      if (cancelled) return;
+      setResolvedImageUrl("");
+      setImagePreviewStatus("error");
+    };
+
+    image.src = nextImageUrl;
+
+    return () => {
+      cancelled = true;
+      image.onload = null;
+      image.onerror = null;
+      image.src = "";
+    };
+  }, [form.image_url]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -159,6 +198,30 @@ export default function PublishGroup() {
               onChange={handleChange}
               placeholder="https://example.com/your-banner.png"
             />
+            {form.image_url.trim() !== "" && (
+              <div className={styles.imagePreviewWrap}>
+                {imagePreviewStatus === "loading" && (
+                  <p className={styles.imagePreviewLoading}>
+                    Loading image preview...
+                  </p>
+                )}
+                {imagePreviewStatus === "error" && (
+                  <p className={styles.error}>
+                    Failed to load image from this URL. Make sure it&apos;s a
+                    direct link to an image and the URL is correct.
+                  </p>
+                )}
+                {imagePreviewStatus === "loaded" && resolvedImageUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={resolvedImageUrl}
+                    src={resolvedImageUrl}
+                    alt="Group image preview"
+                    className={styles.imagePreview}
+                  />
+                )}
+              </div>
+            )}
           </label>
 
           <label className={styles.field}>

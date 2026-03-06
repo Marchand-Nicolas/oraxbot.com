@@ -116,6 +116,25 @@
   color: #a7b2c4;
 }
 
+.imagePreviewWrap {
+  margin-top: 0.5rem;
+}
+
+.imagePreview {
+  width: 100%;
+  max-height: 280px;
+  border-radius: var(--border-radius);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  object-fit: cover;
+  background: rgba(15, 23, 42, 0.62);
+}
+
+.imagePreviewLoading {
+  margin: 0;
+  color: #a7b2c4;
+  font-size: 0.85rem;
+}
+
 .actions {
   display: flex;
   justify-content: flex-end;
