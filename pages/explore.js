@@ -186,6 +186,32 @@ export default function Explore() {
     }
   }, []);
 
+  const handleGroupImageError = useCallback((groupId) => {
+    if (!groupId) return;
+
+    const normalizedId = String(groupId);
+
+    setGroups((prev) =>
+      prev.map((group) =>
+        String(group.id) === normalizedId
+          ? {
+              ...group,
+              image_url: "",
+            }
+          : group,
+      ),
+    );
+
+    setViewGroup((prev) =>
+      prev && String(prev.id) === normalizedId
+        ? {
+            ...prev,
+            image_url: "",
+          }
+        : prev,
+    );
+  }, []);
+
   const handleVoteGroup = useCallback(
     async (groupId, tokenOverride = null) => {
       if (!groupId) return;
@@ -1093,6 +1119,7 @@ export default function Explore() {
                   src={group.image_url}
                   alt={group.name}
                   className={styles.cardImage}
+                  onError={() => handleGroupImageError(group.id)}
                 />
               )}
               <div className={styles.cardContent}>
@@ -1143,6 +1170,7 @@ export default function Explore() {
                     src={viewGroup.image_url}
                     alt={viewGroup.name}
                     className={styles.groupImage}
+                    onError={() => handleGroupImageError(viewGroup.id)}
                   />
                 )}
                 <div className={styles.groupContent}>
