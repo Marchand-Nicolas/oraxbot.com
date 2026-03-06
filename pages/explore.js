@@ -70,6 +70,7 @@ export default function Explore() {
   const sentinelRef = useRef(null);
   const voteAuthHandledRef = useRef(false);
   const menuAuthHandledRef = useRef(false);
+  const hasLoadedInitialPageRef = useRef(false);
 
   const upsertGroup = useCallback((groupToUpsert) => {
     if (!groupToUpsert?.id) return;
@@ -316,6 +317,9 @@ export default function Explore() {
   );
 
   useEffect(() => {
+    if (hasLoadedInitialPageRef.current) return;
+
+    hasLoadedInitialPageRef.current = true;
     loadPage(1);
   }, [loadPage]);
 
