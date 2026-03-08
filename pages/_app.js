@@ -2,6 +2,7 @@ import "../styles/globals.css";
 import ErrorBoundary from "../components/ui/ErrorBoundary";
 import { useEffect } from "react";
 import dynamic from "next/dynamic";
+import { Analytics } from "@vercel/analytics/next";
 import { ScrollProvider } from "../utils/ScrollContext";
 
 const NotificationSystem = dynamic(
@@ -23,6 +24,7 @@ function MyApp({ Component, pageProps }) {
       <ScrollProvider>
         <Component {...pageProps} />
         <NotificationSystem />
+        <Analytics />
       </ScrollProvider>
     </ErrorBoundary>
   );
