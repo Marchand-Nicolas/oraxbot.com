@@ -6,10 +6,22 @@ export default function Footer({ theme = "light" }) {
     <footer
       className={`${styles.footer} ${theme === "dark" ? styles.footerDark : styles.footerLight}`}
     >
-      Orax bot
-      <span>
-        <Image src="/favicon.ico" alt="Orax logo" width={16} height={16} />
-      </span>
+      <div>
+        Orax bot
+        <span>
+          <Image src="/favicon.ico" alt="Orax logo" width={16} height={16} />
+        </span>
+      </div>
+      •
+      <a
+        href="https://ko-fi.com/nicolasmarchand"
+        target="_blank"
+        rel="noreferrer"
+      >
+        <div className={styles.donate}>
+          <p>❤️ 100% free</p>
+        </div>
+      </a>
     </footer>
   );
 }

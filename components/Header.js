@@ -30,14 +30,13 @@ export default function NavBar({ theme = "light" }) {
         <Image src="/logo.png" alt="Captcha logo" width={50} height={50} />
         <strong className={styles.title}>Orax bot</strong>
       </Link>
-      <a
-        href="https://ko-fi.com/nicolasmarchand"
-        target="_blank"
-        rel="noreferrer"
-      >
-        <div className={styles.donate}>
-          <p>❤️ Orax is 100% free</p>
-        </div>
+      <a href="https://ko-fi.com/A0A51KMQ7J" target="_blank">
+        <img
+          height="36"
+          src="https://storage.ko-fi.com/cdn/kofi5.png?v=6"
+          border="0"
+          alt="Buy Me a Coffee at ko-fi.com"
+        />
       </a>
     </nav>
   );

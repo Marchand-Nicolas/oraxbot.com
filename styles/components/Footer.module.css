@@ -4,6 +4,7 @@
   padding: 2rem 0;
   justify-content: center;
   align-items: center;
+  gap: 2rem;
 }
 
 .footerLight {
@@ -18,11 +19,10 @@
   color: #e5e7eb;
 }
 
-.footer a {
+.footer > * {
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-grow: 1;
 }
 
 .footer span {
