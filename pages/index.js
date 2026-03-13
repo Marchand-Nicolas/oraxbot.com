@@ -110,9 +110,9 @@ export default function Home() {
             <h2>Support server &rarr;</h2>
             <p>Any questions? A problem? A suggestion? Contact us</p>
           </a>
-          <Link href="/tos" className={`${styles.card} ${styles.soft}`}>
-            <h2>TOS &rarr;</h2>
-            <p>Terms of service</p>
+          <Link href="/explore" className={`${styles.card} ${styles.soft}`}>
+            <h2>Explore &rarr;</h2>
+            <p>Discover public groups</p>
           </Link>
         </div>
       </section>

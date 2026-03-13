@@ -29,3 +29,12 @@
   height: 1em;
   margin-left: 0.5rem;
 }
+
+.footerLink {
+  color: inherit;
+  text-decoration: none;
+}
+
+.footerLink:hover {
+  text-decoration: underline;
+}
