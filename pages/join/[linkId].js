@@ -7,6 +7,7 @@ import { useRouter } from "next/router";
 import config from "../../utils/config";
 import popup from "../../utils/popup";
 import meteor from "../../public/icons/meteor.svg";
+import { checkAdminPerms } from "../../utils/permissions";
 
 export default function JoinGroup() {
   const router = useRouter();
@@ -16,11 +17,6 @@ export default function JoinGroup() {
   const [channels, setChannels] = useState([]);
 
   const { linkId } = router.query;
-
-  function checkAdminPerms(guild) {
-    // Check if user has admin permission on this guild (https://discord.com/developers/docs/topics/permissions)
-    return guild.permissions_new.toString(16) & 0x0000000000000032;
-  }
 
   const guildId =
     typeof window !== "undefined"

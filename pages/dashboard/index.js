@@ -143,7 +143,7 @@ export default function Dashboard() {
               }
               if (Array.isArray(guilds)) {
                 const parsedGuilds = guilds
-                  .filter((guild) => guild.permissions_new & 0x0000000000000032)
+                  .filter((guild) => checkAdminPerms(guild))
                   .map((guild) => ({
                     id: guild.id,
                     name: guild.name,
@@ -222,9 +222,7 @@ export default function Dashboard() {
       : "";
   const guildId =
     urlGuildId ||
-    (guilds?.find
-      ? guilds?.find((g) => g.permissions_new & 0x0000000000000032)?.id
-      : "");
+    (guilds?.find ? guilds?.find((g) => checkAdminPerms(g))?.id : "");
   let guild = guilds?.find ? guilds?.find((guild) => guild.id === guildId) : "";
 
   if (!guild) {
