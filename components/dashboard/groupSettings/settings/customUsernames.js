@@ -23,6 +23,23 @@ const CustomUsernames = ({ groupId, guildId }) => {
     }).then((res) =>
       res.json().then((data) => {
         setPattern(data.customUsernamesPattern || "");
+      }),
+    );
+
+    // Load the custom user picture URL
+    fetch(`${config.apiV2}get_group_settings_field`, {
+      method: "POST",
+      body: JSON.stringify({
+        token: getCookie("token"),
+        groupId,
+        guildId,
+        fieldName: "customUserPPUrl",
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }).then((res) =>
+      res.json().then((data) => {
         setUserPpUrl(data.customUserPPUrl || "");
       }),
     );
@@ -71,13 +88,14 @@ const CustomUsernames = ({ groupId, guildId }) => {
         onChange={(e) => {
           const newUrl = e.target.value;
           setUserPpUrl(newUrl);
-          fetch(`${config.apiV2}set_custom_usernames_pattern`, {
+          fetch(`${config.apiV2}set_group_settings_field`, {
             method: "POST",
             body: JSON.stringify({
               token: getCookie("token"),
               groupId,
               guildId,
-              customUserPPUrl: newUrl
+              fieldName: "customUserPPUrl",
+              customUserPPUrl: newUrl,
             }),
             headers: {
               "Content-Type": "application/json",
