@@ -23,7 +23,7 @@ const CustomUsernames = ({ groupId, guildId }) => {
     }).then((res) =>
       res.json().then((data) => {
         setPattern(data.customUsernamesPattern || "");
-        setUserPpUrl(data.customUserPpUrl || "");
+        setUserPpUrl(data.customUserPPUrl || "");
       }),
     );
   }, [groupId, guildId]);
@@ -77,7 +77,7 @@ const CustomUsernames = ({ groupId, guildId }) => {
               token: getCookie("token"),
               groupId,
               guildId,
-              customUserPpUrl: newUrl,
+              customUserPPUrl: newUrl
             }),
             headers: {
               "Content-Type": "application/json",
