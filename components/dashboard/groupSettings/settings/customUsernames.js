@@ -5,6 +5,7 @@ import { getCookie } from "../../../../utils/cookies";
 
 const CustomUsernames = ({ groupId, guildId }) => {
   const [pattern, setPattern] = useState("");
+  const [userPpUrl, setUserPpUrl] = useState("");
 
   useEffect(() => {
     if (!groupId || !guildId) return;
@@ -14,15 +15,16 @@ const CustomUsernames = ({ groupId, guildId }) => {
       body: JSON.stringify({
         token: getCookie("token"),
         groupId,
-        guildId
+        guildId,
       }),
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     }).then((res) =>
       res.json().then((data) => {
         setPattern(data.customUsernamesPattern || "");
-      })
+        setUserPpUrl(data.customUserPpUrl || "");
+      }),
     );
   }, [groupId, guildId]);
 
@@ -47,15 +49,43 @@ const CustomUsernames = ({ groupId, guildId }) => {
               token: getCookie("token"),
               groupId,
               guildId,
-              customUsernamesPattern: newPattern
+              customUsernamesPattern: newPattern,
             }),
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
           });
         }}
         value={pattern}
         id="custom-usernames-pattern"
+      />
+      <label htmlFor="custom-user-pp-url" style={{ marginTop: "1.5rem" }}>
+        <strong>Custom user picture url:</strong>
+      </label>
+      <label>
+        You can use <code>{`{userAvatarUrl}`}</code> to customize the profile
+        pictures dynamically.
+      </label>
+      <TextInput
+        placeholder="https://example.com/users/{userAvatarUrl}"
+        onChange={(e) => {
+          const newUrl = e.target.value;
+          setUserPpUrl(newUrl);
+          fetch(`${config.apiV2}set_custom_usernames_pattern`, {
+            method: "POST",
+            body: JSON.stringify({
+              token: getCookie("token"),
+              groupId,
+              guildId,
+              customUserPpUrl: newUrl,
+            }),
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+        }}
+        value={userPpUrl}
+        id="custom-user-pp-url"
       />
     </>
   );
