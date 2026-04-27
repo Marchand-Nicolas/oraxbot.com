@@ -95,7 +95,7 @@ const CustomUsernames = ({ groupId, guildId }) => {
               groupId,
               guildId,
               fieldName: "customUserPPUrl",
-              customUserPPUrl: newUrl,
+              fieldValue: newUrl,
             }),
             headers: {
               "Content-Type": "application/json",
