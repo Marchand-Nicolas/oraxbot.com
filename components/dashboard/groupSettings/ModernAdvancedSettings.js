@@ -373,10 +373,7 @@ const ModernAdvancedSettings = () => {
                 onClick={() =>
                   popup(
                     "Banned users",
-                    <BannedUsersWindow
-                      groupId={groupId}
-                      guildId={guildId}
-                    />,
+                    <BannedUsersWindow groupId={groupId} guildId={guildId} />,
                     "default",
                     {
                       close: true,

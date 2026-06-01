@@ -46,7 +46,9 @@ const BannedUsersWindow = ({ groupId, guildId }) => {
         }
 
         if (isMounted) {
-          setBannedUsers(Array.isArray(data.bannedUsers) ? data.bannedUsers : []);
+          setBannedUsers(
+            Array.isArray(data.bannedUsers) ? data.bannedUsers : [],
+          );
         }
       } catch (error) {
         console.error("Failed to load banned users:", error);
@@ -94,8 +96,13 @@ const BannedUsersWindow = ({ groupId, guildId }) => {
         throw new Error(data.error || "Unable to unban user");
       }
 
-      setBannedUsers((currentUsers) => currentUsers.filter((user) => user.id !== userId));
-      notify.success("User unbanned", "The user has been removed from the ban list.");
+      setBannedUsers((currentUsers) =>
+        currentUsers.filter((user) => user.id !== userId),
+      );
+      notify.success(
+        "User unbanned",
+        "The user has been removed from the ban list.",
+      );
     } catch (error) {
       console.error("Failed to unban user:", error);
       notify.error(
@@ -110,7 +117,8 @@ const BannedUsersWindow = ({ groupId, guildId }) => {
   return (
     <div className={styles.window}>
       <p className={styles.description}>
-        Manage the users banned from this group. Use the trash icon to unban them.
+        Manage the users banned from this group. Use the trash icon to unban
+        them.
       </p>
 
       {loading ? (
@@ -147,7 +155,12 @@ const BannedUsersWindow = ({ groupId, guildId }) => {
                   disabled={removingUserId === user.id}
                   aria-label={`Unban ${user.username}`}
                 >
-                  <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor">
+                  <svg
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.8}
+                    stroke="currentColor"
+                  >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
