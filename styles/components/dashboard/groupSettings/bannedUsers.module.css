@@ -1,0 +1,122 @@
+.window {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.description {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.5;
+}
+
+.state {
+  padding: 14px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 48vh;
+  overflow-y: auto;
+  padding-right: 4px;
+  width: 100%;
+}
+
+.userRow {
+  display: grid;
+  grid-template-columns: 40px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.userInfo strong {
+  color: #ffffff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.userInfo span {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.unbanButton {
+  width: 38px !important;
+  min-width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 12px;
+  background: rgba(252, 81, 81, 0.15);
+  color: #ff8f8f;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+  margin-top: 0 !important;
+  padding: 0;
+  flex: 0 0 38px;
+  justify-self: end;
+  margin-left: auto;
+}
+
+.unbanButton:hover:not(:disabled) {
+  background: rgba(252, 81, 81, 0.28);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.unbanButton:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.unbanButton svg {
+  width: 18px;
+  height: 18px;
+}
+
+@media screen and (max-width: 520px) {
+  .userRow {
+    grid-template-columns: 40px 1fr;
+  }
+
+  .unbanButton {
+    justify-self: end;
+    width: 38px !important;
+    max-width: 38px;
+  }
+}

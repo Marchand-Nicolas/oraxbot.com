@@ -2,6 +2,7 @@ import styles from "../../../styles/dashboard/OwnedGroup.module.css";
 import advancedStyles from "../../../styles/components/dashboard/groupSettings/advancedSettings.module.css";
 import fire from "../../../public/icons/fire.svg";
 import drop from "../../../public/icons/drop.svg";
+import Image from "next/image";
 import popup from "../../../utils/popup";
 import config from "../../../utils/config";
 import { getCookie } from "../../../utils/cookies";
@@ -9,6 +10,7 @@ import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import Filters from "./settings/filters";
 import TextField from "./settings/textField";
+import BannedUsersWindow from "./BannedUsersWindow";
 
 const updateDisableUserWarningMessage = (
   e,
@@ -204,9 +206,13 @@ const ModernAdvancedSettings = () => {
               </label>
             </div>
             <div className={advancedStyles.illustrationContainer}>
-              <img
+              <Image
                 src="/illustrations/userWarningMessage.png"
                 alt="User warning message example"
+                width={1200}
+                height={800}
+                unoptimized
+                style={{ width: "100%", height: "auto" }}
               />
             </div>
           </div>
@@ -361,6 +367,26 @@ const ModernAdvancedSettings = () => {
                 className="button round dangerous"
               >
                 Delete the group
+              </button>
+
+              <button
+                onClick={() =>
+                  popup(
+                    "Banned users",
+                    <BannedUsersWindow
+                      groupId={groupId}
+                      guildId={guildId}
+                    />,
+                    "default",
+                    {
+                      close: true,
+                      customButtonName: "Close",
+                    },
+                  )
+                }
+                className="button round normal"
+              >
+                View banned users
               </button>
             </div>
           </div>
