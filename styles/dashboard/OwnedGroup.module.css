@@ -256,11 +256,74 @@
   margin: 10px 0;
   gap: 15px;
   transition: all 0.2s ease;
+  position: relative;
 }
 
 .buttonContainer:hover {
   background-color: rgba(128, 128, 128, 0.5);
   transform: translateY(-1px);
+}
+
+.buttonContainerDisabled {
+  cursor: not-allowed;
+}
+
+.buttonContainerDisabled:hover {
+  background-color: rgba(128, 128, 128, 0.333);
+  transform: none;
+}
+
+.buttonContainerDisabled p,
+.buttonContainerDisabled .channelIcon,
+.buttonContainerDisabled .disabledButton {
+  opacity: 0.45;
+  filter: grayscale(1);
+}
+
+.disabledButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #1e1e24;
+  color: #ffffff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  width: max-content;
+  max-width: 240px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #1e1e24;
+}
+
+.buttonContainerDisabled:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
 }
 
 .buttonContainer > div {
