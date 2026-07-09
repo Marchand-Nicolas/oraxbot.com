@@ -8,7 +8,16 @@ import config from "../../utils/config.json";
 import popup from "../../utils/popup";
 import meteor from "../../public/icons/meteor.svg";
 import { checkAdminPerms } from "../../utils/permissions";
+import ActionModal from "../../components/ui/ActionModal";
+import { openTopggVote, startOraxPlusCheckout } from "../../utils/oraxPlus";
 import type { Channel, DiscordGuild, DiscordUser } from "../../types";
+
+interface ChannelLimitData {
+  current: number;
+  limit: number;
+  maxLimit: number;
+  groupOwnerId: string;
+}
 
 export default function JoinGroup() {
   const router = useRouter();
@@ -16,6 +25,9 @@ export default function JoinGroup() {
   const [user, setUser] = useState<DiscordUser | null>(null);
   const [group, setGroup] = useState<Record<string, unknown>>({});
   const [channels, setChannels] = useState<{ result?: Channel[] }>({});
+  const [showChannelLimitModal, setShowChannelLimitModal] = useState(false);
+  const [channelLimitData, setChannelLimitData] =
+    useState<ChannelLimitData | null>(null);
 
   const { linkId } = router.query;
 
@@ -149,6 +161,9 @@ export default function JoinGroup() {
     if (checkAdminPerms(guild)) adminGuildNumber++;
   }
 
+  const isGroupOwner =
+    channelLimitData != null && guildId === channelLimitData.groupOwnerId;
+
   return (
     <>
       <div className={dashboardStyles.background} />
@@ -178,17 +193,36 @@ export default function JoinGroup() {
                       },
                     })
                       .then((res) => res.json())
-                      .then((res: { error?: string }) => {
-                        if (res.error) popup("Error", res.error, "error");
-                        else {
-                          popup(
-                            "Success",
-                            "You have successfully joined the group !",
-                            "success",
-                          );
-                          router.push(`/dashboard?guild=${guildId}`);
-                        }
-                      });
+                      .then(
+                        (res: {
+                          error?: string;
+                          errorCode?: string;
+                          current?: number;
+                          limit?: number;
+                          maxLimit?: number;
+                          groupOwnerId?: string;
+                        }) => {
+                          if (res.errorCode === "channel_limit_reached") {
+                            setChannelLimitData({
+                              current: res.current || 0,
+                              limit: res.limit || 5,
+                              maxLimit: res.maxLimit || 50,
+                              groupOwnerId: res.groupOwnerId || "",
+                            });
+                            setShowChannelLimitModal(true);
+                            return;
+                          }
+                          if (res.error) popup("Error", res.error, "error");
+                          else {
+                            popup(
+                              "Success",
+                              "You have successfully joined the group !",
+                              "success",
+                            );
+                            router.push(`/dashboard?guild=${guildId}`);
+                          }
+                        },
+                      );
                   }}
                   key={"channel_" + index}
                   className={styles.channelButton}
@@ -293,6 +327,70 @@ export default function JoinGroup() {
           </div>
         )}
       </div>
+      {showChannelLimitModal && channelLimitData && (
+        <ActionModal
+          title="Channel limit reached"
+          description={
+            <div>
+              <p>
+                This group already has{" "}
+                <strong>
+                  {channelLimitData.current}/{channelLimitData.limit}
+                </strong>{" "}
+                linked channels. Choose an option below to continue.
+              </p>
+
+              <div style={{ marginTop: "16px" }}>
+                <p style={{ fontWeight: 600, marginBottom: "4px" }}>
+                  Vote on Top.gg
+                </p>
+                <p style={{ fontSize: "14px", opacity: 0.8 }}>
+                  Vote for Orax on Top.gg to join this group right away, even
+                  past the limit.
+                </p>
+              </div>
+
+              <div style={{ marginTop: "16px" }}>
+                <p style={{ fontWeight: 600, marginBottom: "4px" }}>
+                  Orax Plus subscription
+                </p>
+                {isGroupOwner ? (
+                  <p style={{ fontSize: "14px", opacity: 0.8 }}>
+                    Subscribe to Orax Plus ($2.99/mo) to raise the limit to{" "}
+                    {channelLimitData.maxLimit} channels per group.
+                  </p>
+                ) : (
+                  <p style={{ fontSize: "14px", opacity: 0.8 }}>
+                    Only the group owner can subscribe to increase this limit.
+                  </p>
+                )}
+              </div>
+            </div>
+          }
+          actions={[
+            {
+              label: "Vote on Top.gg",
+              variant: "primary",
+              onClick: () => {
+                setShowChannelLimitModal(false);
+                openTopggVote();
+              },
+            },
+            {
+              label: isGroupOwner
+                ? "Subscribe $2.99/mo"
+                : "Subscribe (owner only)",
+              variant: "secondary",
+              disabled: !isGroupOwner,
+              onClick: () => {
+                setShowChannelLimitModal(false);
+                startOraxPlusCheckout(channelLimitData.groupOwnerId);
+              },
+            },
+          ]}
+          onClose={() => setShowChannelLimitModal(false)}
+        />
+      )}
     </>
   );
 }

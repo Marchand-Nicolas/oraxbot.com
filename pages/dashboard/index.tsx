@@ -15,6 +15,7 @@ import { notify } from "../../components/ui/NotificationSystem";
 import ActionModal from "../../components/ui/ActionModal";
 import ErrorBoundary from "../../components/ui/ErrorBoundary";
 import { getStorage, setStorage } from "../../utils/storage";
+import { startOraxPlusCheckout as startCheckout } from "../../utils/oraxPlus";
 import { checkAdminPerms } from "../../utils/permissions";
 
 function formatRemainingPlanTime(expiresAt?: string | null) {
@@ -313,6 +314,8 @@ export default function Dashboard() {
     !oraxPlus?.active || oraxPlus.entitlement?.source === "topgg_vote";
   const isAtGroupLimit = ownedGroupsCount >= groupLimit;
 
+  const startOraxPlusCheckout = () => startCheckout(guildId as string);
+
   async function startOraxPlusVote() {
     const voteWindow = window.open("about:blank", "_blank");
 
@@ -345,9 +348,7 @@ export default function Dashboard() {
       }
 
       const voteUrl =
-        typeof data.vote_url === "string"
-          ? data.vote_url
-          : "https://top.gg/bot/813377282109866024/vote";
+        typeof data.vote_url === "string" ? data.vote_url : config.topggVoteUrl;
       if (voteWindow) {
         voteWindow.location.href = voteUrl;
       } else {
@@ -429,38 +430,6 @@ export default function Dashboard() {
     oraxPlus?.entitlement?.expiresAt,
     voteBaselineExpiresAt,
   ]);
-
-  async function startOraxPlusCheckout() {
-    try {
-      const response = await fetch(
-        `${config.apiV2}create_orax_plus_checkout_session`,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            guildId,
-            token: getCookie("token"),
-            successUrl: `${window.location.origin}/dashboard?guild=${guildId}&orax_plus=success`,
-            cancelUrl: `${window.location.origin}/dashboard?guild=${guildId}&orax_plus=cancelled`,
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        },
-      );
-      const data = await response.json();
-      if (!response.ok || !data?.result || !data?.url) {
-        throw new Error(data?.message || "Unable to start Stripe Checkout.");
-      }
-      window.location.href = data.url;
-    } catch (error) {
-      notify.error(
-        "Checkout failed",
-        error instanceof Error
-          ? error.message
-          : "Unable to start Orax Plus checkout.",
-      );
-    }
-  }
 
   useEffect(() => {
     if (!guild) return;
