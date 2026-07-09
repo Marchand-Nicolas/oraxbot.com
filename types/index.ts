@@ -35,10 +35,22 @@ export interface OwnedGroup {
   [key: string]: unknown;
 }
 
+export interface OraxPlusStatus {
+  active?: boolean;
+  plan?: "free" | "orax_plus" | string;
+  limits?: {
+    groupsPerGuild?: number;
+    channelsPerGroup?: number;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
 export interface GuildData {
   bot?: boolean;
   ownedGroups?: OwnedGroup[];
   settings?: GuildSettings;
+  oraxPlus?: OraxPlusStatus;
   [key: string]: unknown;
 }
 

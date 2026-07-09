@@ -146,6 +146,7 @@ const Notification = ({
 };
 
 const NotificationSystem = () => {
+  const [isMounted, setIsMounted] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
   const addNotification = useCallback((notification: AddNotificationOptions) => {
@@ -170,13 +171,14 @@ const NotificationSystem = () => {
 
   // Store reference for global access
   useEffect(() => {
+    setIsMounted(true);
     addNotificationRef = addNotification;
     return () => {
       addNotificationRef = null;
     };
   }, [addNotification]);
 
-  if (typeof window === "undefined") return null;
+  if (!isMounted) return null;
 
   return createPortal(
     <div className={styles.container}>

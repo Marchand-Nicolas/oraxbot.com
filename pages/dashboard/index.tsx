@@ -21,7 +21,9 @@ export default function Dashboard() {
   const [user, setUser] = useState<DiscordUser | undefined>(undefined);
   const [guilds, setGuilds] = useState<Guild[]>([]);
   const [guildDatas, setGuildDatas] = useState<GuildData>({});
-  const [batchGuildDatas, setBatchGuildDatas] = useState<Record<string, GuildData>>({});
+  const [batchGuildDatas, setBatchGuildDatas] = useState<
+    Record<string, GuildData>
+  >({});
   const [settings, setSettings] = useState<GuildSettings>({
     lang: 0,
     public: false,
@@ -135,27 +137,33 @@ export default function Dashboard() {
             },
           })
             .then((res) => res.json())
-              .then((guilds: (Guild[] & { retry_after?: number }) | { retry_after?: number }) => {
-              if (guilds.retry_after) {
-                setTimeout(() => {
-                  loadUserData(token);
-                }, guilds.retry_after + 50);
-                return;
-              }
-              if (Array.isArray(guilds)) {
-                const parsedGuilds = guilds
-                  .filter((guild) => checkAdminPerms(guild))
-                  .map((guild) => ({
-                    id: guild.id,
-                    name: guild.name,
-                    icon: guild.icon,
-                    permissions_new: guild.permissions_new,
-                  }));
-                setGuilds(parsedGuilds);
-                setStorage("cachedGuilds", JSON.stringify(parsedGuilds));
-              }
-              setLoading(false);
-            })
+            .then(
+              (
+                guilds:
+                  | (Guild[] & { retry_after?: number })
+                  | { retry_after?: number },
+              ) => {
+                if (guilds.retry_after) {
+                  setTimeout(() => {
+                    loadUserData(token);
+                  }, guilds.retry_after + 50);
+                  return;
+                }
+                if (Array.isArray(guilds)) {
+                  const parsedGuilds = guilds
+                    .filter((guild) => checkAdminPerms(guild))
+                    .map((guild) => ({
+                      id: guild.id,
+                      name: guild.name,
+                      icon: guild.icon,
+                      permissions_new: guild.permissions_new,
+                    }));
+                  setGuilds(parsedGuilds);
+                  setStorage("cachedGuilds", JSON.stringify(parsedGuilds));
+                }
+                setLoading(false);
+              },
+            )
             .catch((error) => {
               notify.error(
                 "Data Loading Failed",
@@ -195,10 +203,14 @@ export default function Dashboard() {
       .then((res: { result?: boolean; servers?: GuildData[] }) => {
         if (res.result && res.servers) {
           // Convert array to object keyed by guildId
-          const serversById = res.servers.reduce<Record<string, GuildData>>((acc, server) => {
-            if (typeof server.guildId === "string") acc[server.guildId] = server;
-            return acc;
-          }, {});
+          const serversById = res.servers.reduce<Record<string, GuildData>>(
+            (acc, server) => {
+              if (typeof server.guildId === "string")
+                acc[server.guildId] = server;
+              return acc;
+            },
+            {},
+          );
           setBatchGuildDatas(serversById);
         }
       })
@@ -206,6 +218,21 @@ export default function Dashboard() {
         console.error("Error fetching batch server data:", error);
       });
   }, [guilds]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const oraxPlusResult = params.get("orax_plus");
+    if (oraxPlusResult === "success") {
+      notify.success(
+        "Payment received",
+        "Orax Plus will activate as soon as Stripe confirms the subscription.",
+      );
+      setTimeout(() => setRefreshGuildDatas(true), 1500);
+    } else if (oraxPlusResult === "cancelled") {
+      notify.error("Checkout cancelled", "Orax Plus was not activated.");
+    }
+  }, []);
 
   function imgError(guildId: string) {
     const guildElement = document.getElementById("guild_" + guildId);
@@ -240,10 +267,111 @@ export default function Dashboard() {
       };
   }
 
+  const ownedGroupsCount = guildDatas.ownedGroups?.length || 0;
+  const oraxPlus = guildDatas.oraxPlus;
+  const groupLimit = oraxPlus?.limits?.groupsPerGuild || 2;
+  const channelLimit = oraxPlus?.limits?.channelsPerGroup || 5;
+  const isAtGroupLimit = ownedGroupsCount >= groupLimit;
+
+  async function startOraxPlusVote() {
+    const voteWindow = window.open("about:blank", "_blank");
+
+    try {
+      const response = await fetch(`${config.apiV2}start_orax_plus_vote`, {
+        method: "POST",
+        body: JSON.stringify({
+          guildId,
+          token: getCookie("token"),
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await response.json();
+      if (!response.ok || !data?.result) {
+        throw new Error(
+          data?.message || "Unable to prepare the Top.gg vote for this server.",
+        );
+      }
+
+      if (data.activated) {
+        voteWindow?.close();
+        notify.success(
+          "Orax Plus activated",
+          "Your latest Top.gg vote was applied to this server.",
+        );
+        setRefreshGuildDatas(true);
+        return;
+      }
+
+      const voteUrl =
+        typeof data.vote_url === "string"
+          ? data.vote_url
+          : "https://top.gg/bot/813377282109866024/vote";
+      if (voteWindow) {
+        voteWindow.location.href = voteUrl;
+      } else {
+        window.location.href = voteUrl;
+      }
+      notify.success(
+        "Vote opened",
+        "Orax Plus will activate automatically when Top.gg sends the vote.",
+      );
+    } catch (error) {
+      voteWindow?.close();
+      notify.error(
+        "Vote setup failed",
+        error instanceof Error
+          ? error.message
+          : "Unable to prepare the Top.gg vote.",
+      );
+    }
+  }
+
+  async function startOraxPlusCheckout() {
+    try {
+      const response = await fetch(
+        `${config.apiV2}create_orax_plus_checkout_session`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            guildId,
+            token: getCookie("token"),
+            successUrl: `${window.location.origin}/dashboard?guild=${guildId}&orax_plus=success`,
+            cancelUrl: `${window.location.origin}/dashboard?guild=${guildId}&orax_plus=cancelled`,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+      const data = await response.json();
+      if (!response.ok || !data?.result || !data?.url) {
+        throw new Error(data?.message || "Unable to start Stripe Checkout.");
+      }
+      window.location.href = data.url;
+    } catch (error) {
+      notify.error(
+        "Checkout failed",
+        error instanceof Error
+          ? error.message
+          : "Unable to start Orax Plus checkout.",
+      );
+    }
+  }
+
   useEffect(() => {
-    if (refreshGuildDatas) return setRefreshGuildDatas(false);
     if (!guild) return;
     if (!guild.id) return;
+    if (refreshGuildDatas) {
+      setBatchGuildDatas((previous) => {
+        const next = { ...previous };
+        delete next[guild!.id];
+        return next;
+      });
+      setRefreshGuildDatas(false);
+      return;
+    }
     if (guild.id !== lastLoadedGuildId) {
       setGuildDatas({});
       setSettings({});
@@ -402,15 +530,25 @@ export default function Dashboard() {
                 </button>
               </a>
               <button
-                onClick={() =>
+                disabled={isAtGroupLimit}
+                onClick={() => {
+                  if (isAtGroupLimit) {
+                    notify.error(
+                      "Group limit reached",
+                      "Activate Orax Plus to create more groups on this server.",
+                    );
+                    return;
+                  }
                   renderWithRoot(
                     <CreateGroupMenu
                       guildId={guildId}
+                      ownedGroupsCount={ownedGroupsCount}
+                      oraxPlus={oraxPlus}
                       setRefreshGuildDatas={setRefreshGuildDatas}
                     />,
                     document.getElementById("menu"),
-                  )
-                }
+                  );
+                }}
                 className={styles.button}
               >
                 Create an interserver group
@@ -495,12 +633,53 @@ export default function Dashboard() {
         {guildDatas.bot ? (
           <>
             <br></br>
+            <section className={styles.oraxPlusPanel}>
+              <div>
+                <span className={styles.planBadge}>
+                  {oraxPlus?.active ? "Orax Plus" : "Free plan"}
+                </span>
+                <h2>Orax Plus</h2>
+                <p>
+                  {oraxPlus?.active
+                    ? "This server can use the extended Orax Plus limits."
+                    : "Vote once a week on Top.gg or subscribe monthly to unlock higher limits for this server. Vote activation is automatic after Top.gg sends the webhook."}
+                </p>
+              </div>
+              <div className={styles.planStats}>
+                <div>
+                  <strong>
+                    {ownedGroupsCount}/{groupLimit}
+                  </strong>
+                  <span>owned groups</span>
+                </div>
+                <div>
+                  <strong>{channelLimit}</strong>
+                  <span>channels per group</span>
+                </div>
+              </div>
+              {!oraxPlus?.active && (
+                <div className={styles.planActions}>
+                  <button
+                    className={styles.secondaryButton}
+                    onClick={startOraxPlusVote}
+                  >
+                    Vote on Top.gg
+                  </button>
+                  <button
+                    className={styles.primaryButton}
+                    onClick={startOraxPlusCheckout}
+                  >
+                    Subscribe $2.99/mo
+                  </button>
+                </div>
+              )}
+            </section>
             <ErrorBoundary>
               {guildDatas.ownedGroups && guildDatas.ownedGroups.length ? (
                 <section className={styles.groupContainer}>
                   <h2>📺 Owned groups</h2>
                   <div className="line wrap gap-1">
-                {guildDatas.ownedGroups?.map((group) => (
+                    {guildDatas.ownedGroups?.map((group) => (
                       <Link
                         key={"ownedGroup_" + group.id}
                         href={`/dashboard/ownedgroup/${group.id}?guild=${guild.id}&icon=${guild.icon}&groupName=${group.name}`}
@@ -535,37 +714,42 @@ export default function Dashboard() {
             <HiddenMenu title="🚫 Service limits">
               <section className={styles.section}>
                 <p className="hint">
-                  There are no paid products for Orax, everything is free.
-                  <br />
-                  However, to avoid abuse, we have set limits that we hope will
-                  not harm your experience.
-                  <br />
-                  If you need to exceed them, please contact us.
+                  Free servers can own up to 2 groups and link up to 5 channels
+                  per group. Orax Plus raises this server to 100 groups and 50
+                  channels per group.
                 </p>
                 <div className="line wrap">
-                  <p>{guildDatas.ownedGroups?.length || "0"}/100 owned groups</p>
+                  <p>
+                    {ownedGroupsCount}/{groupLimit} owned groups
+                  </p>
                   <div className={[styles.progress, "progress"].join(" ")}>
                     <div
                       className="shrinker"
-                      style={{ width: (guildDatas.ownedGroups?.length || 0) + "%" }}
+                      style={{
+                        width:
+                          Math.min((ownedGroupsCount / groupLimit) * 100, 100) +
+                          "%",
+                      }}
                     />
                   </div>
                 </div>
                 {guildDatas.ownedGroups?.map((group) => (
                   <div key={"group_" + group.id} className="line wrap">
                     <p>
-                      {group.name} : {group.linkedChannels.length || "0"}/30
+                      {group.name} : {group.linkedChannels.length || "0"}/
+                      {channelLimit}
                       connected channels
                     </p>
-                    <div
-                      className={[styles.progress, "progress"].join(" ")}
-                    >
+                    <div className={[styles.progress, "progress"].join(" ")}>
                       <div
                         className="shrinker"
                         style={{
                           width:
-                            ((group.linkedChannels.length / 30) * 100 || 0) +
-                            "%",
+                            (Math.min(
+                              (group.linkedChannels.length / channelLimit) *
+                                100,
+                              100,
+                            ) || 0) + "%",
                         }}
                       />
                     </div>

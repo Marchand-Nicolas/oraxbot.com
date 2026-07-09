@@ -5,3 +5,19 @@
 .cancelButton {
   background: rgb(255, 108, 108) !important;
 }
+
+.quotaHint {
+  margin: 0 0 12px 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 14px;
+}
+
+.limitWarning {
+  margin: 0 0 14px 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 184, 77, 0.45);
+  border-radius: 6px;
+  color: #ffe1a3;
+  background: rgba(255, 184, 77, 0.12);
+  font-size: 14px;
+}

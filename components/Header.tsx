@@ -28,7 +28,7 @@ export default function NavBar({ theme = "light" }: { theme?: string }) {
       className={`${styles.nav} ${theme === "dark" ? styles.navDark : styles.navLight}`}
     >
       <Link href="/" className="line">
-        <Image src="/logo.png" alt="Captcha logo" width={50} height={50} />
+        <Image src="/logo.png" alt="Orax logo" width={50} height={50} />
         <strong className={styles.title}>Orax bot</strong>
       </Link>
       <a href="https://ko-fi.com/A0A51KMQ7J" target="_blank">
