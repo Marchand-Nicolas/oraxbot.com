@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import styles from "../../styles/components/dashboard/CreateGroupMenu.module.css";
+import ActionModal from "../ui/ActionModal";
 import config from "../../utils/config.json";
 import { unmountRoot } from "../../utils/reactRoot";
 import { notify } from "../ui/NotificationSystem";
@@ -11,11 +12,14 @@ interface CreateGroupMenuProps {
   setRefreshGuildDatas: (value: boolean) => void;
   ownedGroupsCount?: number;
   oraxPlus?: OraxPlusStatus;
+  onStartOraxPlusVote?: () => void;
+  onStartOraxPlusCheckout?: () => void;
 }
 
 export default function CreateGroupMenu(props: CreateGroupMenuProps) {
   const serverIp = config.serverIp;
   const [channels, setChannels] = useState<Channel[]>([]);
+  const [showGroupLimitModal, setShowGroupLimitModal] = useState(false);
   const groupLimit = props.oraxPlus?.limits?.groupsPerGuild || 2;
   const ownedGroupsCount = props.ownedGroupsCount || 0;
   const isAtGroupLimit = ownedGroupsCount >= groupLimit;
@@ -46,8 +50,9 @@ export default function CreateGroupMenu(props: CreateGroupMenuProps) {
   }, [props.guildId, serverIp]);
 
   return (
-    <div className={"popup"}>
-      <div className="container">
+    <>
+      <div className={"popup"}>
+        <div className="container">
         <div>
           <Image
             alt="decoration"
@@ -99,13 +104,9 @@ export default function CreateGroupMenu(props: CreateGroupMenuProps) {
           </button>
           <button
             className="default"
-            disabled={isAtGroupLimit}
             onClick={() => {
               if (isAtGroupLimit) {
-                notify.error(
-                  "Group limit reached",
-                  "This server cannot create another group with its current plan.",
-                );
+                setShowGroupLimitModal(true);
                 return;
               }
               const groupNameEl = document.getElementById(
@@ -174,6 +175,39 @@ export default function CreateGroupMenu(props: CreateGroupMenuProps) {
           </button>
         </div>
       </div>
-    </div>
+      </div>
+      {showGroupLimitModal && (
+        <ActionModal
+          title="Group limit reached"
+          description={
+            <p>
+              This server has reached its current group quota. Vote on Top.gg or
+              subscribe to Orax Plus to unlock more interserver groups.
+            </p>
+          }
+          actions={[
+            {
+              label: "Vote on Top.gg",
+              variant: "secondary",
+              disabled: !props.onStartOraxPlusVote,
+              onClick: () => {
+                setShowGroupLimitModal(false);
+                props.onStartOraxPlusVote?.();
+              },
+            },
+            {
+              label: "Subscribe $2.99/mo",
+              variant: "primary",
+              disabled: !props.onStartOraxPlusCheckout,
+              onClick: () => {
+                setShowGroupLimitModal(false);
+                props.onStartOraxPlusCheckout?.();
+              },
+            },
+          ]}
+          onClose={() => setShowGroupLimitModal(false)}
+        />
+      )}
+    </>
   );
 }

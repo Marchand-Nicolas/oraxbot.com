@@ -1,0 +1,110 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.62);
+  backdrop-filter: blur(8px);
+}
+
+.modal {
+  position: relative;
+  width: min(100%, 460px);
+  padding: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 16px;
+  color: white;
+  background: linear-gradient(
+    145deg,
+    rgba(16, 24, 39, 0.98),
+    rgba(35, 27, 71, 0.98)
+  );
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
+}
+
+.closeButton {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+}
+
+.closeButton:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.modal h2 {
+  margin: 0 36px 12px 0;
+}
+
+.description {
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.55;
+}
+
+.description p {
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.actionButton {
+  flex: 1;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.actionButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.32);
+}
+
+.actionButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.primary {
+  background: linear-gradient(135deg, rgb(0, 161, 232), #8151fc);
+}
+
+.secondary {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.danger {
+  background: rgba(255, 108, 108, 0.85);
+}
+
+@media (max-width: 560px) {
+  .modal {
+    padding: 24px 20px;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+}

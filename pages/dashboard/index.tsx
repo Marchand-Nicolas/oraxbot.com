@@ -12,6 +12,7 @@ import Settings from "../../components/dashboard/Settings";
 import Loading from "../../components/Loading";
 import HiddenMenu from "../../components/ui/hiddenMenu";
 import { notify } from "../../components/ui/NotificationSystem";
+import ActionModal from "../../components/ui/ActionModal";
 import ErrorBoundary from "../../components/ui/ErrorBoundary";
 import { getStorage, setStorage } from "../../utils/storage";
 import { checkAdminPerms } from "../../utils/permissions";
@@ -60,6 +61,7 @@ export default function Dashboard() {
   const [paymentProgress, setPaymentProgress] = useState(0);
   const [refreshGuildDatas, setRefreshGuildDatas] = useState(false);
   const [isPollingOraxPlusVote, setIsPollingOraxPlusVote] = useState(false);
+  const [showGroupLimitModal, setShowGroupLimitModal] = useState(false);
   const [voteBaselineExpiresAt, setVoteBaselineExpiresAt] = useState<
     string | null
   >(null);
@@ -630,13 +632,9 @@ export default function Dashboard() {
                 </button>
               </a>
               <button
-                disabled={isAtGroupLimit}
                 onClick={() => {
                   if (isAtGroupLimit) {
-                    notify.error(
-                      "Group limit reached",
-                      "Activate Orax Plus to create more groups on this server.",
-                    );
+                    setShowGroupLimitModal(true);
                     return;
                   }
                   renderWithRoot(
@@ -644,6 +642,8 @@ export default function Dashboard() {
                       guildId={guildId}
                       ownedGroupsCount={ownedGroupsCount}
                       oraxPlus={oraxPlus}
+                      onStartOraxPlusVote={startOraxPlusVote}
+                      onStartOraxPlusCheckout={startOraxPlusCheckout}
                       setRefreshGuildDatas={setRefreshGuildDatas}
                     />,
                     document.getElementById("menu"),
@@ -869,6 +869,36 @@ export default function Dashboard() {
         <div id="container" key={guild.id + "_" + paymentProgress}></div>
         <br></br>
       </div>
+      {showGroupLimitModal && (
+        <ActionModal
+          title="Group limit reached"
+          description={
+            <p>
+              This server has reached its current group quota. Vote on Top.gg or
+              subscribe to Orax Plus to unlock more interserver groups.
+            </p>
+          }
+          actions={[
+            {
+              label: "Vote on Top.gg",
+              variant: "secondary",
+              onClick: () => {
+                setShowGroupLimitModal(false);
+                startOraxPlusVote();
+              },
+            },
+            {
+              label: "Subscribe $2.99/mo",
+              variant: "primary",
+              onClick: () => {
+                setShowGroupLimitModal(false);
+                startOraxPlusCheckout();
+              },
+            },
+          ]}
+          onClose={() => setShowGroupLimitModal(false)}
+        />
+      )}
       {loading && <Loading />}
     </>
   );
