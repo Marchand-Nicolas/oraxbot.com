@@ -1,0 +1,585 @@
+import styles from "../../styles/Dashboard.module.css";
+import config from "../../utils/config.json";
+import type { DiscordUser, Guild, GuildData, GuildSettings } from "../../types";
+import { useState, useEffect } from "react";
+import { getCookie, setCookie } from "../../utils/cookies";
+import Link from "next/link";
+import { renderWithRoot } from "../../utils/reactRoot";
+import popup from "../../utils/popup";
+import meteor from "../../public/icons/meteor.svg";
+import CreateGroupMenu from "../../components/dashboard/CreateGroupMenu";
+import Settings from "../../components/dashboard/Settings";
+import Loading from "../../components/Loading";
+import HiddenMenu from "../../components/ui/hiddenMenu";
+import { notify } from "../../components/ui/NotificationSystem";
+import ErrorBoundary from "../../components/ui/ErrorBoundary";
+import { getStorage, setStorage } from "../../utils/storage";
+import { checkAdminPerms } from "../../utils/permissions";
+
+export default function Dashboard() {
+  const serverIp = config.serverIp;
+  const [user, setUser] = useState<DiscordUser | undefined>(undefined);
+  const [guilds, setGuilds] = useState<Guild[]>([]);
+  const [guildDatas, setGuildDatas] = useState<GuildData>({});
+  const [batchGuildDatas, setBatchGuildDatas] = useState<Record<string, GuildData>>({});
+  const [settings, setSettings] = useState<GuildSettings>({
+    lang: 0,
+    public: false,
+    public_link: "",
+    default: true,
+  });
+  const [paymentProgress, setPaymentProgress] = useState(0);
+  const [refreshGuildDatas, setRefreshGuildDatas] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [lastLoadedGuildId, setLastLoadedGuildId] = useState("");
+
+  useEffect(() => {
+    let token = getCookie("token");
+    let cachedUserDatas = getStorage("cachedUserDatas");
+    let cachedGuilds = getStorage("cachedGuilds");
+    if (cachedGuilds && cachedUserDatas && token) {
+      setLoading(false);
+      try {
+        setUser(JSON.parse(cachedUserDatas));
+        setGuilds(JSON.parse(cachedGuilds));
+      } catch (error) {
+        console.error("Error parsing cached data:", error);
+        setTimeout(() => {
+          notify.error(
+            "Error parsing cached data",
+            "An error occurred while parsing cached data. Please try refreshing the page.",
+          );
+        }, 1000);
+        setUser(undefined);
+        setGuilds([]);
+      }
+    }
+    const params = new URLSearchParams(window.location.search);
+    const state = params.get("state");
+    if (!token || token === "undefined" || state) {
+      const code = params.get("code");
+      if (code) {
+        fetch(`${serverIp}login`, {
+          method: "POST",
+          body: JSON.stringify({ token: code }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((res) => res.json())
+          .then((res) => {
+            if (!res.access_token || res.access_token === "undefined") {
+              notify.error(
+                "Login Failed",
+                "Invalid authentication response. Redirecting...",
+              );
+              setTimeout(() => (window.location.href = "/dashboard"), 2000);
+              return;
+            }
+            setCookie("token", res.access_token, res.expires_in - 1000);
+            token = res.access_token;
+            if (state) {
+              window.location.href = state;
+              return;
+            } else {
+              loadUserData(res.access_token);
+            }
+          })
+          .catch((error) => {
+            notify.error(
+              "Login Failed",
+              "Unable to complete authentication. Please try again.",
+            );
+            setTimeout(() => (window.location.href = "/dashboard"), 3000);
+          });
+      } else {
+        const redirectUri =
+          encodeURI(process.env.NEXT_PUBLIC_WEBSITE_URL || "") + "%2Fdashboard";
+        window.location.href = `https://discord.com/api/oauth2/authorize?client_id=812298057470967858&redirect_uri=${redirectUri}&response_type=code&scope=identify%20guilds`;
+        return;
+      }
+    } else {
+      loadUserData(token);
+    }
+
+    function loadUserData(token: string) {
+      fetch("https://discordapp.com/api/users/@me", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Accept: "application/json",
+          Authorization: "Bearer " + token,
+        },
+      })
+        .then((res) => res.json())
+        .then((userDatas) => {
+          if (userDatas.retry_after) {
+            setTimeout(() => {
+              loadUserData(token);
+            }, userDatas.retry_after + 50);
+            return;
+          }
+          if (userDatas.message === "401: Unauthorized") {
+            setCookie("token", "", 0);
+            window.location.href = "/dashboard";
+            return;
+          }
+          setUser(userDatas);
+          setStorage("cachedUserDatas", JSON.stringify(userDatas));
+          fetch("https://discordapp.com/api/v6/users/@me/guilds", {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+              Accept: "application/json",
+              Authorization: "Bearer " + token,
+            },
+          })
+            .then((res) => res.json())
+              .then((guilds: (Guild[] & { retry_after?: number }) | { retry_after?: number }) => {
+              if (guilds.retry_after) {
+                setTimeout(() => {
+                  loadUserData(token);
+                }, guilds.retry_after + 50);
+                return;
+              }
+              if (Array.isArray(guilds)) {
+                const parsedGuilds = guilds
+                  .filter((guild) => checkAdminPerms(guild))
+                  .map((guild) => ({
+                    id: guild.id,
+                    name: guild.name,
+                    icon: guild.icon,
+                    permissions_new: guild.permissions_new,
+                  }));
+                setGuilds(parsedGuilds);
+                setStorage("cachedGuilds", JSON.stringify(parsedGuilds));
+              }
+              setLoading(false);
+            })
+            .catch((error) => {
+              notify.error(
+                "Data Loading Failed",
+                "Unable to load your Discord data. Please try refreshing the page.",
+              );
+              setLoading(false);
+            });
+        })
+        .catch((error) => {
+          notify.error(
+            "Data Loading Failed",
+            "Unable to load your Discord data. Please try refreshing the page.",
+          );
+          setLoading(false);
+        });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (guilds.length === 0) return;
+
+    const token = getCookie("token");
+    if (!token) return;
+
+    // Fetch batch data for all guilds
+    fetch(`${config.apiV2}get_servers_data_batch`, {
+      method: "POST",
+      body: JSON.stringify({
+        guildIds: guilds.map((g) => g.id),
+        token: token,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => res.json())
+      .then((res: { result?: boolean; servers?: GuildData[] }) => {
+        if (res.result && res.servers) {
+          // Convert array to object keyed by guildId
+          const serversById = res.servers.reduce<Record<string, GuildData>>((acc, server) => {
+            if (typeof server.guildId === "string") acc[server.guildId] = server;
+            return acc;
+          }, {});
+          setBatchGuildDatas(serversById);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching batch server data:", error);
+      });
+  }, [guilds]);
+
+  function imgError(guildId: string) {
+    const guildElement = document.getElementById("guild_" + guildId);
+    const img = guildElement?.querySelector("img");
+    if (img) img.src = "/assets/default_guild_icon.jpg";
+  }
+  function endImgLoading(guildId: string) {
+    const guildElement = document.getElementById("guild_" + guildId);
+    guildElement?.classList.remove("loading");
+  }
+
+  const urlGuildId =
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search).get("guild")
+      : "";
+  const guildId =
+    urlGuildId || guilds.find((g) => checkAdminPerms(g))?.id || "";
+  let guild: Guild | undefined = guilds.find((guild) => guild.id === guildId);
+
+  if (!guild) {
+    if (guilds.length > 0) {
+      guild = guilds.find((guild) => checkAdminPerms(guild));
+    }
+    if (!guild)
+      guild = {
+        id: "",
+        name: "",
+        icon: "",
+        owner: false,
+        permissions: 2147483647,
+        permissions_new: "4398046511103",
+      };
+  }
+
+  useEffect(() => {
+    if (refreshGuildDatas) return setRefreshGuildDatas(false);
+    if (!guild) return;
+    if (!guild.id) return;
+    if (guild.id !== lastLoadedGuildId) {
+      setGuildDatas({});
+      setSettings({});
+    }
+
+    // Use batch data if available
+    if (batchGuildDatas[guild.id]) {
+      const serverData = batchGuildDatas[guild.id];
+      setGuildDatas(serverData);
+      if (serverData.settings) setSettings(serverData.settings);
+      setLastLoadedGuildId(guild.id);
+    } else {
+      // Fallback to individual request if batch data is not available
+      fetch(`${config.apiV2}get_server_data`, {
+        method: "POST",
+        body: JSON.stringify({
+          guildId: guild.id,
+          token: getCookie("token"),
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+        .then((res) => res.json())
+        .then((res) => {
+          if (res.result) {
+            setGuildDatas(res);
+            setSettings(res.settings);
+            setLastLoadedGuildId(guild.id);
+          } else {
+            setGuildDatas({});
+            setSettings({});
+            notify.error(
+              "Server Data Error",
+              "Unable to load server configuration. Some features may not work properly.",
+              { duration: 8000 },
+            );
+          }
+        })
+        .catch((error) => {
+          setGuildDatas({});
+          setSettings({});
+          notify.error(
+            "Server Data Error",
+            "Unable to load server configuration. Some features may not work properly.",
+            { duration: 8000 },
+          );
+        });
+    }
+  }, [guild, paymentProgress, refreshGuildDatas, batchGuildDatas]);
+
+  return (
+    <>
+      <div
+        style={{
+          backgroundImage: guild.icon
+            ? `url('https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.webp?size=96')`
+            : undefined,
+        }}
+        className={styles.background}
+      />
+      <nav className={styles.navbar}>
+        {guilds.length > 0
+          ? guilds
+              .sort((a, b) => {
+                const aHasBot = batchGuildDatas[a.id]?.bot ? 1 : 0;
+                const bHasBot = batchGuildDatas[b.id]?.bot ? 1 : 0;
+                return bHasBot - aHasBot;
+              })
+              .map((g) =>
+                checkAdminPerms(g) ? (
+                  <Link key={"nav_guild_" + g.id} href={"?guild=" + g.id}>
+                    <div
+                      id={"guild_" + g.id}
+                      className={[
+                        styles.navGuild,
+                        !document.getElementById("guild_" + g.id) && "loading",
+                        guild?.id === g.id ? styles.selected : null,
+                        (batchGuildDatas[g.id]?.ownedGroups?.length ?? 0) > 0
+                          ? styles.hasGroups
+                          : null,
+                      ].join(" ")}
+                    >
+                      <img
+                        className={styles.guildIcon}
+                        onLoad={() => endImgLoading(g.id)}
+                        onError={() => imgError(g.id)}
+                        src={
+                          g.icon
+                            ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.webp?size=96`
+                            : "/assets/default_guild_icon.jpg"
+                        }
+                        alt={g.name + " (guild icon)"}
+                      />
+                    </div>
+                  </Link>
+                ) : null,
+              )
+          : [...Array(3)].map((o, index) => (
+              <div key={"nav_guild_" + index} className={styles.navGuild}>
+                <div
+                  className={[styles.guildIcon, styles.placeHolder].join(" ")}
+                />
+              </div>
+            ))}
+      </nav>
+      <div className={styles.page}>
+        <h1 className={styles.title}>{guild.name}</h1>
+        <div className={styles.actionsContainer}>
+          <a
+            href="https://discord.gg/e3pBtbum4A"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <button className={styles.button}>
+              Support{" "}
+              <strong>
+                <svg
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M16.712 4.33a9.027 9.027 0 011.652 1.306c.51.51.944 1.064 1.306 1.652M16.712 4.33l-3.448 4.138m3.448-4.138a9.014 9.014 0 00-9.424 0M19.67 7.288l-4.138 3.448m4.138-3.448a9.014 9.014 0 010 9.424m-4.138-5.976a3.736 3.736 0 00-.88-1.388 3.737 3.737 0 00-1.388-.88m2.268 2.268a3.765 3.765 0 010 2.528m-2.268-4.796a3.765 3.765 0 00-2.528 0m4.796 4.796c-.181.506-.475.982-.88 1.388a3.736 3.736 0 01-1.388.88m2.268-2.268l4.138 3.448m0 0a9.027 9.027 0 01-1.306 1.652c-.51.51-1.064.944-1.652 1.306m0 0l-3.448-4.138m3.448 4.138a9.014 9.014 0 01-9.424 0m5.976-4.138a3.765 3.765 0 01-2.528 0m0 0a3.736 3.736 0 01-1.388-.88 3.737 3.737 0 01-.88-1.388m2.268 2.268L7.288 19.67m0 0a9.024 9.024 0 01-1.652-1.306 9.027 9.027 0 01-1.306-1.652m0 0l4.138-3.448M4.33 16.712a9.014 9.014 0 010-9.424m4.138 5.976a3.765 3.765 0 010-2.528m0 0c.181-.506.475-.982.88-1.388a3.736 3.736 0 011.388-.88m-2.268 2.268L4.33 7.288m6.406 1.18L7.288 4.33m0 0a9.024 9.024 0 00-1.652 1.306A9.025 9.025 0 004.33 7.288"
+                  />
+                </svg>
+              </strong>
+            </button>
+          </a>
+          {guildDatas.bot ? (
+            <>
+              <a
+                href="https://ko-fi.com/nicolasmarchand"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <button className={styles.button}>
+                  Donate ❤️{" "}
+                  <strong>
+                    <svg
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0 1 12 15a9.065 9.065 0 0 0-6.23-.693L5 14.5m14.8.8 1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0 1 12 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5"
+                      />
+                    </svg>
+                  </strong>
+                </button>
+              </a>
+              <button
+                onClick={() =>
+                  renderWithRoot(
+                    <CreateGroupMenu
+                      guildId={guildId}
+                      setRefreshGuildDatas={setRefreshGuildDatas}
+                    />,
+                    document.getElementById("menu"),
+                  )
+                }
+                className={styles.button}
+              >
+                Create an interserver group
+                <strong>
+                  <svg
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12.75 3.03v.568c0 .334.148.65.405.864l1.068.89c.442.369.535 1.01.216 1.49l-.51.766a2.25 2.25 0 01-1.161.886l-.143.048a1.107 1.107 0 00-.57 1.664c.369.555.169 1.307-.427 1.605L9 13.125l.423 1.059a.956.956 0 01-1.652.928l-.679-.906a1.125 1.125 0 00-1.906.172L4.5 15.75l-.612.153M12.75 3.031a9 9 0 00-8.862 12.872M12.75 3.031a9 9 0 016.69 14.036m0 0l-.177-.529A2.25 2.25 0 0017.128 15H16.5l-.324-.324a1.453 1.453 0 00-2.328.377l-.036.073a1.586 1.586 0 01-.982.816l-.99.282c-.55.157-.894.702-.8 1.267l.073.438c.08.474.49.821.97.821.846 0 1.598.542 1.865 1.345l.215.643m5.276-3.67a9.012 9.012 0 01-5.276 3.67m0 0a9 9 0 01-10.275-4.835M15.75 9c0 .896-.393 1.7-1.016 2.25"
+                    />
+                  </svg>
+                </strong>
+              </button>
+              <Link href="/explore" target="_blank" rel="noreferrer">
+                <button className={styles.button}>
+                  Explore groups
+                  <strong>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="size-6"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z"
+                      />
+                    </svg>
+                  </strong>
+                </button>
+              </Link>
+            </>
+          ) : (
+            <button
+              onClick={() =>
+                popup("Invite the bot", `Warning`, "warning", {
+                  content: (
+                    <p className="content">
+                      It is necessary for Orax to access the content of the
+                      messages in order to synchronize them between channels. By
+                      inviting Orax, it will be able to read all the messages of
+                      your server.<br></br>
+                      For security and privacy reasons, we suggest you to give
+                      it the permission to read the messages only in the
+                      channels it is used in.
+                    </p>
+                  ),
+                  icon: meteor,
+                  action: function () {
+                    window.open(config.inviteLink + "&guild_id=" + guild.id);
+                  },
+                })
+              }
+              className={styles.button}
+            >
+              Add bot
+              <strong>
+                <svg
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </strong>
+            </button>
+          )}
+        </div>
+        {guildDatas.bot ? (
+          <>
+            <br></br>
+            <ErrorBoundary>
+              {guildDatas.ownedGroups && guildDatas.ownedGroups.length ? (
+                <section className={styles.groupContainer}>
+                  <h2>📺 Owned groups</h2>
+                  <div className="line wrap gap-1">
+                {guildDatas.ownedGroups?.map((group) => (
+                      <Link
+                        key={"ownedGroup_" + group.id}
+                        href={`/dashboard/ownedgroup/${group.id}?guild=${guild.id}&icon=${guild.icon}&groupName=${group.name}`}
+                      >
+                        <div className={styles.group}>{group.name}</div>
+                      </Link>
+                    ))}
+                  </div>
+                </section>
+              ) : (
+                <section className={styles.emptyGroupContainer}>
+                  <h2>
+                    This server does not own any group. You can either create
+                    one or explore groups{" "}
+                    <Link className="underline" href="/explore">
+                      here
+                    </Link>
+                    .
+                  </h2>
+                </section>
+              )}
+            </ErrorBoundary>
+            <ErrorBoundary>
+              <Settings
+                key={"settingsGuild_" + guildId}
+                guild={guild}
+                guildId={guildId}
+                settings={settings}
+                setSettings={setSettings}
+              />
+            </ErrorBoundary>
+            <HiddenMenu title="🚫 Service limits">
+              <section className={styles.section}>
+                <p className="hint">
+                  There are no paid products for Orax, everything is free.
+                  <br />
+                  However, to avoid abuse, we have set limits that we hope will
+                  not harm your experience.
+                  <br />
+                  If you need to exceed them, please contact us.
+                </p>
+                <div className="line wrap">
+                  <p>{guildDatas.ownedGroups?.length || "0"}/100 owned groups</p>
+                  <div className={[styles.progress, "progress"].join(" ")}>
+                    <div
+                      className="shrinker"
+                      style={{ width: (guildDatas.ownedGroups?.length || 0) + "%" }}
+                    />
+                  </div>
+                </div>
+                {guildDatas.ownedGroups?.map((group) => (
+                  <div key={"group_" + group.id} className="line wrap">
+                    <p>
+                      {group.name} : {group.linkedChannels.length || "0"}/30
+                      connected channels
+                    </p>
+                    <div
+                      className={[styles.progress, "progress"].join(" ")}
+                    >
+                      <div
+                        className="shrinker"
+                        style={{
+                          width:
+                            ((group.linkedChannels.length / 30) * 100 || 0) +
+                            "%",
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </section>
+            </HiddenMenu>
+            {/*guildDatas.connectedGroups ? null : <section className={styles.emptyGroupContainer}><h2>This server isn't connected to any group</h2></section>*/}
+          </>
+        ) : null}
+        <div id="container" key={guild.id + "_" + paymentProgress}></div>
+        <br></br>
+      </div>
+      {loading && <Loading />}
+    </>
+  );
+}
