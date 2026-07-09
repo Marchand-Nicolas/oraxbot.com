@@ -843,8 +843,7 @@ export default function Dashboard() {
                   <div key={"group_" + group.id} className="line wrap">
                     <p>
                       {group.name} : {group.linkedChannels.length || "0"}/
-                      {channelLimit}
-                      connected channels
+                      {channelLimit} connected channels
                     </p>
                     <div className={[styles.progress, "progress"].join(" ")}>
                       <div
