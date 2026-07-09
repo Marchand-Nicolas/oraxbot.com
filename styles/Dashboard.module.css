@@ -217,6 +217,12 @@
   color: rgba(255, 255, 255, 0.78);
 }
 
+.oraxPlusPanel .planRenewalNote {
+  margin-top: 8px;
+  color: #bceeff;
+  font-weight: 700;
+}
+
 .planBadge {
   display: inline-flex;
   align-items: center;

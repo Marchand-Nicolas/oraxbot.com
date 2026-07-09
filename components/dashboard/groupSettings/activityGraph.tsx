@@ -6,6 +6,23 @@ import config from "../../../utils/config.json";
 import { getCookie } from "../../../utils/cookies";
 import LoadingCircle from "../../LoadingCircle";
 
+type ActivityPoint = {
+  date: string;
+  count: number | string;
+};
+
+const formatDateKey = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const getActivityDateKey = (date: string) => {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(date)) return date;
+  return formatDateKey(new Date(date));
+};
+
 const ActivityGraph = () => {
   const router = useRouter();
   const params = new URLSearchParams(router.asPath.split("?")[1]);
@@ -38,25 +55,25 @@ const ActivityGraph = () => {
         "Content-Type": "application/json",
       },
     }).then((res) =>
-      res.json().then((data: { activity?: { date: string; count: number }[] }) => {
+      res.json().then((data: { activity?: ActivityPoint[] }) => {
         const activity = data.activity;
-        if (!activity || activity.length == 0) return setLoading(false);
-        const activityDates = activity.map((a) =>
-          new Date(a.date).toLocaleDateString(),
+        const countsByDate = new Map(
+          (activity || []).map((a) => [
+            getActivityDateKey(a.date),
+            Number(a.count) || 0,
+          ]),
         );
-        const activityMessages = activity.map((a) => a.count);
         const resDates: string[] = [];
         const resMessages: number[] = [];
-        const firstDate = new Date(activity[0].date);
+
         const today = new Date();
+        const firstDate = new Date(today);
+        firstDate.setDate(today.getDate() - 29);
+
         for (let d = firstDate; d <= today; d.setDate(d.getDate() + 1)) {
+          const dateKey = formatDateKey(d);
           resDates.push(d.toLocaleDateString());
-          const index = activityDates.indexOf(d.toLocaleDateString());
-          if (index != -1) {
-            resMessages.push(activityMessages[index]);
-          } else {
-            resMessages.push(0);
-          }
+          resMessages.push(countsByDate.get(dateKey) || 0);
         }
         setDates(resDates);
         setMessages(resMessages);

@@ -38,6 +38,14 @@ export interface OwnedGroup {
 export interface OraxPlusStatus {
   active?: boolean;
   plan?: "free" | "orax_plus" | string;
+  entitlement?: {
+    source?: "topgg_vote" | "stripe" | "manual" | string;
+    sourceRef?: string | null;
+    userId?: string | null;
+    startsAt?: string | null;
+    expiresAt?: string | null;
+    [key: string]: unknown;
+  } | null;
   limits?: {
     groupsPerGuild?: number;
     channelsPerGroup?: number;

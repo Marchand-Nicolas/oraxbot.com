@@ -1,7 +1,7 @@
 import styles from "../../styles/Dashboard.module.css";
 import config from "../../utils/config.json";
 import type { DiscordUser, Guild, GuildData, GuildSettings } from "../../types";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getCookie, setCookie } from "../../utils/cookies";
 import Link from "next/link";
 import { renderWithRoot } from "../../utils/reactRoot";
@@ -15,6 +15,33 @@ import { notify } from "../../components/ui/NotificationSystem";
 import ErrorBoundary from "../../components/ui/ErrorBoundary";
 import { getStorage, setStorage } from "../../utils/storage";
 import { checkAdminPerms } from "../../utils/permissions";
+
+function formatRemainingPlanTime(expiresAt?: string | null) {
+  if (!expiresAt) return null;
+
+  const expiresAtTime = new Date(expiresAt).getTime();
+  if (Number.isNaN(expiresAtTime)) return null;
+
+  const remainingMs = expiresAtTime - Date.now();
+  if (remainingMs <= 0) return "less than a minute";
+
+  const minute = 60 * 1000;
+  const hour = 60 * minute;
+  const day = 24 * hour;
+
+  if (remainingMs >= day) {
+    const days = Math.ceil(remainingMs / day);
+    return `${days} day${days === 1 ? "" : "s"}`;
+  }
+
+  if (remainingMs >= hour) {
+    const hours = Math.ceil(remainingMs / hour);
+    return `${hours} hour${hours === 1 ? "" : "s"}`;
+  }
+
+  const minutes = Math.ceil(remainingMs / minute);
+  return `${minutes} minute${minutes === 1 ? "" : "s"}`;
+}
 
 export default function Dashboard() {
   const serverIp = config.serverIp;
@@ -32,8 +59,13 @@ export default function Dashboard() {
   });
   const [paymentProgress, setPaymentProgress] = useState(0);
   const [refreshGuildDatas, setRefreshGuildDatas] = useState(false);
+  const [isPollingOraxPlusVote, setIsPollingOraxPlusVote] = useState(false);
+  const [voteBaselineExpiresAt, setVoteBaselineExpiresAt] = useState<
+    string | null
+  >(null);
   const [loading, setLoading] = useState(true);
   const [lastLoadedGuildId, setLastLoadedGuildId] = useState("");
+  const votePollAttemptsRef = useRef(0);
 
   useEffect(() => {
     let token = getCookie("token");
@@ -271,6 +303,12 @@ export default function Dashboard() {
   const oraxPlus = guildDatas.oraxPlus;
   const groupLimit = oraxPlus?.limits?.groupsPerGuild || 2;
   const channelLimit = oraxPlus?.limits?.channelsPerGroup || 5;
+  const votePlanExpiresIn =
+    oraxPlus?.active && oraxPlus.entitlement?.source === "topgg_vote"
+      ? formatRemainingPlanTime(oraxPlus.entitlement.expiresAt)
+      : null;
+  const showOraxPlusActions =
+    !oraxPlus?.active || oraxPlus.entitlement?.source === "topgg_vote";
   const isAtGroupLimit = ownedGroupsCount >= groupLimit;
 
   async function startOraxPlusVote() {
@@ -317,6 +355,8 @@ export default function Dashboard() {
         "Vote opened",
         "Orax Plus will activate automatically when Top.gg sends the vote.",
       );
+      setVoteBaselineExpiresAt(oraxPlus?.entitlement?.expiresAt || null);
+      setIsPollingOraxPlusVote(true);
     } catch (error) {
       voteWindow?.close();
       notify.error(
@@ -327,6 +367,66 @@ export default function Dashboard() {
       );
     }
   }
+
+  useEffect(() => {
+    if (!isPollingOraxPlusVote || !guildId) return;
+
+    votePollAttemptsRef.current = 0;
+    setRefreshGuildDatas(true);
+
+    const intervalId = window.setInterval(() => {
+      votePollAttemptsRef.current += 1;
+      setRefreshGuildDatas(true);
+
+      if (votePollAttemptsRef.current >= 24) {
+        window.clearInterval(intervalId);
+        setIsPollingOraxPlusVote(false);
+        setVoteBaselineExpiresAt(null);
+        notify.error(
+          "Vote not detected yet",
+          "Top.gg may still be processing the vote. Refresh the dashboard in a moment if Orax Plus does not appear.",
+          { duration: 8000 },
+        );
+      }
+    }, 5000);
+
+    return () => window.clearInterval(intervalId);
+  }, [guildId, isPollingOraxPlusVote]);
+
+  useEffect(() => {
+    if (!isPollingOraxPlusVote) return;
+    if (!oraxPlus?.active || oraxPlus.entitlement?.source !== "topgg_vote") {
+      return;
+    }
+
+    const currentExpiresAt = oraxPlus.entitlement.expiresAt || null;
+    const currentExpiresAtTime = currentExpiresAt
+      ? new Date(currentExpiresAt).getTime()
+      : 0;
+    const baselineExpiresAtTime = voteBaselineExpiresAt
+      ? new Date(voteBaselineExpiresAt).getTime()
+      : 0;
+
+    if (
+      !voteBaselineExpiresAt ||
+      (currentExpiresAtTime && currentExpiresAtTime > baselineExpiresAtTime)
+    ) {
+      setIsPollingOraxPlusVote(false);
+      setVoteBaselineExpiresAt(null);
+      notify.success(
+        "Orax Plus activated",
+        voteBaselineExpiresAt
+          ? "Your Top.gg vote extended this server's plan."
+          : "Your Top.gg vote was applied to this server.",
+      );
+    }
+  }, [
+    isPollingOraxPlusVote,
+    oraxPlus?.active,
+    oraxPlus?.entitlement?.source,
+    oraxPlus?.entitlement?.expiresAt,
+    voteBaselineExpiresAt,
+  ]);
 
   async function startOraxPlusCheckout() {
     try {
@@ -644,6 +744,12 @@ export default function Dashboard() {
                     ? "This server can use the extended Orax Plus limits."
                     : "Vote once a week on Top.gg or subscribe monthly to unlock higher limits for this server. Vote activation is automatic after Top.gg sends the webhook."}
                 </p>
+                {votePlanExpiresIn && (
+                  <p className={styles.planRenewalNote}>
+                    Expires in {votePlanExpiresIn}, vote again to extend your
+                    plan.
+                  </p>
+                )}
               </div>
               <div className={styles.planStats}>
                 <div>
@@ -657,7 +763,7 @@ export default function Dashboard() {
                   <span>channels per group</span>
                 </div>
               </div>
-              {!oraxPlus?.active && (
+              {showOraxPlusActions && (
                 <div className={styles.planActions}>
                   <button
                     className={styles.secondaryButton}
