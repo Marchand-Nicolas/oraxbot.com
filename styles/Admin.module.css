@@ -1,0 +1,248 @@
+.background {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(37deg, rgb(0, 161, 232) 0%, #8151fc 100%);
+  background-size: cover;
+}
+
+.background::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  backdrop-filter: blur(100px);
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.page {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.45);
+  min-height: calc(100vh - 80px);
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 24px;
+}
+
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 360px;
+  margin: 60px auto;
+}
+
+.loginForm input {
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.loginForm input:focus {
+  border-color: var(--primary);
+}
+
+.loginForm input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.loginButton {
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(37deg, rgb(0, 161, 232) 0%, #8151fc 100%);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.loginButton:hover {
+  opacity: 0.9;
+}
+
+.loginButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.error {
+  color: #ff6b6b;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.statCards {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.statCard {
+  flex: 1;
+  min-width: 180px;
+  padding: 20px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.statCardLabel {
+  color: #8f9093;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.statCardValue {
+  color: #fff;
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+.statsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.selectedDate {
+  font-size: 1.1rem;
+  color: #cdd0d6;
+}
+
+.selectedDate strong {
+  color: #fff;
+}
+
+.logoutButton {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.logoutButton:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.chartContainer {
+  margin-bottom: 32px;
+}
+
+.chartContainer h2 {
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+}
+
+.chartTotal {
+  color: #cdd0d6;
+  font-size: 0.95rem;
+  margin-bottom: 12px;
+}
+
+.dayStats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dayStats h2 {
+  font-size: 1.2rem;
+  margin-bottom: 4px;
+}
+
+.dayStatsTotal {
+  color: #cdd0d6;
+  font-size: 0.95rem;
+  margin-bottom: 12px;
+}
+
+.statRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: background 0.2s;
+}
+
+.statRow:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.commandName {
+  color: #fff;
+  font-weight: 500;
+  font-family: monospace;
+}
+
+.commandCount {
+  color: var(--primary);
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.noData {
+  color: #8f9093;
+  text-align: center;
+  padding: 32px;
+}
+
+.backToToday {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: #cdd0d6;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.backToToday:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+}
