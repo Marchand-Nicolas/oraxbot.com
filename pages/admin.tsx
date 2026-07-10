@@ -136,7 +136,7 @@ export default function Admin() {
     return (
       <>
         <div className={styles.background} />
-        <div className={styles.page}>
+        <div className={`${styles.page} ${styles.pageLogin}`}>
           <h1 className={styles.title}>Admin Dashboard</h1>
           <form className={styles.loginForm} onSubmit={handleLogin}>
             <input
