@@ -45,7 +45,10 @@ export default function Admin() {
   const [dayTotal, setDayTotal] = useState(0);
   const [monthActivity, setMonthActivity] = useState<ActivityPoint[]>([]);
   const [monthTotal, setMonthTotal] = useState(0);
+  const [messageActivity, setMessageActivity] = useState<ActivityPoint[]>([]);
+  const [messageTotal, setMessageTotal] = useState(0);
   const [guildCount, setGuildCount] = useState<number | null>(null);
+  const [dayMessageCount, setDayMessageCount] = useState(0);
   const [loadingDay, setLoadingDay] = useState(false);
   const [loadingMonth, setLoadingMonth] = useState(false);
   const [ApexChart, setApexChart] =
@@ -106,6 +109,8 @@ export default function Admin() {
         if (data.result) {
           setMonthActivity(data.activity || []);
           setMonthTotal(data.total || 0);
+          setMessageActivity(data.messageActivity || []);
+          setMessageTotal(data.messageTotal || 0);
           setGuildCount(data.guildCount ?? null);
         }
         setLoadingMonth(false);
@@ -126,6 +131,7 @@ export default function Admin() {
         if (data.result) {
           setDayStats(data.stats || []);
           setDayTotal(data.total || 0);
+          setDayMessageCount(data.messageCount || 0);
         }
         setLoadingDay(false);
       })
@@ -263,6 +269,90 @@ export default function Admin() {
     },
   ];
 
+  const messageCountsByDate = new Map(
+    messageActivity.map((a) => [a.date, a.count]),
+  );
+  const chartMessageCounts = chartDateKeys.map(
+    (key) => messageCountsByDate.get(key) || 0,
+  );
+
+  const messageChartOptions: ApexOptions = {
+    chart: {
+      id: "message-usage-chart",
+      toolbar: { show: false },
+      foreColor: "#fff",
+      events: {
+        click: (_event, _chartContext, config) => {
+          const pointIndex = config?.dataPointIndex;
+          if (
+            pointIndex !== undefined &&
+            pointIndex >= 0 &&
+            chartDateKeys[pointIndex]
+          ) {
+            setSelectedDate(chartDateKeys[pointIndex]);
+          }
+        },
+      },
+    },
+    xaxis: {
+      categories: chartDates,
+      tickAmount: 10,
+      labels: { show: false },
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+    },
+    yaxis: {
+      show: true,
+      labels: { show: true },
+      axisBorder: { show: true },
+      axisTicks: { show: false },
+    },
+    fill: {
+      type: "gradient",
+      gradient: {
+        type: "vertical",
+        shadeIntensity: 0.5,
+        gradientToColors: ["white"],
+        inverseColors: false,
+        opacityFrom: 1,
+        opacityTo: 1,
+        stops: [0, 50, 100],
+      },
+    },
+    stroke: {
+      curve: "smooth",
+      width: 4,
+      lineCap: "round",
+    },
+    colors: ["#00a1e8"],
+    grid: { show: false },
+    tooltip: {
+      enabled: true,
+      theme: "dark",
+      x: {
+        formatter: function (_val: number, opts: any) {
+          const idx = opts?.dataPointIndex;
+          if (idx !== undefined && chartDateKeys[idx]) {
+            return formatDisplayDate(chartDateKeys[idx]);
+          }
+          return "";
+        },
+      },
+    },
+    dataLabels: { enabled: false },
+    markers: {
+      size: 0,
+      hover: { size: 6 },
+    },
+  };
+
+  const messageSeries: ApexOptions["series"] = [
+    {
+      name: "Messages relayed",
+      data: chartMessageCounts,
+    },
+  ];
+
   const isToday = selectedDate === formatDateKey(new Date());
 
   return (
@@ -290,13 +380,25 @@ export default function Admin() {
             </span>
           </div>
           <div className={styles.statCard}>
+            <span className={styles.statCardLabel}>Messages relayed (30 days)</span>
+            <span className={styles.statCardValue}>
+              {messageTotal.toLocaleString()}
+            </span>
+          </div>
+          <div className={styles.statCard}>
             <span className={styles.statCardLabel}>
-              {isToday
-                ? "Commands today"
-                : `Commands on ${formatDisplayDate(selectedDate)}`}
+              {isToday ? "Commands today" : `Commands on ${formatDisplayDate(selectedDate)}`}
             </span>
             <span className={styles.statCardValue}>
               {dayTotal.toLocaleString()}
+            </span>
+          </div>
+          <div className={styles.statCard}>
+            <span className={styles.statCardLabel}>
+              {isToday ? "Messages relayed today" : `Messages on ${formatDisplayDate(selectedDate)}`}
+            </span>
+            <span className={styles.statCardValue}>
+              {dayMessageCount.toLocaleString()}
             </span>
           </div>
         </div>
@@ -312,6 +414,23 @@ export default function Admin() {
             <ApexChart
               options={chartOptions}
               series={series}
+              type="line"
+              height={200}
+            />
+          )}
+        </div>
+
+        <div className={styles.chartContainer}>
+          <h2>Messages relayed (30 days)</h2>
+          <span className={styles.chartTotal}>
+            {messageTotal.toLocaleString()} messages relayed in the last 30 days
+          </span>
+          {loadingMonth || !ApexChart ? (
+            <LoadingCircle />
+          ) : (
+            <ApexChart
+              options={messageChartOptions}
+              series={messageSeries}
               type="line"
               height={200}
             />
@@ -338,7 +457,9 @@ export default function Admin() {
             )}
           </div>
           <span className={styles.dayStatsTotal}>
-            {dayTotal} command{dayTotal !== 1 ? "s" : ""} used
+            {dayTotal.toLocaleString()} command{dayTotal !== 1 ? "s" : ""} used
+            {" • "}
+            {dayMessageCount.toLocaleString()} message{dayMessageCount !== 1 ? "s" : ""} relayed
             {!isToday && " on this day"}
           </span>
           {loadingDay ? (
