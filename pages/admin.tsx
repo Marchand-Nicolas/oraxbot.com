@@ -11,6 +11,11 @@ type CommandStat = {
   count: number;
 };
 
+type DashboardInteractionStat = {
+  interaction: string;
+  count: number;
+};
+
 type ActivityPoint = {
   date: string;
   count: number;
@@ -42,9 +47,17 @@ export default function Admin() {
 
   const [selectedDate, setSelectedDate] = useState(formatDateKey(new Date()));
   const [dayStats, setDayStats] = useState<CommandStat[]>([]);
+  const [dayDashboardInteractionStats, setDayDashboardInteractionStats] =
+    useState<DashboardInteractionStat[]>([]);
   const [dayTotal, setDayTotal] = useState(0);
+  const [dayDashboardInteractionTotal, setDayDashboardInteractionTotal] =
+    useState(0);
   const [monthActivity, setMonthActivity] = useState<ActivityPoint[]>([]);
+  const [monthDashboardInteractionActivity, setMonthDashboardInteractionActivity] =
+    useState<ActivityPoint[]>([]);
   const [monthTotal, setMonthTotal] = useState(0);
+  const [monthDashboardInteractionTotal, setMonthDashboardInteractionTotal] =
+    useState(0);
   const [messageActivity, setMessageActivity] = useState<ActivityPoint[]>([]);
   const [messageTotal, setMessageTotal] = useState(0);
   const [guildCount, setGuildCount] = useState<number | null>(null);
@@ -99,19 +112,31 @@ export default function Admin() {
   useEffect(() => {
     if (!token) return;
     setLoadingMonth(true);
-    fetch(`${apiBase}admin_get_command_stats_month`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.result) {
-          setMonthActivity(data.activity || []);
-          setMonthTotal(data.total || 0);
-          setMessageActivity(data.messageActivity || []);
-          setMessageTotal(data.messageTotal || 0);
-          setGuildCount(data.guildCount ?? null);
+    Promise.all([
+      fetch(`${apiBase}admin_get_command_stats_month`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+      }).then((res) => res.json()),
+      fetch(`${apiBase}admin_get_dashboard_interaction_stats_month`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+      }).then((res) => res.json()),
+    ])
+      .then(([commandData, dashboardInteractionData]) => {
+        if (commandData.result) {
+          setMonthActivity(commandData.activity || []);
+          setMonthTotal(commandData.total || 0);
+          setMessageActivity(commandData.messageActivity || []);
+          setMessageTotal(commandData.messageTotal || 0);
+          setGuildCount(commandData.guildCount ?? null);
+        }
+        if (dashboardInteractionData.result) {
+          setMonthDashboardInteractionActivity(
+            dashboardInteractionData.activity || [],
+          );
+          setMonthDashboardInteractionTotal(dashboardInteractionData.total || 0);
         }
         setLoadingMonth(false);
       })
@@ -121,17 +146,27 @@ export default function Admin() {
   useEffect(() => {
     if (!token) return;
     setLoadingDay(true);
-    fetch(`${apiBase}admin_get_command_stats_day`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, date: selectedDate }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.result) {
-          setDayStats(data.stats || []);
-          setDayTotal(data.total || 0);
-          setDayMessageCount(data.messageCount || 0);
+    Promise.all([
+      fetch(`${apiBase}admin_get_command_stats_day`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, date: selectedDate }),
+      }).then((res) => res.json()),
+      fetch(`${apiBase}admin_get_dashboard_interaction_stats_day`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, date: selectedDate }),
+      }).then((res) => res.json()),
+    ])
+      .then(([commandData, dashboardInteractionData]) => {
+        if (commandData.result) {
+          setDayStats(commandData.stats || []);
+          setDayTotal(commandData.total || 0);
+          setDayMessageCount(commandData.messageCount || 0);
+        }
+        if (dashboardInteractionData.result) {
+          setDayDashboardInteractionStats(dashboardInteractionData.stats || []);
+          setDayDashboardInteractionTotal(dashboardInteractionData.total || 0);
         }
         setLoadingDay(false);
       })
@@ -353,6 +388,29 @@ export default function Admin() {
     },
   ];
 
+  const dashboardInteractionCountsByDate = new Map(
+    monthDashboardInteractionActivity.map((a) => [a.date, a.count]),
+  );
+  const chartDashboardInteractionCounts = chartDateKeys.map(
+    (key) => dashboardInteractionCountsByDate.get(key) || 0,
+  );
+
+  const dashboardInteractionChartOptions: ApexOptions = {
+    ...chartOptions,
+    chart: {
+      ...(chartOptions.chart || {}),
+      id: "dashboard-interaction-usage-chart",
+    },
+    colors: ["#43b581"],
+  };
+
+  const dashboardInteractionSeries: ApexOptions["series"] = [
+    {
+      name: "Dashboard interactions",
+      data: chartDashboardInteractionCounts,
+    },
+  ];
+
   const isToday = selectedDate === formatDateKey(new Date());
 
   return (
@@ -387,6 +445,14 @@ export default function Admin() {
           </div>
           <div className={styles.statCard}>
             <span className={styles.statCardLabel}>
+              Dashboard interactions (30 days)
+            </span>
+            <span className={styles.statCardValue}>
+              {monthDashboardInteractionTotal.toLocaleString()}
+            </span>
+          </div>
+          <div className={styles.statCard}>
+            <span className={styles.statCardLabel}>
               {isToday ? "Commands today" : `Commands on ${formatDisplayDate(selectedDate)}`}
             </span>
             <span className={styles.statCardValue}>
@@ -399,6 +465,16 @@ export default function Admin() {
             </span>
             <span className={styles.statCardValue}>
               {dayMessageCount.toLocaleString()}
+            </span>
+          </div>
+          <div className={styles.statCard}>
+            <span className={styles.statCardLabel}>
+              {isToday
+                ? "Dashboard interactions today"
+                : `Dashboard interactions on ${formatDisplayDate(selectedDate)}`}
+            </span>
+            <span className={styles.statCardValue}>
+              {dayDashboardInteractionTotal.toLocaleString()}
             </span>
           </div>
         </div>
@@ -414,6 +490,24 @@ export default function Admin() {
             <ApexChart
               options={chartOptions}
               series={series}
+              type="line"
+              height={200}
+            />
+          )}
+        </div>
+
+        <div className={styles.chartContainer}>
+          <h2>Dashboard interactions (30 days)</h2>
+          <span className={styles.chartTotal}>
+            {monthDashboardInteractionTotal.toLocaleString()} dashboard
+            interactions in the last 30 days
+          </span>
+          {loadingMonth || !ApexChart ? (
+            <LoadingCircle />
+          ) : (
+            <ApexChart
+              options={dashboardInteractionChartOptions}
+              series={dashboardInteractionSeries}
               type="line"
               height={200}
             />
@@ -460,6 +554,9 @@ export default function Admin() {
             {dayTotal.toLocaleString()} command{dayTotal !== 1 ? "s" : ""} used
             {" • "}
             {dayMessageCount.toLocaleString()} message{dayMessageCount !== 1 ? "s" : ""} relayed
+            {" • "}
+            {dayDashboardInteractionTotal.toLocaleString()} dashboard interaction
+            {dayDashboardInteractionTotal !== 1 ? "s" : ""}
             {!isToday && " on this day"}
           </span>
           {loadingDay ? (
@@ -474,6 +571,24 @@ export default function Admin() {
             dayStats.map((stat) => (
               <div key={stat.command} className={styles.statRow}>
                 <span className={styles.commandName}>/{stat.command}</span>
+                <span className={styles.commandCount}>{stat.count}</span>
+              </div>
+            ))
+          )}
+
+          <h3 className={styles.subsectionTitle}>Dashboard interactions</h3>
+          {loadingDay ? (
+            <div className={styles.loadingContainer}>
+              <LoadingCircle />
+            </div>
+          ) : dayDashboardInteractionStats.length === 0 ? (
+            <div className={styles.noData}>
+              No dashboard interactions were recorded on this day.
+            </div>
+          ) : (
+            dayDashboardInteractionStats.map((stat) => (
+              <div key={stat.interaction} className={styles.statRow}>
+                <span className={styles.commandName}>{stat.interaction}</span>
                 <span className={styles.commandCount}>{stat.count}</span>
               </div>
             ))
