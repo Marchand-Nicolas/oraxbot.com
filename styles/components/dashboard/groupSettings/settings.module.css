@@ -1,3 +1,9 @@
+.checkboxLabelText {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
 .selectInput {
   border: none;
   background: transparent;

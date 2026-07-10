@@ -120,6 +120,60 @@
   margin-top: 16px;
 }
 
+.oraxPlusTooltip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: help;
+}
+
+.oraxPlusTooltip:focus {
+  outline: none;
+}
+
+.oraxPlusIcon {
+  width: 1rem;
+  height: 1rem;
+  color: #3b82f6;
+  vertical-align: text-bottom;
+}
+
+.oraxPlusTooltipText {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  z-index: 10;
+  width: max-content;
+  max-width: 180px;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.4rem;
+  background: rgba(15, 23, 42, 0.95);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.oraxPlusTooltipText::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  border: 5px solid transparent;
+  border-top-color: rgba(15, 23, 42, 0.95);
+  transform: translateX(-50%);
+}
+
+.oraxPlusTooltip:hover .oraxPlusTooltipText,
+.oraxPlusTooltip:focus .oraxPlusTooltipText {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
 /* Responsive design */
 @media screen and (max-width: 1024px) {
   .settingsGrid {

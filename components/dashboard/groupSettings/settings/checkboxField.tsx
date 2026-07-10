@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import type { ReactNode } from "react";
 import config from "../../../../utils/config.json";
 import styles from "../../../../styles/components/dashboard/groupSettings/settings.module.css";
 import { getCookie } from "../../../../utils/cookies";
@@ -13,6 +14,7 @@ interface CheckboxFieldProps {
   saveEndpoint?: string;
   forceUnchecked?: boolean;
   onBeforeEnable?: () => boolean | Promise<boolean>;
+  labelAdornment?: ReactNode;
 }
 
 const CheckboxField = ({
@@ -25,6 +27,7 @@ const CheckboxField = ({
   saveEndpoint = `${config.apiV2}set_group_settings_field`,
   forceUnchecked = false,
   onBeforeEnable,
+  labelAdornment,
 }: CheckboxFieldProps) => {
   const [isChecked, setIsChecked] = useState(false);
 
@@ -93,7 +96,10 @@ const CheckboxField = ({
           onChange={handleToggle}
           className={styles.checkboxInput}
         />
-        <strong>{label}</strong>
+        <strong className={styles.checkboxLabelText}>
+          {label}
+          {labelAdornment}
+        </strong>
       </label>
       {description && <label>{description}</label>}
     </>
