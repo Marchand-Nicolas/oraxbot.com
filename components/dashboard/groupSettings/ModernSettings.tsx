@@ -59,6 +59,16 @@ const ModernSettings = () => {
               guildId={guildId}
             />
           </div>
+
+          <div className={styles.settingItem}>
+            <CheckboxField
+              label="Translation"
+              description="Automatically translate synced messages. Target language can be selected in every channel's settings."
+              fieldName="translation"
+              groupId={groupId}
+              guildId={guildId}
+            />
+          </div>
         </div>
 
         {/* Moderation Column */}

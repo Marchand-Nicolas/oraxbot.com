@@ -45,7 +45,9 @@ const ChannelButton = ({
       </div>
       <div className={styles.channelButtons}>
         {available ? (
-          <Link href={`./channelSettings/${guildId}/${channel.id}?icon=${icon}`}>
+          <Link
+            href={`./channelSettings/${guildId}/${channel.id}?icon=${icon}&groupId=${groupId}`}
+          >
             <svg
               fill="none"
               viewBox="0 0 24 24"
