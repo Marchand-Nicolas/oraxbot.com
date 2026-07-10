@@ -252,6 +252,10 @@ export default function OwnedGroup() {
           >
             Donate
           </a>
+          <span> • </span>
+          <a href="https://docs.oraxbot.com" target="_blank" rel="noreferrer">
+            Docs
+          </a>
         </footer>
       </div>
     </>
