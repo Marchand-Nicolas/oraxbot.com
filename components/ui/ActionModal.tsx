@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import styles from "../../styles/components/ui/ActionModal.module.css";
 
 export interface ActionModalAction {
@@ -21,7 +22,15 @@ export default function ActionModal({
   actions,
   onClose,
 }: ActionModalProps) {
-  return (
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
+  return createPortal(
     <div className={styles.overlay} role="presentation" onClick={onClose}>
       <section
         className={styles.modal}
@@ -57,6 +66,7 @@ export default function ActionModal({
           ))}
         </div>
       </section>
-    </div>
+    </div>,
+    document.body,
   );
 }

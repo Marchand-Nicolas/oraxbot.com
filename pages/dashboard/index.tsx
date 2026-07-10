@@ -15,7 +15,10 @@ import { notify } from "../../components/ui/NotificationSystem";
 import ActionModal from "../../components/ui/ActionModal";
 import ErrorBoundary from "../../components/ui/ErrorBoundary";
 import { getStorage, setStorage } from "../../utils/storage";
-import { startOraxPlusCheckout as startCheckout } from "../../utils/oraxPlus";
+import {
+  startOraxPlusCheckout as startCheckout,
+  startOraxPlusVote as startVote,
+} from "../../utils/oraxPlus";
 import { checkAdminPerms } from "../../utils/permissions";
 
 function formatRemainingPlanTime(expiresAt?: string | null) {
@@ -317,57 +320,16 @@ export default function Dashboard() {
   const startOraxPlusCheckout = () => startCheckout(guildId as string);
 
   async function startOraxPlusVote() {
-    const voteWindow = window.open("about:blank", "_blank");
+    const result = await startVote(guildId as string);
 
-    try {
-      const response = await fetch(`${config.apiV2}start_orax_plus_vote`, {
-        method: "POST",
-        body: JSON.stringify({
-          guildId,
-          token: getCookie("token"),
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      const data = await response.json();
-      if (!response.ok || !data?.result) {
-        throw new Error(
-          data?.message || "Unable to prepare the Top.gg vote for this server.",
-        );
-      }
+    if (result.activated) {
+      setRefreshGuildDatas(true);
+      return;
+    }
 
-      if (data.activated) {
-        voteWindow?.close();
-        notify.success(
-          "Orax Plus activated",
-          "Your latest Top.gg vote was applied to this server.",
-        );
-        setRefreshGuildDatas(true);
-        return;
-      }
-
-      const voteUrl =
-        typeof data.vote_url === "string" ? data.vote_url : config.topggVoteUrl;
-      if (voteWindow) {
-        voteWindow.location.href = voteUrl;
-      } else {
-        window.location.href = voteUrl;
-      }
-      notify.success(
-        "Vote opened",
-        "Orax Plus will activate automatically when Top.gg sends the vote.",
-      );
+    if (result.voteOpened) {
       setVoteBaselineExpiresAt(oraxPlus?.entitlement?.expiresAt || null);
       setIsPollingOraxPlusVote(true);
-    } catch (error) {
-      voteWindow?.close();
-      notify.error(
-        "Vote setup failed",
-        error instanceof Error
-          ? error.message
-          : "Unable to prepare the Top.gg vote.",
-      );
     }
   }
 

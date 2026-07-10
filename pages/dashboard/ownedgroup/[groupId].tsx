@@ -1,9 +1,14 @@
 import { useRouter } from "next/router";
 import dashboardStyles from "../../../styles/Dashboard.module.css";
 import styles from "../../../styles/dashboard/OwnedGroup.module.css";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import config from "../../../utils/config.json";
 import { getCookie } from "../../../utils/cookies";
+import {
+  getOraxPlusStatus,
+  startOraxPlusCheckout as startCheckout,
+  startOraxPlusVote as startVote,
+} from "../../../utils/oraxPlus";
 import popup from "../../../utils/popup";
 import drop from "../../../public/icons/drop.svg";
 import Link from "next/link";
@@ -12,19 +17,45 @@ import ModernAdvancedSettings from "../../../components/dashboard/groupSettings/
 import ActivityGraph from "../../../components/dashboard/groupSettings/activityGraph";
 import ChannelButton from "../../../components/dashboard/groupSettings/channelButton";
 import Skeleton from "../../../components/ui/skeleton";
-import type { LinkedChannel } from "../../../types";
+import { notify } from "../../../components/ui/NotificationSystem";
+import type { LinkedChannel, OraxPlusStatus } from "../../../types";
 
 export default function OwnedGroup() {
   const router = useRouter();
   const { groupId } = router.query;
   const [link, setLink] = useState("");
   const [channels, setChannels] = useState<LinkedChannel[]>([]);
+  const [oraxPlus, setOraxPlus] = useState<OraxPlusStatus | undefined>();
   const [loading, setLoading] = useState(true);
+  const [isPollingOraxPlusVote, setIsPollingOraxPlusVote] = useState(false);
+  const votePollAttemptsRef = useRef(0);
 
   const params = new URLSearchParams(router.asPath.split("?")[1]);
   const guildId = params.get("guild") ?? undefined;
   const guildIcon = params.get("icon");
   const groupName = params.get("groupName");
+
+  const refreshOraxPlusStatus = useCallback(async () => {
+    if (!guildId) return undefined;
+
+    const status = await getOraxPlusStatus(guildId);
+    if (status) setOraxPlus(status);
+    return status;
+  }, [guildId]);
+
+  const startOraxPlusCheckout = () => {
+    if (!guildId) return;
+
+    startCheckout(guildId, "/dashboard/ownedgroup/" + groupId);
+  };
+
+  const startOraxPlusVote = async () => {
+    if (!guildId) return;
+
+    const result = await startVote(guildId);
+    if (result.activated) refreshOraxPlusStatus();
+    if (result.voteOpened) setIsPollingOraxPlusVote(true);
+  };
 
   useEffect(() => {
     if (groupId) {
@@ -49,11 +80,54 @@ export default function OwnedGroup() {
                 datas.link,
             );
             setChannels(datas.channels);
+            setOraxPlus(datas.oraxPlus);
             setLoading(false);
           }
         });
     }
   }, [groupId, guildId]);
+
+  useEffect(() => {
+    if (!isPollingOraxPlusVote || !guildId) return;
+
+    votePollAttemptsRef.current = 0;
+    refreshOraxPlusStatus();
+
+    const intervalId = window.setInterval(() => {
+      votePollAttemptsRef.current += 1;
+      refreshOraxPlusStatus();
+
+      if (votePollAttemptsRef.current >= 24) {
+        window.clearInterval(intervalId);
+        setIsPollingOraxPlusVote(false);
+        notify.error(
+          "Vote not detected yet",
+          "Top.gg may still be processing the vote. Refresh this page in a moment if Orax Plus does not appear.",
+          { duration: 8000 },
+        );
+      }
+    }, 5000);
+
+    return () => window.clearInterval(intervalId);
+  }, [guildId, isPollingOraxPlusVote, refreshOraxPlusStatus]);
+
+  useEffect(() => {
+    if (!isPollingOraxPlusVote || !oraxPlus?.active) return;
+
+    setIsPollingOraxPlusVote(false);
+    notify.success(
+      "Orax Plus activated",
+      "Your Top.gg vote was applied to this server.",
+    );
+  }, [isPollingOraxPlusVote, oraxPlus?.active]);
+
+  useEffect(() => {
+    if (!guildId) return;
+
+    refreshOraxPlusStatus();
+    const intervalId = window.setInterval(refreshOraxPlusStatus, 60000);
+    return () => window.clearInterval(intervalId);
+  }, [guildId, refreshOraxPlusStatus]);
 
   return (
     <>
@@ -227,7 +301,12 @@ export default function OwnedGroup() {
           </div>
         ) : (
           <>
-            <ModernSettings />
+            <ModernSettings
+              oraxPlus={oraxPlus}
+              onRefreshOraxPlus={refreshOraxPlusStatus}
+              onStartOraxPlusVote={startOraxPlusVote}
+              onStartOraxPlusCheckout={startOraxPlusCheckout}
+            />
             <ModernAdvancedSettings />
           </>
         )}

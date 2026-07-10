@@ -1,5 +1,8 @@
+import { useState } from "react";
 import { useRouter } from "next/router";
 import styles from "../../../styles/dashboard/OwnedGroup.module.css";
+import type { OraxPlusStatus } from "../../../types";
+import ActionModal from "../../ui/ActionModal";
 import CustomUsernames from "./settings/customUsernames";
 import LogMessages from "./settings/logMessages";
 import OptionsField from "./settings/optionField";
@@ -7,11 +10,36 @@ import TextField from "./settings/textField";
 import CheckboxField from "./settings/checkboxField";
 import TextareaField from "./settings/textareaField";
 
-const ModernSettings = () => {
+interface ModernSettingsProps {
+  oraxPlus?: OraxPlusStatus;
+  onRefreshOraxPlus?: () => Promise<OraxPlusStatus | undefined>;
+  onStartOraxPlusVote?: () => void;
+  onStartOraxPlusCheckout?: () => void;
+}
+
+const ModernSettings = ({
+  oraxPlus,
+  onRefreshOraxPlus,
+  onStartOraxPlusVote,
+  onStartOraxPlusCheckout,
+}: ModernSettingsProps) => {
   const router = useRouter();
   const params = new URLSearchParams(router.asPath.split("?")[1]);
   const guildId = params.get("guild") || "";
   const { groupId } = router.query;
+  const [showTranslationModal, setShowTranslationModal] = useState(false);
+  const hasOraxPlus = !!oraxPlus?.active;
+  const shouldBlockTranslation = !!oraxPlus && !hasOraxPlus;
+
+  const requireOraxPlus = async () => {
+    if (hasOraxPlus) return true;
+
+    const latestOraxPlus = await onRefreshOraxPlus?.();
+    if (latestOraxPlus?.active) return true;
+
+    setShowTranslationModal(true);
+    return false;
+  };
 
   return (
     <div className={styles.settingsContainer}>
@@ -67,6 +95,8 @@ const ModernSettings = () => {
               fieldName="translation"
               groupId={groupId}
               guildId={guildId}
+              forceUnchecked={shouldBlockTranslation}
+              onBeforeEnable={requireOraxPlus}
             />
           </div>
         </div>
@@ -116,6 +146,39 @@ const ModernSettings = () => {
           </div>
         </div>
       </div>
+      {showTranslationModal && (
+        <ActionModal
+          title="Orax Plus required"
+          description={
+            <p>
+              Auto translation is an Orax Plus feature. Vote on Top.gg or
+              subscribe to Orax Plus to enable automatic translation for this
+              group.
+            </p>
+          }
+          actions={[
+            {
+              label: "Vote on Top.gg",
+              variant: "secondary",
+              disabled: !onStartOraxPlusVote,
+              onClick: () => {
+                setShowTranslationModal(false);
+                onStartOraxPlusVote?.();
+              },
+            },
+            {
+              label: "Subscribe $2.99/mo",
+              variant: "primary",
+              disabled: !onStartOraxPlusCheckout,
+              onClick: () => {
+                setShowTranslationModal(false);
+                onStartOraxPlusCheckout?.();
+              },
+            },
+          ]}
+          onClose={() => setShowTranslationModal(false)}
+        />
+      )}
     </div>
   );
 };

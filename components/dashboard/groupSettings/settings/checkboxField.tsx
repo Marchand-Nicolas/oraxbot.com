@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import config from "../../../../utils/config.json";
 import styles from "../../../../styles/components/dashboard/groupSettings/settings.module.css";
 import { getCookie } from "../../../../utils/cookies";
@@ -11,6 +11,8 @@ interface CheckboxFieldProps {
   guildId?: string | string[];
   apiEndpoint?: string;
   saveEndpoint?: string;
+  forceUnchecked?: boolean;
+  onBeforeEnable?: () => boolean | Promise<boolean>;
 }
 
 const CheckboxField = ({
@@ -21,8 +23,26 @@ const CheckboxField = ({
   guildId,
   apiEndpoint = `${config.apiV2}get_group_settings_field`,
   saveEndpoint = `${config.apiV2}set_group_settings_field`,
+  forceUnchecked = false,
+  onBeforeEnable,
 }: CheckboxFieldProps) => {
   const [isChecked, setIsChecked] = useState(false);
+
+  const saveValue = useCallback(
+    (fieldValue: boolean) => {
+      fetch(saveEndpoint, {
+        method: "POST",
+        body: JSON.stringify({
+          token: getCookie("token"),
+          groupId,
+          guildId,
+          fieldName,
+          fieldValue,
+        }),
+      });
+    },
+    [fieldName, groupId, guildId, saveEndpoint],
+  );
 
   useEffect(() => {
     if (!groupId || !guildId || !fieldName) return;
@@ -39,25 +59,29 @@ const CheckboxField = ({
     })
       .then((res) => res.json())
       .then((data: Record<string, unknown>) => {
-        setIsChecked(!!data[fieldName]); // Ensure it is treated as a boolean
+        const fieldValue = !!data[fieldName];
+        if (forceUnchecked && fieldValue) saveValue(false);
+        setIsChecked(forceUnchecked ? false : fieldValue);
       });
-  }, [groupId, guildId, fieldName, apiEndpoint]);
+  }, [groupId, guildId, fieldName, apiEndpoint, forceUnchecked, saveValue]);
 
-  const handleToggle = () => {
+  useEffect(() => {
+    if (!forceUnchecked || !isChecked) return;
+
+    setIsChecked(false);
+    saveValue(false);
+  }, [forceUnchecked, isChecked, saveValue]);
+
+  const handleToggle = async () => {
     const newValue = !isChecked;
-    setIsChecked(newValue);
 
-    // Save updated value
-    fetch(saveEndpoint, {
-      method: "POST",
-      body: JSON.stringify({
-        token: getCookie("token"),
-        groupId,
-        guildId,
-        fieldName,
-        fieldValue: newValue,
-      }),
-    });
+    if (newValue && onBeforeEnable && !(await onBeforeEnable())) {
+      setIsChecked(false);
+      return;
+    }
+
+    setIsChecked(newValue);
+    saveValue(newValue);
   };
 
   return (
