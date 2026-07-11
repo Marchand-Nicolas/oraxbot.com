@@ -98,7 +98,7 @@ export default function Home() {
             rel="noreferrer"
             className={styles.card}
           >
-            <h2>❤️ Donate &rarr;</h2>
+            <h2>❤️ Tip &rarr;</h2>
             <p>Support my hard work with my recently launched Ko-fi ✨</p>
           </a>
           <a

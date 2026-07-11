@@ -545,7 +545,7 @@ export default function Dashboard() {
                 rel="noreferrer"
               >
                 <button className={styles.button}>
-                  Donate ❤️{" "}
+                  Tip ❤️{" "}
                   <strong>
                     <svg
                       fill="none"

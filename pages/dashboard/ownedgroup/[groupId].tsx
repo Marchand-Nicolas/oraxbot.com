@@ -329,7 +329,7 @@ export default function OwnedGroup() {
             target="_blank"
             rel="noreferrer"
           >
-            Donate
+            Tip
           </a>
           <span> • </span>
           <a href="https://docs.oraxbot.com" target="_blank" rel="noreferrer">

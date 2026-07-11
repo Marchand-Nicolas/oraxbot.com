@@ -34,7 +34,7 @@ body:has(.navDark) {
   color: #f8fafc;
 }
 
-.navDark .donate {
+.navDark .tip {
   color: #e5e7eb;
 }
 
@@ -78,7 +78,7 @@ body:has(.navDark) {
   -webkit-text-fill-color: transparent;
 }
 
-.donate {
+.tip {
   margin-left: auto;
   margin-right: 1rem;
   cursor: pointer;

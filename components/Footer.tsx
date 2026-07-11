@@ -17,16 +17,6 @@ export default function Footer({ theme = "light" }: { theme?: string }) {
       <Link href="/tos" className={styles.footerLink}>
         TOS
       </Link>
-      •
-      <a
-        href="https://ko-fi.com/nicolasmarchand"
-        target="_blank"
-        rel="noreferrer"
-      >
-        <div className={styles.donate}>
-          <p>❤️ 100% free</p>
-        </div>
-      </a>
     </footer>
   );
 }
