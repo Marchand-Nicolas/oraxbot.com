@@ -109,6 +109,11 @@ a * {
   width: fit-content;
 }
 
+.button.main {
+  padding: 1rem 3rem;
+  font-weight: bold;
+}
+
 .button.dangerous {
   background: #fc5151;
   font-weight: bold;

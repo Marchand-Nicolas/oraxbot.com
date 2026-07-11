@@ -14,15 +14,15 @@ export default function Footer({ theme = "light" }: { theme?: string }) {
         </span>
       </div>
       •
-      <Link href="/tos" className={styles.footerLink}>
-        TOS
-      </Link>
-      •
       <a href="https://docs.oraxbot.com" target="_blank" rel="noreferrer">
         <div className={styles.tip}>
           <p>Docs</p>
         </div>
       </a>
+      •
+      <Link href="/tos" className={styles.footerLink}>
+        TOS
+      </Link>
     </footer>
   );
 }

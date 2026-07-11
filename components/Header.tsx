@@ -31,12 +31,18 @@ export default function NavBar({ theme = "light" }: { theme?: string }) {
         <Image src="/logo.png" alt="Orax logo" width={50} height={50} />
         <strong className={styles.title}>Orax bot</strong>
       </Link>
-      <a href="https://ko-fi.com/A0A51KMQ7J" target="_blank">
+      <a href="https://ko-fi.com/A0A51KMQ7J" target="_blank" className={styles.kofi}>
         <img
           height={36}
           src="https://storage.ko-fi.com/cdn/kofi5.png?v=6"
           alt="Buy Me a Coffee at ko-fi.com"
         />
+      </a>
+      <a
+        href={`https://discord.com/api/oauth2/authorize?client_id=812298057470967858&redirect_uri=${encodeURI(process.env.NEXT_PUBLIC_WEBSITE_URL || "")}%2Fdashboard&response_type=code&scope=identify%20guilds`}
+        className={styles.discordLogin}
+      >
+        Login with Discord
       </a>
     </nav>
   );

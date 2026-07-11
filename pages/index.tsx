@@ -84,14 +84,19 @@ export default function Home() {
         </div>
       </section>
       <Link href="dashboard">
-        <p className="button round center">Dashboard</p>
+        <p className="button round center main">Dashboard</p>
       </Link>
       <section id="informations" className={styles.main}>
         <div className={styles.grid}>
-          <Link className={styles.card} href="/dashboard">
-            <h2>Dashboard &rarr;</h2>
-            <p>Setup the bot</p>
-          </Link>
+          <a
+            href="https://docs.oraxbot.com"
+            target="_blank"
+            rel="noreferrer"
+            className={styles.card}
+          >
+            <h2>📚 Docs &rarr;</h2>
+            <p>Learn how to use the bot with our documentation</p>
+          </a>
           <a
             href="https://ko-fi.com/nicolasmarchand"
             target="_blank"
