@@ -2,7 +2,7 @@ import { Html, Head, Main, NextScript } from "next/document";
 
 export default function App() {
   return (
-    <Html>
+    <Html lang="en">
       <Head />
       <title>Orax bot</title>
       <meta
