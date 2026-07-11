@@ -36,10 +36,10 @@ const ActivityGraph = () => {
   const totalCount = messages.reduce((a, b) => a + b, 0);
 
   useEffect(() => {
-    const { default: ReactApexChart } = require("react-apexcharts") as {
-      default: ComponentType<ReactApexChartProps>;
+    const mod = require("react-apexcharts") as ComponentType<ReactApexChartProps> & {
+      default?: ComponentType<ReactApexChartProps>;
     };
-    setApexChart(() => ReactApexChart);
+    setApexChart(() => mod.default || mod);
   }, []);
 
   useEffect(() => {
@@ -54,8 +54,9 @@ const ActivityGraph = () => {
       headers: {
         "Content-Type": "application/json",
       },
-    }).then((res) =>
-      res.json().then((data: { activity?: ActivityPoint[] }) => {
+    })
+      .then((res) => res.json())
+      .then((data: { activity?: ActivityPoint[] }) => {
         const activity = data.activity;
         const countsByDate = new Map(
           (activity || []).map((a) => [
@@ -78,8 +79,8 @@ const ActivityGraph = () => {
         setDates(resDates);
         setMessages(resMessages);
         setLoading(false);
-      }),
-    );
+      })
+      .catch(() => setLoading(false));
   }, [groupId, guildId]);
 
   const options: ApexOptions = {
