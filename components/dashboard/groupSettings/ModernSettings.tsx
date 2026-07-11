@@ -14,7 +14,7 @@ interface ModernSettingsProps {
   oraxPlus?: OraxPlusStatus;
   onRefreshOraxPlus?: () => Promise<OraxPlusStatus | undefined>;
   onStartOraxPlusVote?: () => void;
-  onStartOraxPlusCheckout?: () => void;
+  onStartOraxPlusCheckout?: (plan?: "monthly" | "lifetime") => void;
 }
 
 const ModernSettings = ({
@@ -198,7 +198,16 @@ const ModernSettings = ({
               disabled: !onStartOraxPlusCheckout,
               onClick: () => {
                 setShowTranslationModal(false);
-                onStartOraxPlusCheckout?.();
+                onStartOraxPlusCheckout?.("monthly");
+              },
+            },
+            {
+              label: "Lifetime $19.99",
+              variant: "primary",
+              disabled: !onStartOraxPlusCheckout,
+              onClick: () => {
+                setShowTranslationModal(false);
+                onStartOraxPlusCheckout?.("lifetime");
               },
             },
           ]}

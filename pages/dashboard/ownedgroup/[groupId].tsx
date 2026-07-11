@@ -43,10 +43,10 @@ export default function OwnedGroup() {
     return status;
   }, [guildId]);
 
-  const startOraxPlusCheckout = () => {
+  const startOraxPlusCheckout = (plan?: "monthly" | "lifetime") => {
     if (!guildId) return;
 
-    startCheckout(guildId, "/dashboard/ownedgroup/" + groupId);
+    startCheckout(guildId, "/dashboard/ownedgroup/" + groupId, plan);
   };
 
   const startOraxPlusVote = async () => {

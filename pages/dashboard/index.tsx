@@ -317,7 +317,8 @@ export default function Dashboard() {
     !oraxPlus?.active || oraxPlus.entitlement?.source === "topgg_vote";
   const isAtGroupLimit = ownedGroupsCount >= groupLimit;
 
-  const startOraxPlusCheckout = () => startCheckout(guildId as string);
+  const startOraxPlusCheckout = (plan?: "monthly" | "lifetime") =>
+    startCheckout(guildId as string, undefined, plan);
 
   async function startOraxPlusVote() {
     const result = await startVote(guildId as string);
@@ -673,7 +674,7 @@ export default function Dashboard() {
                 <p>
                   {oraxPlus?.active
                     ? "This server can use the extended Orax Plus limits."
-                    : "Vote once a week on Top.gg or subscribe monthly to unlock higher limits for this server. Vote activation is automatic after Top.gg sends the webhook."}
+                    : "Vote once a week on Top.gg, subscribe monthly, or buy lifetime to unlock higher limits for this server. Vote activation is automatic after Top.gg sends the webhook."}
                 </p>
                 {votePlanExpiresIn && (
                   <p className={styles.planRenewalNote}>
@@ -704,9 +705,15 @@ export default function Dashboard() {
                   </button>
                   <button
                     className={styles.primaryButton}
-                    onClick={startOraxPlusCheckout}
+                    onClick={() => startOraxPlusCheckout("monthly")}
                   >
                     Subscribe $2.99/mo
+                  </button>
+                  <button
+                    className={styles.primaryButton}
+                    onClick={() => startOraxPlusCheckout("lifetime")}
+                  >
+                    Lifetime $19.99
                   </button>
                 </div>
               )}
@@ -822,7 +829,15 @@ export default function Dashboard() {
               variant: "primary",
               onClick: () => {
                 setShowGroupLimitModal(false);
-                startOraxPlusCheckout();
+                startOraxPlusCheckout("monthly");
+              },
+            },
+            {
+              label: "Lifetime $19.99",
+              variant: "primary",
+              onClick: () => {
+                setShowGroupLimitModal(false);
+                startOraxPlusCheckout("lifetime");
               },
             },
           ]}

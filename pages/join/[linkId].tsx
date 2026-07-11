@@ -387,6 +387,19 @@ export default function JoinGroup() {
                 startOraxPlusCheckout(channelLimitData.groupOwnerId);
               },
             },
+            {
+              label: isGroupOwner ? "Lifetime $19.99" : "Lifetime (owner only)",
+              variant: "secondary",
+              disabled: !isGroupOwner,
+              onClick: () => {
+                setShowChannelLimitModal(false);
+                startOraxPlusCheckout(
+                  channelLimitData.groupOwnerId,
+                  undefined,
+                  "lifetime",
+                );
+              },
+            },
           ]}
           onClose={() => setShowChannelLimitModal(false)}
         />

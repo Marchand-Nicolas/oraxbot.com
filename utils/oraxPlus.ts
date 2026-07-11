@@ -95,6 +95,7 @@ export async function startOraxPlusVote(
 export async function startOraxPlusCheckout(
   guildId: string,
   redirectBase = "/dashboard",
+  plan: "monthly" | "lifetime" = "monthly",
 ) {
   try {
     const response = await fetch(
@@ -104,6 +105,7 @@ export async function startOraxPlusCheckout(
         body: JSON.stringify({
           guildId,
           token: getCookie("token"),
+          plan,
           successUrl: `${window.location.origin}${redirectBase}?guild=${guildId}&orax_plus=success`,
           cancelUrl: `${window.location.origin}${redirectBase}?guild=${guildId}&orax_plus=cancelled`,
         }),

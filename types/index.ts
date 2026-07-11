@@ -39,7 +39,7 @@ export interface OraxPlusStatus {
   active?: boolean;
   plan?: "free" | "orax_plus" | string;
   entitlement?: {
-    source?: "topgg_vote" | "stripe" | "manual" | string;
+    source?: "topgg_vote" | "stripe" | "stripe_lifetime" | "manual" | string;
     sourceRef?: string | null;
     userId?: string | null;
     startsAt?: string | null;

@@ -13,7 +13,7 @@ interface CreateGroupMenuProps {
   ownedGroupsCount?: number;
   oraxPlus?: OraxPlusStatus;
   onStartOraxPlusVote?: () => void;
-  onStartOraxPlusCheckout?: () => void;
+  onStartOraxPlusCheckout?: (plan?: "monthly" | "lifetime") => void;
 }
 
 export default function CreateGroupMenu(props: CreateGroupMenuProps) {
@@ -201,7 +201,16 @@ export default function CreateGroupMenu(props: CreateGroupMenuProps) {
               disabled: !props.onStartOraxPlusCheckout,
               onClick: () => {
                 setShowGroupLimitModal(false);
-                props.onStartOraxPlusCheckout?.();
+                props.onStartOraxPlusCheckout?.("monthly");
+              },
+            },
+            {
+              label: "Lifetime $19.99",
+              variant: "primary",
+              disabled: !props.onStartOraxPlusCheckout,
+              onClick: () => {
+                setShowGroupLimitModal(false);
+                props.onStartOraxPlusCheckout?.("lifetime");
               },
             },
           ]}
