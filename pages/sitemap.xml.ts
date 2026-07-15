@@ -9,7 +9,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
 
   const urls = STATIC_PAGES.map(
     (path) => `  <url>
-    <loc>${SITEMAP_BASE_URL}/${path}</loc>
+    <loc>${SITEMAP_BASE_URL}${path}</loc>
     <lastmod>${lastModified}</lastmod>
     <changefreq>${path === "" ? "weekly" : "monthly"}</changefreq>
     <priority>${path === "" ? "1.0" : "0.6"}</priority>
