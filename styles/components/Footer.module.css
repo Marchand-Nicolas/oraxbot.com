@@ -38,3 +38,12 @@
 .footerLink:hover {
   text-decoration: underline;
 }
+
+@media (max-width: 600px) {
+  .footer {
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1.5rem 1rem;
+    font-size: 0.875rem;
+  }
+}

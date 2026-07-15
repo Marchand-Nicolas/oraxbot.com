@@ -23,6 +23,16 @@ export default function Footer({ theme = "light" }: { theme?: string }) {
       <Link href="/tos" className={styles.footerLink}>
         TOS
       </Link>
+      •
+      <a
+        href="https://github.com/Marchand-Nicolas/oraxbot.com"
+        target="_blank"
+        rel="noreferrer"
+      >
+        <div className={styles.tip}>
+          <p>GitHub</p>
+        </div>
+      </a>
     </footer>
   );
 }
