@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import styles from "../styles/components/Footer.module.css";
 
@@ -7,13 +6,6 @@ export default function Footer({ theme = "light" }: { theme?: string }) {
     <footer
       className={`${styles.footer} ${theme === "dark" ? styles.footerDark : styles.footerLight}`}
     >
-      <div>
-        Orax bot
-        <span>
-          <Image src="/favicon.ico" alt="Orax logo" width={16} height={16} />
-        </span>
-      </div>
-      •
       <a href="https://docs.oraxbot.com" target="_blank" rel="noreferrer">
         <div className={styles.tip}>
           <p>Docs</p>
