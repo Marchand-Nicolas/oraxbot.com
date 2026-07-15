@@ -1,0 +1,17 @@
+{
+  "name": "Orax — Discord Channel Sync",
+  "short_name": "Orax",
+  "description": "Sync Discord channels across multiple servers so communities can chat together.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0c0f17",
+  "theme_color": "#5865F2",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

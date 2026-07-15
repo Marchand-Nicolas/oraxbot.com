@@ -1,14 +1,63 @@
+import Head from "next/head";
 import styles from "../styles/Home.module.css";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import Image from "next/image";
 import Link from "next/link";
 
+const SITE_URL = "https://oraxbot.com";
+const SITE_NAME = "Orax";
+const TITLE = "Orax — Sync Discord Channels Across Multiple Servers";
+const DESCRIPTION =
+  "Orax lets you sync channels between multiple Discord servers so communities can chat, share events, and collaborate without leaving their own server.";
+
 export default function Home() {
   return (
     <>
+      <Head>
+        <title>{TITLE}</title>
+        <meta name="description" content={DESCRIPTION} />
+        <meta name="keywords" content="Discord bot, channel sync, cross-server chat, Discord integration, Orax, Interserv, server bridge" />
+        <meta name="author" content="Orax" />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href={SITE_URL} />
+
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content={SITE_NAME} />
+        <meta property="og:title" content={TITLE} />
+        <meta property="og:description" content={DESCRIPTION} />
+        <meta property="og:url" content={SITE_URL} />
+        <meta property="og:image" content={`${SITE_URL}/logo.png`} />
+        <meta property="og:image:alt" content="Orax logo" />
+        <meta property="og:locale" content="en_US" />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={TITLE} />
+        <meta name="twitter:description" content={DESCRIPTION} />
+        <meta name="twitter:image" content={`${SITE_URL}/logo.png`} />
+
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              name: SITE_NAME,
+              url: SITE_URL,
+              description: DESCRIPTION,
+              applicationCategory: "CommunicationApplication",
+              operatingSystem: "Web",
+              offers: {
+                "@type": "Offer",
+                price: "0",
+                priceCurrency: "USD",
+              },
+            }),
+          }}
+        />
+      </Head>
       <Header />
-      <section className={styles.gradient}>
+      <section className={styles.gradient} aria-label="Hero">
         <div>
           <h1 className={styles.title}>Interserv</h1>
           <p className={styles.description}>
@@ -34,7 +83,7 @@ export default function Home() {
           </a>
         </div>
       </section>
-      <section id="description">
+      <section id="description" aria-label="Features">
         <br />
         <br />
         <br />
@@ -44,12 +93,12 @@ export default function Home() {
           <img
             src="/assets/strip1.svg"
             className={[styles.strip, styles.v1].join(" ")}
-            alt="Decoration"
+            alt="Decorative wave divider"
           />
           <div className={styles.glassCard}>
             <Image
               src="/illustrations/example1.png"
-              alt="Example"
+              alt="Orax synced channels shown side by side across two Discord servers"
               layout="fill"
             />
           </div>
@@ -86,7 +135,7 @@ export default function Home() {
       <Link href="dashboard">
         <p className="button round center main">Dashboard</p>
       </Link>
-      <section id="informations" className={styles.main}>
+      <section id="informations" className={styles.main} aria-label="Resources and links">
         <div className={styles.grid}>
           <a
             href="https://docs.oraxbot.com"
