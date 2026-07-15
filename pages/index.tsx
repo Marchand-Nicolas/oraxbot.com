@@ -4,6 +4,7 @@ import Footer from "../components/Footer";
 import Header from "../components/Header";
 import Image from "next/image";
 import Link from "next/link";
+import config from "../utils/config.json";
 
 const SITE_URL = "https://oraxbot.com";
 const SITE_NAME = "Orax";
@@ -58,15 +59,24 @@ export default function Home() {
       </Head>
       <Header />
       <section className={styles.gradient} aria-label="Hero">
-        <div>
-          <h1 className={styles.title}>Interserv</h1>
+        <div className={styles.heroContent}>
+          <span className={styles.brand}>Orax</span>
+          <h1 className={styles.title}>
+            Sync your channels across multiple Discord servers
+          </h1>
           <p className={styles.description}>
-            Connect your favorite servers{" "}
-            <strong className={[styles.strong, styles.v2].join(" ")}>
-              together
-            </strong>
+            Connect your communities together so they can chat, share events,
+            and collaborate — without leaving their own server
           </p>
-          <a href="#description">
+          <a
+            href={config.inviteLink}
+            target="_blank"
+            rel="noreferrer"
+            className={`button round main ${styles.cta}`}
+          >
+            Add to Discord
+          </a>
+          <a href="#description" aria-label="Scroll to features">
             <svg
               className={styles.bottomArrow}
               fill="none"
