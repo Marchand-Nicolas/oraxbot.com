@@ -1,0 +1,269 @@
+.page {
+  padding: 120px 20px 60px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 3.5rem;
+}
+
+.header h1 {
+  font-size: clamp(2rem, 6vw, 3rem);
+  margin: 0 0 1rem;
+  background: linear-gradient(37deg, rgb(0, 161, 232) 0%, #8151fc 100%);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.header p {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  color: #6b7280;
+  margin: 0 auto;
+  max-width: 600px;
+  line-height: 1.6;
+}
+
+.tiers {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: stretch;
+  gap: 1.5rem;
+}
+
+.tier {
+  flex: 1 1 320px;
+  max-width: 380px;
+  padding: 2.5rem 2rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tier:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px 0 rgba(31, 38, 135, 0.15);
+}
+
+.tier.featured {
+  border: 2px solid #8151fc;
+  background: rgba(129, 81, 252, 0.04);
+}
+
+.tierName {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 0.5rem;
+}
+
+.tierBadge {
+  align-self: flex-start;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: white;
+  background: linear-gradient(37deg, rgb(0, 161, 232) 0%, #8151fc 100%);
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  margin-bottom: 1rem;
+}
+
+.price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.priceAmount {
+  font-size: 3rem;
+  font-weight: 900;
+  color: #111827;
+  line-height: 1;
+}
+
+.pricePeriod {
+  font-size: 1rem;
+  color: #6b7280;
+}
+
+.tierDescription {
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin: 0 0 1.5rem;
+  line-height: 1.5;
+}
+
+.features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.features li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  color: #374151;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.check {
+  color: #8151fc;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.cta {
+  display: block;
+  text-align: center;
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  border: 2px solid #8151fc;
+  color: #8151fc;
+  transition: all 0.3s ease-in-out;
+}
+
+.cta:hover {
+  background: #8151fc;
+  color: white;
+}
+
+.cta.main {
+  background: linear-gradient(37deg, rgb(0, 161, 232) 0%, #8151fc 100%);
+  color: white;
+  border: none;
+}
+
+.cta.main:hover {
+  opacity: 0.9;
+}
+
+.waysSection {
+  margin-top: 4rem;
+}
+
+.waysSection h2 {
+  text-align: center;
+  font-size: 2rem;
+  color: #111827;
+  margin-bottom: 2rem;
+}
+
+.ways {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.way {
+  flex: 1 1 280px;
+  max-width: 340px;
+  padding: 1.75rem 1.5rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.way h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 0.5rem;
+}
+
+.way p {
+  margin: 0;
+  color: #6b7280;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+.wayPrice {
+  font-size: 1.4rem;
+  font-weight: 800;
+  background: linear-gradient(37deg, rgb(0, 161, 232) 0%, #8151fc 100%);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.75rem !important;
+}
+
+.waysNote {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.9rem;
+  margin-top: 1.5rem;
+}
+
+.faq {
+  margin-top: 4rem;
+  max-width: 760px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.faq h2 {
+  text-align: center;
+  font-size: 2rem;
+  color: #111827;
+  margin-bottom: 2rem;
+}
+
+.faqItem {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 1.25rem 0;
+}
+
+.faqItem h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 0.5rem;
+}
+
+.faqItem p {
+  margin: 0;
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+.faqMore {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.faqMore .cta {
+  display: inline-block;
+}
+
+@media (max-width: 600px) {
+  .page {
+    padding: 100px 16px 40px;
+  }
+
+  .tier {
+    flex: 1 1 100%;
+  }
+}

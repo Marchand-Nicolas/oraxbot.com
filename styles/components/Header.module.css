@@ -54,12 +54,31 @@ body:has(.navDark) {
   color: rgb(30, 55, 48);
 }
 
+.navLink {
+  margin-left: auto;
+  margin-right: 1.5rem;
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: var(--text-color);
+  transition: color 0.3s ease-in-out;
+}
+
+.navLink:hover {
+  background: linear-gradient(37deg, rgb(0, 161, 232) 0%, #8151fc 100%);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 @media (max-width: 600px) {
   .title {
     display: none;
   }
 
   a.kofi {
+    display: none;
+  }
+
+  .navLink {
     display: none;
   }
 }
@@ -89,7 +108,6 @@ body:has(.navDark) {
 }
 
 .kofi {
-  margin-left: auto;
   margin-right: 1rem;
 }
 

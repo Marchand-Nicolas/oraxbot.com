@@ -31,6 +31,9 @@ export default function NavBar({ theme = "light" }: { theme?: string }) {
         <Image src="/logo.png" alt="Orax logo" width={50} height={50} />
         <strong className={styles.title}>Orax bot</strong>
       </Link>
+      <Link href="/pricing" className={styles.navLink}>
+        Pricing
+      </Link>
       <a href="https://ko-fi.com/A0A51KMQ7J" target="_blank" className={styles.kofi}>
         <img
           height={36}
