@@ -52,10 +52,6 @@ export default function Pricing() {
               </li>
               <li>
                 <span className={styles.check}>&#10003;</span>
-                Two-way message sync
-              </li>
-              <li>
-                <span className={styles.check}>&#10003;</span>
                 Community support
               </li>
             </ul>
@@ -76,6 +72,9 @@ export default function Pricing() {
               <span className={styles.priceAmount}>from $2.99</span>
               <span className={styles.pricePeriod}>/ mo</span>
             </div>
+            <p className={styles.freeVoteNote}>
+              or get it <strong>free</strong> by voting on Top.gg
+            </p>
             <p className={styles.tierDescription}>
               For power users and large communities that need more.
             </p>
@@ -90,7 +89,14 @@ export default function Pricing() {
               </li>
               <li>
                 <span className={styles.check}>&#10003;</span>
-                Two-way message sync
+                <a
+                  href="https://docs.oraxbot.com/features/auto-translate"
+                  target="_blank"
+                  rel="noreferrer"
+                  className={styles.featureLink}
+                >
+                  Auto-translate feature
+                </a>
               </li>
               <li>
                 <span className={styles.check}>&#10003;</span>
@@ -110,16 +116,16 @@ export default function Pricing() {
               <h3>Vote on Top.gg</h3>
               <p className={styles.wayPrice}>Free</p>
               <p>
-                Vote once a week for Orax on Top.gg. Activation is automatic
-                and lasts until your vote expires.
+                Vote once a week for Orax on Top.gg. Activation is automatic and
+                lasts until your vote expires.
               </p>
             </div>
             <div className={styles.way}>
               <h3>Monthly subscription</h3>
               <p className={styles.wayPrice}>$2.99 / month</p>
               <p>
-                A recurring monthly subscription billed securely through
-                Stripe. Cancel anytime.
+                A recurring monthly subscription billed securely through Stripe.
+                Cancel anytime.
               </p>
             </div>
             <div className={styles.way}>

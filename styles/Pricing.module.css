@@ -97,6 +97,17 @@
   color: #6b7280;
 }
 
+.freeVoteNote {
+  margin: 0 0 1.5rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.freeVoteNote strong {
+  color: #8151fc;
+  font-weight: 700;
+}
+
 .tierDescription {
   color: #6b7280;
   font-size: 0.95rem;
@@ -127,6 +138,16 @@
   color: #8151fc;
   font-weight: 700;
   flex-shrink: 0;
+}
+
+.featureLink {
+  color: #8151fc;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.featureLink:hover {
+  text-decoration: underline;
 }
 
 .cta {
