@@ -32,7 +32,7 @@ export default function NavBar({ theme = "light" }: { theme?: string }) {
         <strong className={styles.title}>Orax bot</strong>
       </Link>
       <Link href="/pricing" className={styles.navLink}>
-        Pricing
+        Pricing <span className={styles.freeTag}>Free</span>
       </Link>
       <a href="https://ko-fi.com/A0A51KMQ7J" target="_blank" className={styles.kofi}>
         <img

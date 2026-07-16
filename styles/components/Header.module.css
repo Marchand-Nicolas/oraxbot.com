@@ -55,6 +55,7 @@ body:has(.navDark) {
 }
 
 .navLink {
+  position: relative;
   margin-left: auto;
   margin-right: 1.5rem;
   font-weight: 500;
@@ -67,6 +68,29 @@ body:has(.navDark) {
   background: linear-gradient(37deg, rgb(0, 161, 232) 0%, #8151fc 100%);
   background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+.freeTag {
+  position: absolute;
+  top: -0.55rem;
+  left: -1.75rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: rgb(0, 161, 232);
+  background: rgba(0, 161, 232, 0.1);
+  border-radius: 999px;
+  padding: 0.15rem 0.45rem;
+  line-height: 1.2;
+  -webkit-text-fill-color: rgb(0, 161, 232);
+}
+
+.navDark .freeTag {
+  color: #7dd3fc;
+  -webkit-text-fill-color: #7dd3fc;
+  background: rgba(125, 211, 252, 0.1);
+  border-color: rgba(125, 211, 252, 0.3);
 }
 
 @media (max-width: 600px) {
