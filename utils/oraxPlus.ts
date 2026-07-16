@@ -92,11 +92,32 @@ export async function startOraxPlusVote(
   }
 }
 
+let checkoutOverlay: HTMLDivElement | null = null;
+
+function showCheckoutOverlay() {
+  if (checkoutOverlay) return;
+  const overlay = document.createElement("div");
+  overlay.className = "popup";
+  overlay.innerHTML =
+    '<div class="container" style="text-align:center">' +
+    '<div class="spinner" style="margin:0 auto 16px"></div>' +
+    '<p style="color:#fff;margin:0">Redirecting to checkout…</p>' +
+    "</div>";
+  document.body.appendChild(overlay);
+  checkoutOverlay = overlay;
+}
+
+function hideCheckoutOverlay() {
+  checkoutOverlay?.remove();
+  checkoutOverlay = null;
+}
+
 export async function startOraxPlusCheckout(
   guildId: string,
   redirectBase = "/dashboard",
   plan: "monthly" | "lifetime" = "monthly",
 ) {
+  showCheckoutOverlay();
   try {
     const response = await fetch(
       `${config.apiV2}create_orax_plus_checkout_session`,
@@ -120,6 +141,7 @@ export async function startOraxPlusCheckout(
     }
     window.location.href = data.url;
   } catch (error) {
+    hideCheckoutOverlay();
     notify.error(
       "Checkout failed",
       error instanceof Error
