@@ -1,5 +1,6 @@
 import type { PlatformConfig } from "./types";
 import type { DiscordGuild } from "../../types";
+import config from "../config.json";
 
 const WEBSITE_URL =
   process.env.NEXT_PUBLIC_WEBSITE_URL || "https://oraxbot.com";
@@ -35,6 +36,11 @@ const fluxer: PlatformConfig = {
   logoPath: "/assets/platforms/fluxer.svg",
 
   authorizeUrl: `https://web.fluxer.app/oauth2/authorize?client_id=1527278943076352000&scope=identify+guilds&redirect_uri=${redirectUri}&response_type=code`,
+
+  getInviteUrl: (guildId) =>
+    `${config.fluxerInviteLink}&guild_id=${guildId}`,
+  addBotLabel: "Add bot",
+  supportsTopggVote: false,
 
   userEndpoint: "https://api.fluxer.app/v1/users/@me",
   guildsEndpoint: "https://api.fluxer.app/v1/users/@me/guilds",

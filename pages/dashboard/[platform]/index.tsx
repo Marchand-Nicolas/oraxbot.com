@@ -481,6 +481,7 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
                       guildId={guildId}
                       ownedGroupsCount={ownedGroupsCount}
                       oraxPlus={oraxPlus}
+                      platform={platform}
                       onStartOraxPlusVote={startOraxPlusVote}
                       onStartOraxPlusCheckout={startOraxPlusCheckout}
                       setRefreshGuildDatas={setRefreshGuildDatas}
@@ -530,7 +531,9 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
             </>
           ) : (
             <button
-              onClick={() =>
+              onClick={() => {
+                const inviteUrl = platform.getInviteUrl(guild.id);
+                if (!inviteUrl) return;
                 popup("Invite the bot", `Warning`, "warning", {
                   content: (
                     <p className="content">
@@ -545,13 +548,13 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
                   ),
                   icon: meteor,
                   action: function () {
-                    window.open(config.inviteLink + "&guild_id=" + guild.id);
+                    window.open(inviteUrl);
                   },
                 })
-              }
+              }}
               className={styles.button}
             >
-              Add bot
+              {platform.addBotLabel}
               <strong>
                 <svg
                   fill="none"
@@ -581,7 +584,9 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
                 <p>
                   {oraxPlus?.active
                     ? "This server can use the extended Orax Plus limits."
-                    : "Vote once a week on Top.gg, subscribe monthly, or buy lifetime to unlock higher limits for this server. Vote activation is automatic after Top.gg sends the webhook."}
+                    : platform.supportsTopggVote
+                      ? "Vote once a week on Top.gg, subscribe monthly, or buy lifetime to unlock higher limits for this server. Vote activation is automatic after Top.gg sends the webhook."
+                      : "Subscribe monthly or buy lifetime to unlock higher limits for this server."}
                 </p>
                 {votePlanExpiresIn && (
                   <p className={styles.planRenewalNote}>
@@ -604,12 +609,14 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
               </div>
               {showOraxPlusActions && (
                 <div className={styles.planActions}>
-                  <button
-                    className={styles.secondaryButton}
-                    onClick={startOraxPlusVote}
-                  >
-                    Vote on Top.gg
-                  </button>
+                  {platform.supportsTopggVote && (
+                    <button
+                      className={styles.secondaryButton}
+                      onClick={startOraxPlusVote}
+                    >
+                      Vote on Top.gg
+                    </button>
+                  )}
                   <button
                     className={styles.primaryButton}
                     onClick={() => startOraxPlusCheckout("monthly")}
@@ -717,22 +724,28 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
           title="Group limit reached"
           description={
             <p>
-              This server has reached its current group quota. Vote on Top.gg or
-              subscribe to Orax Plus to unlock more interserver groups.
+              This server has reached its current group quota.
+              {platform.supportsTopggVote
+                ? " Vote on Top.gg or subscribe to Orax Plus to unlock more interserver groups."
+                : " Subscribe to Orax Plus to unlock more interserver groups."}
             </p>
           }
           actions={[
-            {
-              label: "Vote on Top.gg",
-              variant: "secondary",
-              onClick: () => {
-                setShowGroupLimitModal(false);
-                startOraxPlusVote();
-              },
-            },
+            ...(platform.supportsTopggVote
+              ? [
+                  {
+                    label: "Vote on Top.gg",
+                    variant: "secondary" as const,
+                    onClick: () => {
+                      setShowGroupLimitModal(false);
+                      startOraxPlusVote();
+                    },
+                  },
+                ]
+              : []),
             {
               label: "Subscribe $2.99/mo",
-              variant: "primary",
+              variant: "primary" as const,
               onClick: () => {
                 setShowGroupLimitModal(false);
                 startOraxPlusCheckout("monthly");
@@ -740,7 +753,7 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
             },
             {
               label: "Lifetime $19.99",
-              variant: "primary",
+              variant: "primary" as const,
               onClick: () => {
                 setShowGroupLimitModal(false);
                 startOraxPlusCheckout("lifetime");

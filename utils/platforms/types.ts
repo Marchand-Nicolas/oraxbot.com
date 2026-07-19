@@ -25,6 +25,26 @@ export interface PlatformConfig {
   authorizeUrl: string;
 
   /**
+   * Function that builds the bot-invite URL for a guild on this platform.
+   * Receives the selected guild id and returns a URL (or null when the
+   * platform doesn't support a bot-invite flow, in which case the
+   * dashboard will hide the "Add bot" button).
+   *
+   * The base invite links live in utils/config.json; each platform picks
+   * the one that fits its URL scheme.
+   */
+  getInviteUrl: (guildId: string) => string | null;
+
+  /** Label shown on the "Add bot" button for this platform. */
+  addBotLabel: string;
+
+  /**
+   * Whether this platform's bot is listed on Top.gg and therefore can
+   * unlock Orax Plus via community votes. Discord yes, Fluxer no.
+   */
+  supportsTopggVote: boolean;
+
+  /**
    * Provider-side endpoints used to load the logged-in user's profile and
    * guild list after the OAuth code has been exchanged for a token.
    *

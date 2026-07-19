@@ -7,6 +7,7 @@ import { unmountRoot } from "../../utils/reactRoot";
 import { notify } from "../ui/NotificationSystem";
 import { getCookie } from "../../utils/cookies";
 import type { Channel, OraxPlusStatus } from "../../types";
+import type { PlatformConfig } from "../../utils/platforms";
 
 interface CreateGroupMenuProps {
   guildId: string | string[] | undefined;
@@ -15,6 +16,7 @@ interface CreateGroupMenuProps {
   oraxPlus?: OraxPlusStatus;
   onStartOraxPlusVote?: () => void;
   onStartOraxPlusCheckout?: (plan?: "monthly" | "lifetime") => void;
+  platform?: PlatformConfig;
 }
 
 export default function CreateGroupMenu(props: CreateGroupMenuProps) {
@@ -182,20 +184,26 @@ export default function CreateGroupMenu(props: CreateGroupMenuProps) {
           title="Group limit reached"
           description={
             <p>
-              This server has reached its current group quota. Vote on Top.gg or
-              subscribe to Orax Plus to unlock more interserver groups.
+              This server has reached its current group quota.
+              {props.platform?.supportsTopggVote
+                ? " Vote on Top.gg or subscribe to Orax Plus to unlock more interserver groups."
+                : " Subscribe to Orax Plus to unlock more interserver groups."}
             </p>
           }
           actions={[
-            {
-              label: "Vote on Top.gg",
-              variant: "secondary",
-              disabled: !props.onStartOraxPlusVote,
-              onClick: () => {
-                setShowGroupLimitModal(false);
-                props.onStartOraxPlusVote?.();
-              },
-            },
+            ...(props.platform?.supportsTopggVote
+              ? [
+                  {
+                    label: "Vote on Top.gg",
+                    variant: "secondary" as const,
+                    disabled: !props.onStartOraxPlusVote,
+                    onClick: () => {
+                      setShowGroupLimitModal(false);
+                      props.onStartOraxPlusVote?.();
+                    },
+                  },
+                ]
+              : []),
             {
               label: "Subscribe $2.99/mo",
               variant: "primary",

@@ -9,6 +9,7 @@ import OptionsField from "./settings/optionField";
 import TextField from "./settings/textField";
 import CheckboxField from "./settings/checkboxField";
 import TextareaField from "./settings/textareaField";
+import { getPlatform } from "../../../utils/platforms";
 
 interface ModernSettingsProps {
   oraxPlus?: OraxPlusStatus;
@@ -26,7 +27,10 @@ const ModernSettings = ({
   const router = useRouter();
   const params = new URLSearchParams(router.asPath.split("?")[1]);
   const guildId = params.get("guild") || "";
-  const { groupId } = router.query;
+  const { groupId, platform: platformSlug } = router.query;
+  const platform =
+    typeof platformSlug === "string" ? getPlatform(platformSlug) : undefined;
+  const supportsTopggVote = platform?.supportsTopggVote ?? false;
   const [showTranslationModal, setShowTranslationModal] = useState(false);
   const hasOraxPlus = !!oraxPlus?.active;
   const shouldBlockTranslation = !!oraxPlus && !hasOraxPlus;
@@ -177,21 +181,26 @@ const ModernSettings = ({
           title="Orax Plus required"
           description={
             <p>
-              Auto translation is an Orax Plus feature. Vote on Top.gg or
-              subscribe to Orax Plus to enable automatic translation for this
-              group.
+              Auto translation is an Orax Plus feature.
+              {supportsTopggVote
+                ? " Vote on Top.gg or subscribe to Orax Plus to enable automatic translation for this group."
+                : " Subscribe to Orax Plus to enable automatic translation for this group."}
             </p>
           }
           actions={[
-            {
-              label: "Vote on Top.gg",
-              variant: "secondary",
-              disabled: !onStartOraxPlusVote,
-              onClick: () => {
-                setShowTranslationModal(false);
-                onStartOraxPlusVote?.();
-              },
-            },
+            ...(supportsTopggVote
+              ? [
+                  {
+                    label: "Vote on Top.gg",
+                    variant: "secondary" as const,
+                    disabled: !onStartOraxPlusVote,
+                    onClick: () => {
+                      setShowTranslationModal(false);
+                      onStartOraxPlusVote?.();
+                    },
+                  },
+                ]
+              : []),
             {
               label: "Subscribe $2.99/mo",
               variant: "primary",

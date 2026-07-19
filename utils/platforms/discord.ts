@@ -1,6 +1,7 @@
 import type { PlatformConfig } from "./types";
 import type { DiscordGuild } from "../../types";
 import { checkAdminPerms } from "../permissions";
+import config from "../config.json";
 
 const WEBSITE_URL =
   process.env.NEXT_PUBLIC_WEBSITE_URL || "https://oraxbot.com";
@@ -15,6 +16,11 @@ const discord: PlatformConfig = {
   logoPath: "/assets/platforms/discord.svg",
 
   authorizeUrl: `https://discord.com/api/oauth2/authorize?client_id=812298057470967858&redirect_uri=${redirectUri}&response_type=code&scope=identify%20guilds`,
+
+  getInviteUrl: (guildId) =>
+    `${config.inviteLink}&guild_id=${guildId}`,
+  addBotLabel: "Add bot",
+  supportsTopggVote: true,
 
   userEndpoint: "https://discordapp.com/api/users/@me",
   guildsEndpoint: "https://discordapp.com/api/v6/users/@me/guilds",
