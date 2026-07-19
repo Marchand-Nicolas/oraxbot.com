@@ -59,6 +59,13 @@ export interface PlatformConfig {
   addBotLabel: string;
 
   /**
+   * Support URL the user is sent to from the dashboard's "Support" button.
+   * Discord points at a support server invite; Fluxer points at a support
+   * group on fluxer.gg.
+   */
+  supportUrl: string;
+
+  /**
    * Bot-list vote provider this platform can unlock Orax Plus through.
    *
    * Discord is listed on Top.gg (webhook-tracked, dashboard polls after

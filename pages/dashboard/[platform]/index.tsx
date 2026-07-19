@@ -402,7 +402,7 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
         <h1 className={styles.title}>{guild.name}</h1>
         <div className={styles.actionsContainer}>
           <a
-            href="https://discord.gg/e3pBtbum4A"
+            href={platform.supportUrl}
             target="_blank"
             rel="noreferrer"
           >

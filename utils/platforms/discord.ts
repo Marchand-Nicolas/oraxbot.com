@@ -20,6 +20,7 @@ const discord: PlatformConfig = {
   getInviteUrl: (guildId) =>
     `${config.inviteLink}&guild_id=${guildId}`,
   addBotLabel: "Add bot",
+  supportUrl: "https://discord.gg/e3pBtbum4A",
   vote: {
     provider: "topgg",
     url: config.topggVoteUrl,
