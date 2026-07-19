@@ -38,6 +38,7 @@ const fluxer: PlatformConfig = {
 
   userEndpoint: "https://api.fluxer.app/v1/users/@me",
   guildsEndpoint: "https://api.fluxer.app/v1/users/@me/guilds",
+  proxyThroughBackend: true,
 
   hasPermissionFlags: true,
   isAdmin,
@@ -56,8 +57,6 @@ const fluxer: PlatformConfig = {
   cookieName: "token_fluxer",
   cachedUserStorageKey: "cachedUserDatas_fluxer",
   cachedGuildsStorageKey: "cachedGuilds_fluxer",
-
-  callProviderDirectly: true,
 };
 
 export default fluxer;

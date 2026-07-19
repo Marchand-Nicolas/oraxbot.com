@@ -27,9 +27,15 @@ export interface PlatformConfig {
   /**
    * Provider-side endpoints used to load the logged-in user's profile and
    * guild list after the OAuth code has been exchanged for a token.
+   *
+   * When `proxyThroughBackend` is false, the dashboard calls these URLs
+   * directly from the browser. When true (because the provider's API
+   * does not send CORS headers), the request is routed through the bot's
+   * `proxy_platform_api` endpoint instead.
    */
   userEndpoint: string;
   guildsEndpoint: string;
+  proxyThroughBackend: boolean;
 
   /** Whether this platform's guild payloads expose `permissions_new`. */
   hasPermissionFlags: boolean;
@@ -64,11 +70,4 @@ export interface PlatformConfig {
   /** localStorage keys used to cache profile data between page loads. */
   cachedUserStorageKey: string;
   cachedGuildsStorageKey: string;
-
-  /**
-   * Whether this platform's web API should be called via the orax bot
-   * proxy. Discord talks to discord.com directly; newer platforms may
-   * also be called directly. Always true for now.
-   */
-  callProviderDirectly: true;
 }

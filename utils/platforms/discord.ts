@@ -18,6 +18,7 @@ const discord: PlatformConfig = {
 
   userEndpoint: "https://discordapp.com/api/users/@me",
   guildsEndpoint: "https://discordapp.com/api/v6/users/@me/guilds",
+  proxyThroughBackend: false,
 
   hasPermissionFlags: true,
   isAdmin: (guild: DiscordGuild) => checkAdminPerms(guild),
@@ -34,8 +35,6 @@ const discord: PlatformConfig = {
   cookieName: "token_discord",
   cachedUserStorageKey: "cachedUserDatas_discord",
   cachedGuildsStorageKey: "cachedGuilds_discord",
-
-  callProviderDirectly: true,
 };
 
 export default discord;

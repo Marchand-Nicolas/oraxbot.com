@@ -64,15 +64,7 @@ export async function fetchPlatformUser(
   platform: PlatformConfig,
   token: string,
 ): Promise<DiscordUser> {
-  const res = await fetch(platform.userEndpoint, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      Accept: "application/json",
-      Authorization: "Bearer " + token,
-    },
-  });
-  return (await res.json()) as DiscordUser;
+  return fetchPlatformResource(platform, token, "user") as Promise<DiscordUser>;
 }
 
 /** Fetch the logged-in user's guild list from the platform's REST API. */
@@ -80,7 +72,34 @@ export async function fetchPlatformGuilds(
   platform: PlatformConfig,
   token: string,
 ): Promise<Guild[]> {
-  const res = await fetch(platform.guildsEndpoint, {
+  return fetchPlatformResource(platform, token, "guilds") as Promise<Guild[]>;
+}
+
+/**
+ * Internal helper that routes the request either directly to the
+ * provider (Discord-style APIs with CORS) or through the bot's
+ * `proxy_platform_api` endpoint (Fluxer-style APIs without CORS).
+ */
+async function fetchPlatformResource(
+  platform: PlatformConfig,
+  token: string,
+  resource: "user" | "guilds",
+): Promise<unknown> {
+  if (platform.proxyThroughBackend) {
+    const res = await fetch(`${config.apiV2}proxy_platform_api`, {
+      method: "POST",
+      body: JSON.stringify({
+        platform: platform.slug,
+        token,
+        resource,
+      }),
+      headers: { "Content-Type": "application/json" },
+    });
+    return res.json();
+  }
+
+  const url = resource === "user" ? platform.userEndpoint : platform.guildsEndpoint;
+  const res = await fetch(url, {
     method: "GET",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -88,7 +107,7 @@ export async function fetchPlatformGuilds(
       Authorization: "Bearer " + token,
     },
   });
-  return (await res.json()) as Guild[];
+  return res.json();
 }
 
 /**
