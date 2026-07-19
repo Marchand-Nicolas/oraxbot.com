@@ -37,6 +37,13 @@ const discord: PlatformConfig = {
   getGuildIconUrl: ({ id, icon }) =>
     icon ? `https://cdn.discordapp.com/icons/${id}/${icon}.webp?size=96` : null,
 
+  getUserIconUrl: ({ id, avatar }) =>
+    avatar
+      ? avatar.startsWith("http")
+        ? avatar
+        : `https://cdn.discordapp.com/avatars/${id}/${avatar}.webp?size=128`
+      : null,
+
   getGuildBackgroundUrl: ({ id, icon }) =>
     icon
       ? `https://cdn.discordapp.com/icons/${id}/${icon}.webp?size=96`

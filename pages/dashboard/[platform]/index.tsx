@@ -8,6 +8,7 @@ import popup from "../../../utils/popup";
 import meteor from "../../../public/icons/meteor.svg";
 import CreateGroupMenu from "../../../components/dashboard/CreateGroupMenu";
 import Settings from "../../../components/dashboard/Settings";
+import UserMenu from "../../../components/dashboard/UserMenu";
 import Loading from "../../../components/Loading";
 import GuildIcon from "../../../components/GuildIcon";
 import HiddenMenu from "../../../components/ui/hiddenMenu";
@@ -349,6 +350,7 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
 
   return (
     <>
+      {activeUser && <UserMenu user={activeUser} platform={platform} />}
       <div
         style={{
           backgroundImage: backgroundImage ? `url('${backgroundImage}')` : undefined,

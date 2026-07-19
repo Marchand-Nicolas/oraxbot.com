@@ -106,6 +106,13 @@ export interface PlatformConfig {
   getGuildIconUrl: (guild: { id: string; icon: string | null }) => string | null;
 
   /**
+   * Build the URL used as the `src` of a logged-in user's avatar `<img>`.
+   * Returns null when the user has no avatar (caller falls back to a
+   * component that shows the user's initials).
+   */
+  getUserIconUrl: (user: { id: string; avatar?: string | null }) => string | null;
+
+  /**
    * CDN-style URL template used for full-bleed backgrounds in the dashboard.
    * Returns null when no background image is available.
    */

@@ -59,6 +59,13 @@ const fluxer: PlatformConfig = {
       ? `https://fluxerusercontent.com/icons/${id}/${icon}.webp?size=96`
       : null,
 
+  getUserIconUrl: ({ id, avatar }) =>
+    avatar
+      ? avatar.startsWith("http")
+        ? avatar
+        : `https://fluxerusercontent.com/avatars/${id}/${avatar}.webp?size=128`
+      : null,
+
   getGuildBackgroundUrl: ({ id, icon }) =>
     icon
       ? `https://fluxerusercontent.com/icons/${id}/${icon}.webp?size=96`
