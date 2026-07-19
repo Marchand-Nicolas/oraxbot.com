@@ -78,7 +78,7 @@ export default function PlatformDashboardPage() {
     return <Loading />;
   }
 
-  return <Dashboard platform={platform} />;
+  return <Dashboard key={platform.slug} platform={platform} />;
 }
 
 function Dashboard({ platform }: { platform: PlatformConfig }) {
