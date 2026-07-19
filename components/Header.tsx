@@ -41,7 +41,7 @@ export default function NavBar({ theme = "light" }: { theme?: string }) {
           alt="Buy Me a Coffee at ko-fi.com"
         />
       </a>
-      <Link href="/dashboard" className={styles.discordLogin}>
+      <Link href="/login" className={styles.discordLogin}>
         Login
       </Link>
     </nav>
