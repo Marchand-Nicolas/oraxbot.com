@@ -1,849 +1,252 @@
-import styles from "../../styles/Dashboard.module.css";
-import config from "../../utils/config.json";
-import type { DiscordUser, Guild, GuildData, GuildSettings } from "../../types";
-import { useState, useEffect, useRef } from "react";
-import { getCookie, setCookie } from "../../utils/cookies";
+import { useEffect, useState } from "react";
+import Head from "next/head";
 import Link from "next/link";
-import { renderWithRoot } from "../../utils/reactRoot";
-import popup from "../../utils/popup";
-import meteor from "../../public/icons/meteor.svg";
-import CreateGroupMenu from "../../components/dashboard/CreateGroupMenu";
-import Settings from "../../components/dashboard/Settings";
-import Loading from "../../components/Loading";
-import HiddenMenu from "../../components/ui/hiddenMenu";
-import { notify } from "../../components/ui/NotificationSystem";
-import ActionModal from "../../components/ui/ActionModal";
-import ErrorBoundary from "../../components/ui/ErrorBoundary";
-import { getStorage, setStorage } from "../../utils/storage";
+import { useRouter } from "next/router";
+import styles from "../../styles/PlatformLogin.module.css";
+import { platformList, getPlatform } from "../../utils/platforms";
+import type { PlatformConfig } from "../../utils/platforms/types";
 import {
-  startOraxPlusCheckout as startCheckout,
-  startOraxPlusVote as startVote,
-} from "../../utils/oraxPlus";
-import { checkAdminPerms } from "../../utils/permissions";
+  exchangeOauthCode,
+  persistPlatformToken,
+} from "../../utils/platforms/oauth";
+import { getCookie, setCookie } from "../../utils/cookies";
+import { notify } from "../../components/ui/NotificationSystem";
+import Loading from "../../components/Loading";
 
-function formatRemainingPlanTime(expiresAt?: string | null) {
-  if (!expiresAt) return null;
+const TITLE = "Orax Dashboard — Choose your platform";
+const DESCRIPTION =
+  "Sign in to the Orax dashboard with Discord or Fluxer to manage your interserver groups.";
 
-  const expiresAtTime = new Date(expiresAt).getTime();
-  if (Number.isNaN(expiresAtTime)) return null;
-
-  const remainingMs = expiresAtTime - Date.now();
-  if (remainingMs <= 0) return "less than a minute";
-
-  const minute = 60 * 1000;
-  const hour = 60 * minute;
-  const day = 24 * hour;
-
-  if (remainingMs >= day) {
-    const days = Math.ceil(remainingMs / day);
-    return `${days} day${days === 1 ? "" : "s"}`;
-  }
-
-  if (remainingMs >= hour) {
-    const hours = Math.ceil(remainingMs / hour);
-    return `${hours} hour${hours === 1 ? "" : "s"}`;
-  }
-
-  const minutes = Math.ceil(remainingMs / minute);
-  return `${minutes} minute${minutes === 1 ? "" : "s"}`;
-}
-
-export default function Dashboard() {
-  const [user, setUser] = useState<DiscordUser | undefined>(undefined);
-  const [guilds, setGuilds] = useState<Guild[]>([]);
-  const [guildDatas, setGuildDatas] = useState<GuildData>({});
-  const [batchGuildDatas, setBatchGuildDatas] = useState<
-    Record<string, GuildData>
-  >({});
-  const [settings, setSettings] = useState<GuildSettings>({
-    lang: 0,
-    public: false,
-    public_link: "",
-    default: true,
-  });
-  const [paymentProgress, setPaymentProgress] = useState(0);
-  const [refreshGuildDatas, setRefreshGuildDatas] = useState(false);
-  const [isPollingOraxPlusVote, setIsPollingOraxPlusVote] = useState(false);
-  const [showGroupLimitModal, setShowGroupLimitModal] = useState(false);
-  const [voteBaselineExpiresAt, setVoteBaselineExpiresAt] = useState<
-    string | null
-  >(null);
-  const [loading, setLoading] = useState(true);
-  const [lastLoadedGuildId, setLastLoadedGuildId] = useState("");
-  const votePollAttemptsRef = useRef(0);
+/**
+ * Login hub for the dashboard.
+ *
+ * Responsibilities:
+ *  - If the user already has a valid session for a platform (cookie
+ *    `token_<slug>`), redirect straight to `/dashboard/<slug>`.
+ *  - If the OAuth provider sent us back here with `?code=...&state=...`,
+ *    exchange the code with the platform encoded in `state`, persist the
+ *    token, and redirect to the right dashboard.
+ *  - Otherwise render two buttons (Discord / Fluxer) that each start the
+ *    OAuth flow with `state=/dashboard/<slug>` so we can route the user
+ *    back here correctly.
+ *
+ * Adding a new platform only requires registering it in
+ * `utils/platforms/index.ts` — this page renders a button for every entry.
+ */
+export default function DashboardLogin() {
+  const router = useRouter();
+  const [status, setStatus] = useState<
+    "loading" | "ready" | "exchanging"
+  >("loading");
 
   useEffect(() => {
-    let token = getCookie("token");
-    let cachedUserDatas = getStorage("cachedUserDatas");
-    let cachedGuilds = getStorage("cachedGuilds");
-    if (cachedGuilds && cachedUserDatas && token) {
-      setLoading(false);
-      try {
-        setUser(JSON.parse(cachedUserDatas));
-        setGuilds(JSON.parse(cachedGuilds));
-      } catch (error) {
-        console.error("Error parsing cached data:", error);
-        setTimeout(() => {
-          notify.error(
-            "Error parsing cached data",
-            "An error occurred while parsing cached data. Please try refreshing the page.",
-          );
-        }, 1000);
-        setUser(undefined);
-        setGuilds([]);
-      }
-    }
+    void handleEntry();
+  }, []);
+
+  async function handleEntry() {
     const params = new URLSearchParams(window.location.search);
-    const state = params.get("state");
-    if (!token || token === "undefined" || state) {
-      const code = params.get("code");
-      if (code) {
-        fetch(`${config.apiV2}exchange_discord_oauth_code`, {
-          method: "POST",
-          body: JSON.stringify({ token: code }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-          .then((res) => res.json())
-          .then((res) => {
-            if (!res.access_token || res.access_token === "undefined") {
-              notify.error(
-                "Login Failed",
-                "Invalid authentication response. Redirecting...",
-              );
-              setTimeout(() => (window.location.href = "/dashboard"), 2000);
-              return;
-            }
-            setCookie("token", res.access_token, res.expires_in - 1000);
-            token = res.access_token;
-            if (state) {
-              window.location.href = state;
-              return;
-            } else {
-              loadUserData(res.access_token);
-            }
-          })
-          .catch((error) => {
-            notify.error(
-              "Login Failed",
-              "Unable to complete authentication. Please try again.",
-            );
-            setTimeout(() => (window.location.href = "/dashboard"), 3000);
-          });
-      } else {
-        const redirectUri =
-          encodeURI(process.env.NEXT_PUBLIC_WEBSITE_URL || "") + "%2Fdashboard";
-        window.location.href = `https://discord.com/api/oauth2/authorize?client_id=812298057470967858&redirect_uri=${redirectUri}&response_type=code&scope=identify%20guilds`;
+    const code = params.get("code");
+    const stateParam = params.get("state");
+
+    // OAuth callback: provider returned here with a code.
+    if (code) {
+      const targetPlatform = resolvePlatformFromState(stateParam);
+
+      if (!targetPlatform) {
+        notify.error(
+          "Login Failed",
+          "We could not determine which platform you tried to log in with.",
+        );
+        cleanOAuthQuery();
+        setStatus("ready");
         return;
       }
-    } else {
-      loadUserData(token);
-    }
 
-    function loadUserData(token: string) {
-      fetch("https://discordapp.com/api/users/@me", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Accept: "application/json",
-          Authorization: "Bearer " + token,
-        },
-      })
-        .then((res) => res.json())
-        .then((userDatas) => {
-          if (userDatas.retry_after) {
-            setTimeout(() => {
-              loadUserData(token);
-            }, userDatas.retry_after + 50);
-            return;
-          }
-          if (userDatas.message === "401: Unauthorized") {
-            setCookie("token", "", 0);
-            window.location.href = "/dashboard";
-            return;
-          }
-          setUser(userDatas);
-          setStorage("cachedUserDatas", JSON.stringify(userDatas));
-          fetch("https://discordapp.com/api/v6/users/@me/guilds", {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-              Accept: "application/json",
-              Authorization: "Bearer " + token,
-            },
-          })
-            .then((res) => res.json())
-            .then(
-              (
-                guilds:
-                  | (Guild[] & { retry_after?: number })
-                  | { retry_after?: number },
-              ) => {
-                if (guilds.retry_after) {
-                  setTimeout(() => {
-                    loadUserData(token);
-                  }, guilds.retry_after + 50);
-                  return;
-                }
-                if (Array.isArray(guilds)) {
-                  const parsedGuilds = guilds
-                    .filter((guild) => checkAdminPerms(guild))
-                    .map((guild) => ({
-                      id: guild.id,
-                      name: guild.name,
-                      icon: guild.icon,
-                      permissions_new: guild.permissions_new,
-                    }));
-                  setGuilds(parsedGuilds);
-                  setStorage("cachedGuilds", JSON.stringify(parsedGuilds));
-                }
-                setLoading(false);
-              },
-            )
-            .catch((error) => {
-              notify.error(
-                "Data Loading Failed",
-                "Unable to load your Discord data. Please try refreshing the page.",
-              );
-              setLoading(false);
-            });
-        })
-        .catch((error) => {
+      setStatus("exchanging");
+      try {
+        const response = await exchangeOauthCode(targetPlatform, code);
+        if (!response.access_token || response.access_token === "undefined") {
           notify.error(
-            "Data Loading Failed",
-            "Unable to load your Discord data. Please try refreshing the page.",
+            "Login Failed",
+            "Invalid authentication response. Please try again.",
           );
-          setLoading(false);
-        });
-    }
-  }, []);
-
-  useEffect(() => {
-    if (guilds.length === 0) return;
-
-    const token = getCookie("token");
-    if (!token) return;
-
-    // Fetch batch data for all guilds
-    fetch(`${config.apiV2}get_servers_data_batch`, {
-      method: "POST",
-      body: JSON.stringify({
-        guildIds: guilds.map((g) => g.id),
-        token: token,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((res) => res.json())
-      .then((res: { result?: boolean; servers?: GuildData[] }) => {
-        if (res.result && res.servers) {
-          // Convert array to object keyed by guildId
-          const serversById = res.servers.reduce<Record<string, GuildData>>(
-            (acc, server) => {
-              if (typeof server.guildId === "string")
-                acc[server.guildId] = server;
-              return acc;
-            },
-            {},
-          );
-          setBatchGuildDatas(serversById);
+          cleanOAuthQuery();
+          setStatus("ready");
+          return;
         }
-      })
-      .catch((error) => {
-        console.error("Error fetching batch server data:", error);
-      });
-  }, [guilds]);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const params = new URLSearchParams(window.location.search);
-    const oraxPlusResult = params.get("orax_plus");
-    if (oraxPlusResult === "success") {
-      notify.success(
-        "Payment received",
-        "Orax Plus will activate as soon as Stripe confirms the subscription.",
-      );
-      setTimeout(() => setRefreshGuildDatas(true), 1500);
-    } else if (oraxPlusResult === "cancelled") {
-      notify.error("Checkout cancelled", "Orax Plus was not activated.");
-    }
-  }, []);
-
-  function imgError(guildId: string) {
-    const guildElement = document.getElementById("guild_" + guildId);
-    const img = guildElement?.querySelector("img");
-    if (img) img.src = "/assets/default_guild_icon.jpg";
-  }
-  function endImgLoading(guildId: string) {
-    const guildElement = document.getElementById("guild_" + guildId);
-    guildElement?.classList.remove("loading");
-  }
-
-  const urlGuildId =
-    typeof window !== "undefined"
-      ? new URLSearchParams(window.location.search).get("guild")
-      : "";
-  const guildId =
-    urlGuildId || guilds.find((g) => checkAdminPerms(g))?.id || "";
-  let guild: Guild | undefined = guilds.find((guild) => guild.id === guildId);
-
-  if (!guild) {
-    if (guilds.length > 0) {
-      guild = guilds.find((guild) => checkAdminPerms(guild));
-    }
-    if (!guild)
-      guild = {
-        id: "",
-        name: "",
-        icon: "",
-        owner: false,
-        permissions: 2147483647,
-        permissions_new: "4398046511103",
-      };
-  }
-
-  const ownedGroupsCount = guildDatas.ownedGroups?.length || 0;
-  const oraxPlus = guildDatas.oraxPlus;
-  const groupLimit = oraxPlus?.limits?.groupsPerGuild || 2;
-  const channelLimit = oraxPlus?.limits?.channelsPerGroup || 5;
-  const votePlanExpiresIn =
-    oraxPlus?.active && oraxPlus.entitlement?.source === "topgg_vote"
-      ? formatRemainingPlanTime(oraxPlus.entitlement.expiresAt)
-      : null;
-  const showOraxPlusActions =
-    !oraxPlus?.active || oraxPlus.entitlement?.source === "topgg_vote";
-  const isAtGroupLimit = ownedGroupsCount >= groupLimit;
-
-  const startOraxPlusCheckout = (plan?: "monthly" | "lifetime") =>
-    startCheckout(guildId as string, undefined, plan);
-
-  async function startOraxPlusVote() {
-    const result = await startVote(guildId as string);
-
-    if (result.activated) {
-      setRefreshGuildDatas(true);
-      return;
-    }
-
-    if (result.voteOpened) {
-      setVoteBaselineExpiresAt(oraxPlus?.entitlement?.expiresAt || null);
-      setIsPollingOraxPlusVote(true);
-    }
-  }
-
-  useEffect(() => {
-    if (!isPollingOraxPlusVote || !guildId) return;
-
-    votePollAttemptsRef.current = 0;
-    setRefreshGuildDatas(true);
-
-    const intervalId = window.setInterval(() => {
-      votePollAttemptsRef.current += 1;
-      setRefreshGuildDatas(true);
-
-      if (votePollAttemptsRef.current >= 24) {
-        window.clearInterval(intervalId);
-        setIsPollingOraxPlusVote(false);
-        setVoteBaselineExpiresAt(null);
-        notify.error(
-          "Vote not detected yet",
-          "Top.gg may still be processing the vote. Refresh the dashboard in a moment if Orax Plus does not appear.",
-          { duration: 8000 },
+        const expiresIn =
+          typeof response.expires_in === "number" ? response.expires_in : 0;
+        persistPlatformToken(
+          targetPlatform,
+          response.access_token,
+          Math.max(expiresIn - 1000, 60),
         );
+
+        // If state points somewhere other than the platform root (e.g. a
+        // deep link the user wanted to land on post-login), honour it as
+        // long as it is a relative path.
+        const deepLink =
+          stateParam &&
+          stateParam.startsWith("/") &&
+          stateParam !== `/dashboard/${targetPlatform.slug}`
+            ? stateParam
+            : `/dashboard/${targetPlatform.slug}`;
+
+        window.location.href = deepLink;
+        return;
+      } catch (error) {
+        notify.error(
+          "Login Failed",
+          "Unable to complete authentication. Please try again.",
+        );
+        cleanOAuthQuery();
+        setStatus("ready");
+        return;
       }
-    }, 5000);
+    }
 
-    return () => window.clearInterval(intervalId);
-  }, [guildId, isPollingOraxPlusVote]);
-
-  useEffect(() => {
-    if (!isPollingOraxPlusVote) return;
-    if (!oraxPlus?.active || oraxPlus.entitlement?.source !== "topgg_vote") {
+    // Already logged in to a platform? Bounce to its dashboard.
+    const activePlatform = detectActivePlatform();
+    if (activePlatform) {
+      window.location.href = `/dashboard/${activePlatform.slug}`;
       return;
     }
 
-    const currentExpiresAt = oraxPlus.entitlement.expiresAt || null;
-    const currentExpiresAtTime = currentExpiresAt
-      ? new Date(currentExpiresAt).getTime()
-      : 0;
-    const baselineExpiresAtTime = voteBaselineExpiresAt
-      ? new Date(voteBaselineExpiresAt).getTime()
-      : 0;
+    setStatus("ready");
+  }
 
-    if (
-      !voteBaselineExpiresAt ||
-      (currentExpiresAtTime && currentExpiresAtTime > baselineExpiresAtTime)
-    ) {
-      setIsPollingOraxPlusVote(false);
-      setVoteBaselineExpiresAt(null);
-      notify.success(
-        "Orax Plus activated",
-        voteBaselineExpiresAt
-          ? "Your Top.gg vote extended this server's plan."
-          : "Your Top.gg vote was applied to this server.",
-      );
+  function handleLoginClick(platform: PlatformConfig) {
+    // Mirror any other platform token out of the shared `token` cookie so
+    // the new platform's session is the one that becomes active.
+    const other = detectActivePlatform();
+    if (other && other.slug !== platform.slug) {
+      // keep the per-platform cookie; just clear the shared alias.
+      setCookie("token", "", 0);
     }
-  }, [
-    isPollingOraxPlusVote,
-    oraxPlus?.active,
-    oraxPlus?.entitlement?.source,
-    oraxPlus?.entitlement?.expiresAt,
-    voteBaselineExpiresAt,
-  ]);
+    window.location.href = buildAuthorizeUrl(platform);
+  }
 
-  useEffect(() => {
-    if (!guild) return;
-    if (!guild.id) return;
-    if (refreshGuildDatas) {
-      setBatchGuildDatas((previous) => {
-        const next = { ...previous };
-        delete next[guild!.id];
-        return next;
-      });
-      setRefreshGuildDatas(false);
-      return;
-    }
-    if (guild.id !== lastLoadedGuildId) {
-      setGuildDatas({});
-      setSettings({});
-    }
-
-    // Use batch data if available
-    if (batchGuildDatas[guild.id]) {
-      const serverData = batchGuildDatas[guild.id];
-      setGuildDatas(serverData);
-      if (serverData.settings) setSettings(serverData.settings);
-      setLastLoadedGuildId(guild.id);
-    } else {
-      // Fallback to individual request if batch data is not available
-      fetch(`${config.apiV2}get_server_data`, {
-        method: "POST",
-        body: JSON.stringify({
-          guildId: guild.id,
-          token: getCookie("token"),
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-        .then((res) => res.json())
-        .then((res) => {
-          if (res.result) {
-            setGuildDatas(res);
-            setSettings(res.settings);
-            setLastLoadedGuildId(guild.id);
-          } else {
-            setGuildDatas({});
-            setSettings({});
-            notify.error(
-              "Server Data Error",
-              "Unable to load server configuration. Some features may not work properly.",
-              { duration: 8000 },
-            );
-          }
-        })
-        .catch((error) => {
-          setGuildDatas({});
-          setSettings({});
-          notify.error(
-            "Server Data Error",
-            "Unable to load server configuration. Some features may not work properly.",
-            { duration: 8000 },
-          );
-        });
-    }
-  }, [guild, paymentProgress, refreshGuildDatas, batchGuildDatas]);
+  if (status === "loading" || status === "exchanging") {
+    return (
+      <div className={styles.container}>
+        <div className={styles.spinnerContainer}>
+          <div className="spinner" aria-hidden="true" />
+          <span>
+            {status === "exchanging"
+              ? "Completing sign-in..."
+              : "Loading..."}
+          </span>
+        </div>
+        <Loading />
+      </div>
+    );
+  }
 
   return (
     <>
-      <div
-        style={{
-          backgroundImage: guild.icon
-            ? `url('https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.webp?size=96')`
-            : undefined,
-        }}
-        className={styles.background}
-      />
-      <nav className={styles.navbar}>
-        {guilds.length > 0
-          ? guilds
-              .sort((a, b) => {
-                const aHasBot = batchGuildDatas[a.id]?.bot ? 1 : 0;
-                const bHasBot = batchGuildDatas[b.id]?.bot ? 1 : 0;
-                return bHasBot - aHasBot;
-              })
-              .map((g) =>
-                checkAdminPerms(g) ? (
-                  <Link key={"nav_guild_" + g.id} href={"?guild=" + g.id}>
-                    <div
-                      id={"guild_" + g.id}
-                      className={[
-                        styles.navGuild,
-                        !document.getElementById("guild_" + g.id) && "loading",
-                        guild?.id === g.id ? styles.selected : null,
-                        (batchGuildDatas[g.id]?.ownedGroups?.length ?? 0) > 0
-                          ? styles.hasGroups
-                          : null,
-                      ].join(" ")}
-                    >
-                      <img
-                        className={styles.guildIcon}
-                        onLoad={() => endImgLoading(g.id)}
-                        onError={() => imgError(g.id)}
-                        src={
-                          g.icon
-                            ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.webp?size=96`
-                            : "/assets/default_guild_icon.jpg"
-                        }
-                        alt={g.name + " (guild icon)"}
-                      />
-                    </div>
-                  </Link>
-                ) : null,
-              )
-          : [...Array(3)].map((o, index) => (
-              <div key={"nav_guild_" + index} className={styles.navGuild}>
-                <div
-                  className={[styles.guildIcon, styles.placeHolder].join(" ")}
-                />
-              </div>
-            ))}
-      </nav>
-      <div className={styles.page}>
-        <h1 className={styles.title}>{guild.name}</h1>
-        <div className={styles.actionsContainer}>
-          <a
-            href="https://discord.gg/e3pBtbum4A"
-            target="_blank"
-            rel="noreferrer"
-          >
-            <button className={styles.button}>
-              Support{" "}
-              <strong>
-                <svg
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M16.712 4.33a9.027 9.027 0 011.652 1.306c.51.51.944 1.064 1.306 1.652M16.712 4.33l-3.448 4.138m3.448-4.138a9.014 9.014 0 00-9.424 0M19.67 7.288l-4.138 3.448m4.138-3.448a9.014 9.014 0 010 9.424m-4.138-5.976a3.736 3.736 0 00-.88-1.388 3.737 3.737 0 00-1.388-.88m2.268 2.268a3.765 3.765 0 010 2.528m-2.268-4.796a3.765 3.765 0 00-2.528 0m4.796 4.796c-.181.506-.475.982-.88 1.388a3.736 3.736 0 01-1.388.88m2.268-2.268l4.138 3.448m0 0a9.027 9.027 0 01-1.306 1.652c-.51.51-1.064.944-1.652 1.306m0 0l-3.448-4.138m3.448 4.138a9.014 9.014 0 01-9.424 0m5.976-4.138a3.765 3.765 0 01-2.528 0m0 0a3.736 3.736 0 01-1.388-.88 3.737 3.737 0 01-.88-1.388m2.268 2.268L7.288 19.67m0 0a9.024 9.024 0 01-1.652-1.306 9.027 9.027 0 01-1.306-1.652m0 0l4.138-3.448M4.33 16.712a9.014 9.014 0 010-9.424m4.138 5.976a3.765 3.765 0 010-2.528m0 0c.181-.506.475-.982.88-1.388a3.736 3.736 0 011.388-.88m-2.268 2.268L4.33 7.288m6.406 1.18L7.288 4.33m0 0a9.024 9.024 0 00-1.652 1.306A9.025 9.025 0 004.33 7.288"
-                  />
-                </svg>
-              </strong>
-            </button>
-          </a>
-          {guildDatas.bot ? (
-            <>
-              <a
-                href="https://ko-fi.com/nicolasmarchand"
-                target="_blank"
-                rel="noreferrer"
-              >
-                <button className={styles.button}>
-                  Tip ❤️{" "}
-                  <strong>
-                    <svg
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0 1 12 15a9.065 9.065 0 0 0-6.23-.693L5 14.5m14.8.8 1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0 1 12 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5"
-                      />
-                    </svg>
-                  </strong>
-                </button>
-              </a>
+      <Head>
+        <title>{TITLE}</title>
+        <meta name="description" content={DESCRIPTION} />
+        <meta name="robots" content="noindex, nofollow" />
+      </Head>
+      <div className={styles.container}>
+        <div className={styles.card}>
+          <img
+            src="/logo.png"
+            alt="Orax logo"
+            className={styles.logo}
+            width={56}
+            height={56}
+          />
+          <h1 className={styles.title}>Welcome to Orax</h1>
+          <p className={styles.subtitle}>
+            Choose a platform to access your dashboard
+          </p>
+          <div className={styles.buttonList}>
+            {platformList.map((platform) => (
               <button
-                onClick={() => {
-                  if (isAtGroupLimit) {
-                    setShowGroupLimitModal(true);
-                    return;
-                  }
-                  renderWithRoot(
-                    <CreateGroupMenu
-                      guildId={guildId}
-                      ownedGroupsCount={ownedGroupsCount}
-                      oraxPlus={oraxPlus}
-                      onStartOraxPlusVote={startOraxPlusVote}
-                      onStartOraxPlusCheckout={startOraxPlusCheckout}
-                      setRefreshGuildDatas={setRefreshGuildDatas}
-                    />,
-                    document.getElementById("menu"),
-                  );
-                }}
+                key={platform.slug}
+                type="button"
                 className={styles.button}
+                style={{
+                  background:
+                    platform.brandGradient ?? platform.brandColor,
+                }}
+                onClick={() => handleLoginClick(platform)}
               >
-                Create an interserver group
-                <strong>
-                  <svg
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M12.75 3.03v.568c0 .334.148.65.405.864l1.068.89c.442.369.535 1.01.216 1.49l-.51.766a2.25 2.25 0 01-1.161.886l-.143.048a1.107 1.107 0 00-.57 1.664c.369.555.169 1.307-.427 1.605L9 13.125l.423 1.059a.956.956 0 01-1.652.928l-.679-.906a1.125 1.125 0 00-1.906.172L4.5 15.75l-.612.153M12.75 3.031a9 9 0 00-8.862 12.872M12.75 3.031a9 9 0 016.69 14.036m0 0l-.177-.529A2.25 2.25 0 0017.128 15H16.5l-.324-.324a1.453 1.453 0 00-2.328.377l-.036.073a1.586 1.586 0 01-.982.816l-.99.282c-.55.157-.894.702-.8 1.267l.073.438c.08.474.49.821.97.821.846 0 1.598.542 1.865 1.345l.215.643m5.276-3.67a9.012 9.012 0 01-5.276 3.67m0 0a9 9 0 01-10.275-4.835M15.75 9c0 .896-.393 1.7-1.016 2.25"
-                    />
-                  </svg>
-                </strong>
+                <PlatformIcon platform={platform} />
+                <span>Login with {platform.label}</span>
               </button>
-              <Link href="/explore" target="_blank" rel="noreferrer">
-                <button className={styles.button}>
-                  Explore groups
-                  <strong>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="size-6"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z"
-                      />
-                    </svg>
-                  </strong>
-                </button>
-              </Link>
-            </>
-          ) : (
-            <button
-              onClick={() =>
-                popup("Invite the bot", `Warning`, "warning", {
-                  content: (
-                    <p className="content">
-                      It is necessary for Orax to access the content of the
-                      messages in order to synchronize them between channels. By
-                      inviting Orax, it will be able to read all the messages of
-                      your server.<br></br>
-                      For security and privacy reasons, we suggest you to give
-                      it the permission to read the messages only in the
-                      channels it is used in.
-                    </p>
-                  ),
-                  icon: meteor,
-                  action: function () {
-                    window.open(config.inviteLink + "&guild_id=" + guild.id);
-                  },
-                })
-              }
-              className={styles.button}
-            >
-              Add bot
-              <strong>
-                <svg
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </strong>
-            </button>
-          )}
+            ))}
+          </div>
+          <p className={styles.footer}>
+            New here?{" "}
+            <Link href="/">Learn more about Orax</Link>
+          </p>
         </div>
-        {guildDatas.bot ? (
-          <>
-            <br></br>
-            <section className={styles.oraxPlusPanel}>
-              <div>
-                <span className={styles.planBadge}>
-                  {oraxPlus?.active ? "Orax Plus" : "Free plan"}
-                </span>
-                <h2>Orax Plus</h2>
-                <p>
-                  {oraxPlus?.active
-                    ? "This server can use the extended Orax Plus limits."
-                    : "Vote once a week on Top.gg, subscribe monthly, or buy lifetime to unlock higher limits for this server. Vote activation is automatic after Top.gg sends the webhook."}
-                </p>
-                {votePlanExpiresIn && (
-                  <p className={styles.planRenewalNote}>
-                    Expires in {votePlanExpiresIn}, vote again to extend your
-                    plan.
-                  </p>
-                )}
-              </div>
-              <div className={styles.planStats}>
-                <div>
-                  <strong>
-                    {ownedGroupsCount}/{groupLimit}
-                  </strong>
-                  <span>owned groups</span>
-                </div>
-                <div>
-                  <strong>{channelLimit}</strong>
-                  <span>channels per group</span>
-                </div>
-              </div>
-              {showOraxPlusActions && (
-                <div className={styles.planActions}>
-                  <button
-                    className={styles.secondaryButton}
-                    onClick={startOraxPlusVote}
-                  >
-                    Vote on Top.gg
-                  </button>
-                  <button
-                    className={styles.primaryButton}
-                    onClick={() => startOraxPlusCheckout("monthly")}
-                  >
-                    Subscribe $2.99/mo
-                  </button>
-                  <button
-                    className={styles.primaryButton}
-                    onClick={() => startOraxPlusCheckout("lifetime")}
-                  >
-                    Lifetime $19.99
-                  </button>
-                </div>
-              )}
-            </section>
-            <ErrorBoundary>
-              {guildDatas.ownedGroups && guildDatas.ownedGroups.length ? (
-                <section className={styles.groupContainer}>
-                  <h2>📺 Owned groups</h2>
-                  <div className="line wrap gap-1">
-                    {guildDatas.ownedGroups?.map((group) => (
-                      <Link
-                        key={"ownedGroup_" + group.id}
-                        href={`/dashboard/ownedgroup/${group.id}?guild=${guild.id}&icon=${guild.icon}&groupName=${group.name}`}
-                      >
-                        <div className={styles.group}>{group.name}</div>
-                      </Link>
-                    ))}
-                  </div>
-                </section>
-              ) : (
-                <section className={styles.emptyGroupContainer}>
-                  <h2>
-                    This server does not own any group. You can either create
-                    one or explore groups{" "}
-                    <Link className="underline" href="/explore">
-                      here
-                    </Link>
-                    .
-                  </h2>
-                </section>
-              )}
-            </ErrorBoundary>
-            <ErrorBoundary>
-              <Settings
-                key={"settingsGuild_" + guildId}
-                guild={guild}
-                guildId={guildId}
-                settings={settings}
-                setSettings={setSettings}
-              />
-            </ErrorBoundary>
-            <HiddenMenu title="🚫 Service limits">
-              <section className={styles.section}>
-                <p className="hint">
-                  Free servers can own up to 2 groups and link up to 5 channels
-                  per group. Orax Plus raises this server to 100 groups and 50
-                  channels per group.
-                </p>
-                <div className="line wrap">
-                  <p>
-                    {ownedGroupsCount}/{groupLimit} owned groups
-                  </p>
-                  <div className={[styles.progress, "progress"].join(" ")}>
-                    <div
-                      className="shrinker"
-                      style={{
-                        width:
-                          Math.min((ownedGroupsCount / groupLimit) * 100, 100) +
-                          "%",
-                      }}
-                    />
-                  </div>
-                </div>
-                {guildDatas.ownedGroups?.map((group) => (
-                  <div key={"group_" + group.id} className="line wrap">
-                    <p>
-                      {group.name} : {group.linkedChannels.length || "0"}/
-                      {channelLimit} connected channels
-                    </p>
-                    <div className={[styles.progress, "progress"].join(" ")}>
-                      <div
-                        className="shrinker"
-                        style={{
-                          width:
-                            (Math.min(
-                              (group.linkedChannels.length / channelLimit) *
-                                100,
-                              100,
-                            ) || 0) + "%",
-                        }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </section>
-            </HiddenMenu>
-            {/*guildDatas.connectedGroups ? null : <section className={styles.emptyGroupContainer}><h2>This server isn't connected to any group</h2></section>*/}
-          </>
-        ) : null}
-        <div id="container" key={guild.id + "_" + paymentProgress}></div>
-        <br></br>
       </div>
-      {showGroupLimitModal && (
-        <ActionModal
-          title="Group limit reached"
-          description={
-            <p>
-              This server has reached its current group quota. Vote on Top.gg or
-              subscribe to Orax Plus to unlock more interserver groups.
-            </p>
-          }
-          actions={[
-            {
-              label: "Vote on Top.gg",
-              variant: "secondary",
-              onClick: () => {
-                setShowGroupLimitModal(false);
-                startOraxPlusVote();
-              },
-            },
-            {
-              label: "Subscribe $2.99/mo",
-              variant: "primary",
-              onClick: () => {
-                setShowGroupLimitModal(false);
-                startOraxPlusCheckout("monthly");
-              },
-            },
-            {
-              label: "Lifetime $19.99",
-              variant: "primary",
-              onClick: () => {
-                setShowGroupLimitModal(false);
-                startOraxPlusCheckout("lifetime");
-              },
-            },
-          ]}
-          onClose={() => setShowGroupLimitModal(false)}
-        />
-      )}
-      {loading && <Loading />}
     </>
   );
+}
+
+function PlatformIcon({ platform }: { platform: PlatformConfig }) {
+  return (
+    <img
+      src={platform.logoPath}
+      alt=""
+      className={styles.buttonIcon}
+      width={22}
+      height={22}
+    />
+  );
+}
+
+/**
+ * Builds the OAuth authorize URL for a platform and embeds the post-login
+ * destination in the `state` param so this page can route the callback.
+ */
+function buildAuthorizeUrl(platform: PlatformConfig): string {
+  const target = `/dashboard/${platform.slug}`;
+  const stateParam = encodeURIComponent(target);
+  const sep = platform.authorizeUrl.includes("?") ? "&" : "?";
+  return `${platform.authorizeUrl}${sep}state=${stateParam}`;
+}
+
+/** Try to extract a registered platform slug from the OAuth state param. */
+function resolvePlatformFromState(
+  state: string | null,
+): PlatformConfig | undefined {
+  if (!state) {
+    // Legacy callback without state — assume Discord (the original flow).
+    return getPlatform("discord");
+  }
+  const decoded = decodeURIComponent(state);
+  const match = decoded.match(/^\/dashboard\/([^/?#]+)/);
+  if (match) {
+    return getPlatform(match[1]);
+  }
+  if (getPlatform(decoded)) {
+    return getPlatform(decoded);
+  }
+  return undefined;
+}
+
+/**
+ * Returns the first registered platform that has a non-empty session
+ * cookie, so we can auto-redirect users that are already signed in.
+ */
+function detectActivePlatform(): PlatformConfig | undefined {
+  return platformList.find((platform) => {
+    const token = getCookie(platform.cookieName);
+    return Boolean(token && token !== "undefined");
+  });
+}
+
+function cleanOAuthQuery() {
+  if (typeof window === "undefined") return;
+  const url = new URL(window.location.href);
+  url.searchParams.delete("code");
+  url.searchParams.delete("state");
+  window.history.replaceState({}, document.title, url.toString());
 }

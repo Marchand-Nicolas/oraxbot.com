@@ -41,12 +41,9 @@ export default function NavBar({ theme = "light" }: { theme?: string }) {
           alt="Buy Me a Coffee at ko-fi.com"
         />
       </a>
-      <a
-        href={`https://discord.com/api/oauth2/authorize?client_id=812298057470967858&redirect_uri=${encodeURI(process.env.NEXT_PUBLIC_WEBSITE_URL || "")}%2Fdashboard&response_type=code&scope=identify%20guilds`}
-        className={styles.discordLogin}
-      >
-        Login with Discord
-      </a>
+      <Link href="/dashboard" className={styles.discordLogin}>
+        Login
+      </Link>
     </nav>
   );
 }

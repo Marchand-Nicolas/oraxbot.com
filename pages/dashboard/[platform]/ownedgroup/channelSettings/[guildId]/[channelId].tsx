@@ -1,13 +1,18 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import dashboardStyles from "../../../../../styles/Dashboard.module.css";
-import groupStyles from "../../../../../styles/dashboard/OwnedGroup.module.css";
-import BackButton from "../../../../../components/ui/backButton";
-import ChannelDisableWarningMessage from "../../../../../components/dashboard/groupSettings/channelSettings/channelDisableWarningMessage";
-import HiddenMenu from "../../../../../components/ui/hiddenMenu";
-import OptionsField from "../../../../../components/dashboard/groupSettings/settings/optionField";
-import config from "../../../../../utils/config.json";
-import { getCookie } from "../../../../../utils/cookies";
+import dashboardStyles from "../../../../../../styles/Dashboard.module.css";
+import groupStyles from "../../../../../../styles/dashboard/OwnedGroup.module.css";
+import BackButton from "../../../../../../components/ui/backButton";
+import ChannelDisableWarningMessage from "../../../../../../components/dashboard/groupSettings/channelSettings/channelDisableWarningMessage";
+import HiddenMenu from "../../../../../../components/ui/hiddenMenu";
+import OptionsField from "../../../../../../components/dashboard/groupSettings/settings/optionField";
+import config from "../../../../../../utils/config.json";
+import { getCookie } from "../../../../../../utils/cookies";
+import {
+  setActiveTokenCookie,
+  setAuthRedirectTarget,
+} from "../../../../../../utils/apiClient";
+import { getPlatform } from "../../../../../../utils/platforms";
 
 type TranslationLanguageOption = {
   name: string;
@@ -28,7 +33,9 @@ type TranslationLanguagesResponse = {
 export default function ChannelSettings() {
   const router = useRouter();
   const params = new URLSearchParams(router.asPath.split("?")[1]);
-  const { guildId, channelId } = router.query;
+  const { guildId, channelId, platform: platformSlug } = router.query;
+  const platform =
+    typeof platformSlug === "string" ? getPlatform(platformSlug) : undefined;
   const guildIcon = params.get("icon");
   const groupId = params.get("groupId") || undefined;
   const [translationEnabled, setTranslationEnabled] = useState(false);
@@ -37,12 +44,18 @@ export default function ChannelSettings() {
   >(fallbackTranslationLanguageOptions);
 
   useEffect(() => {
-    if (!groupId || !guildId) return;
+    if (!platform) return;
+    setActiveTokenCookie(platform.cookieName);
+    setAuthRedirectTarget(`/dashboard/${platform.slug}`);
+  }, [platform]);
+
+  useEffect(() => {
+    if (!groupId || !guildId || !platform) return;
 
     fetch(`${config.apiV2}get_group_settings_field`, {
       method: "POST",
       body: JSON.stringify({
-        token: getCookie("token"),
+        token: getCookie(platform.cookieName),
         groupId,
         guildId,
         fieldName: "translation",
@@ -52,7 +65,7 @@ export default function ChannelSettings() {
       .then((data: Record<string, unknown>) => {
         setTranslationEnabled(!!data.translation);
       });
-  }, [groupId, guildId]);
+  }, [groupId, guildId, platform]);
 
   useEffect(() => {
     fetch(`${config.apiV2}get_translation_languages`)
@@ -82,14 +95,21 @@ export default function ChannelSettings() {
       });
   }, []);
 
+  const backgroundIconUrl =
+    guildIcon && guildIcon !== "null" && platform
+      ? platform.getGuildBackgroundUrl({
+          id: String(guildId ?? ""),
+          icon: guildIcon,
+        })
+      : null;
+
   return (
     <>
       <div
         style={{
-          backgroundImage:
-            guildIcon && guildIcon != "null"
-              ? `url('https://cdn.discordapp.com/icons/${guildId}/${guildIcon}.webp?size=96')`
-              : undefined,
+          backgroundImage: backgroundIconUrl
+            ? `url('${backgroundIconUrl}')`
+            : undefined,
         }}
         className={dashboardStyles.background}
       />

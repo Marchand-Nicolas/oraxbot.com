@@ -1,28 +1,35 @@
 import { useRouter } from "next/router";
-import dashboardStyles from "../../../styles/Dashboard.module.css";
-import styles from "../../../styles/dashboard/OwnedGroup.module.css";
+import dashboardStyles from "../../../../styles/Dashboard.module.css";
+import styles from "../../../../styles/dashboard/OwnedGroup.module.css";
 import { useCallback, useEffect, useRef, useState } from "react";
-import config from "../../../utils/config.json";
-import { getCookie } from "../../../utils/cookies";
+import config from "../../../../utils/config.json";
+import { getCookie } from "../../../../utils/cookies";
 import {
   getOraxPlusStatus,
   startOraxPlusCheckout as startCheckout,
   startOraxPlusVote as startVote,
-} from "../../../utils/oraxPlus";
-import popup from "../../../utils/popup";
-import drop from "../../../public/icons/drop.svg";
+} from "../../../../utils/oraxPlus";
+import popup from "../../../../utils/popup";
+import drop from "../../../../public/icons/drop.svg";
 import Link from "next/link";
-import ModernSettings from "../../../components/dashboard/groupSettings/ModernSettings";
-import ModernAdvancedSettings from "../../../components/dashboard/groupSettings/ModernAdvancedSettings";
-import ActivityGraph from "../../../components/dashboard/groupSettings/activityGraph";
-import ChannelButton from "../../../components/dashboard/groupSettings/channelButton";
-import Skeleton from "../../../components/ui/skeleton";
-import { notify } from "../../../components/ui/NotificationSystem";
-import type { LinkedChannel, OraxPlusStatus } from "../../../types";
+import ModernSettings from "../../../../components/dashboard/groupSettings/ModernSettings";
+import ModernAdvancedSettings from "../../../../components/dashboard/groupSettings/ModernAdvancedSettings";
+import ActivityGraph from "../../../../components/dashboard/groupSettings/activityGraph";
+import ChannelButton from "../../../../components/dashboard/groupSettings/channelButton";
+import Skeleton from "../../../../components/ui/skeleton";
+import { notify } from "../../../../components/ui/NotificationSystem";
+import type { LinkedChannel, OraxPlusStatus } from "../../../../types";
+import {
+  setActiveTokenCookie,
+  setAuthRedirectTarget,
+} from "../../../../utils/apiClient";
+import { getPlatform } from "../../../../utils/platforms";
 
 export default function OwnedGroup() {
   const router = useRouter();
-  const { groupId } = router.query;
+  const { groupId, platform: platformSlug } = router.query;
+  const platform =
+    typeof platformSlug === "string" ? getPlatform(platformSlug) : undefined;
   const [link, setLink] = useState("");
   const [channels, setChannels] = useState<LinkedChannel[]>([]);
   const [oraxPlus, setOraxPlus] = useState<OraxPlusStatus | undefined>();
@@ -35,6 +42,14 @@ export default function OwnedGroup() {
   const guildIcon = params.get("icon");
   const groupName = params.get("groupName");
 
+  // Configure the API client to use this platform's session cookie so that
+  // any fetch calls made from child components resolve to the right token.
+  useEffect(() => {
+    if (!platform) return;
+    setActiveTokenCookie(platform.cookieName);
+    setAuthRedirectTarget(`/dashboard/${platform.slug}`);
+  }, [platform]);
+
   const refreshOraxPlusStatus = useCallback(async () => {
     if (!guildId) return undefined;
 
@@ -44,9 +59,13 @@ export default function OwnedGroup() {
   }, [guildId]);
 
   const startOraxPlusCheckout = (plan?: "monthly" | "lifetime") => {
-    if (!guildId) return;
+    if (!guildId || !platform) return;
 
-    startCheckout(guildId, "/dashboard/ownedgroup/" + groupId, plan);
+    startCheckout(
+      guildId,
+      `/dashboard/${platform.slug}/ownedgroup/${groupId}`,
+      plan,
+    );
   };
 
   const startOraxPlusVote = async () => {
@@ -58,13 +77,14 @@ export default function OwnedGroup() {
   };
 
   useEffect(() => {
-    if (groupId) {
+    if (groupId && platform) {
       fetch(`${config.apiV2}get_admin_group_data`, {
         method: "POST",
         body: JSON.stringify({
-          token: getCookie("token"),
+          token: getCookie(platform.cookieName),
           groupId,
           guildId,
+          platform: platform.slug,
         }),
         headers: {
           "Content-Type": "application/json",
@@ -72,7 +92,6 @@ export default function OwnedGroup() {
       })
         .then((res) => res.json())
         .then((datas) => {
-          console.log(datas);
           if (datas.result) {
             setLink(
               (process.env.NEXT_PUBLIC_WEBSITE_URL || "") +
@@ -85,7 +104,7 @@ export default function OwnedGroup() {
           }
         });
     }
-  }, [groupId, guildId]);
+  }, [groupId, guildId, platform]);
 
   useEffect(() => {
     if (!isPollingOraxPlusVote || !guildId) return;
@@ -129,14 +148,18 @@ export default function OwnedGroup() {
     return () => window.clearInterval(intervalId);
   }, [guildId, refreshOraxPlusStatus]);
 
+  const backgroundIconUrl =
+    guildIcon && guildIcon !== "null" && platform
+      ? platform.getGuildBackgroundUrl({ id: guildId ?? "", icon: guildIcon })
+      : null;
+
   return (
     <>
       <div
         style={{
-          backgroundImage:
-            guildIcon && guildIcon != "null"
-              ? `url('https://cdn.discordapp.com/icons/${guildId}/${guildIcon}.webp?size=96')`
-              : undefined,
+          backgroundImage: backgroundIconUrl
+            ? `url('${backgroundIconUrl}')`
+            : undefined,
         }}
         className={dashboardStyles.background}
       />
@@ -208,14 +231,17 @@ export default function OwnedGroup() {
               )}
             </div>
 
-            {!loading && (
+            {!loading && platform && (
               <button
                 onClick={() =>
                   fetch(`${config.apiV2}generate_interserv_group_link`, {
                     method: "POST",
-                    body: `{ "token": "${getCookie(
-                      "token",
-                    )}", "groupId": ${groupId}, "guildId":"${guildId}" }`,
+                    body: JSON.stringify({
+                      token: getCookie(platform.cookieName),
+                      groupId: Number(groupId),
+                      guildId,
+                      platform: platform.slug,
+                    }),
                   })
                     .then((res) => res.json())
                     .then((datas) => {

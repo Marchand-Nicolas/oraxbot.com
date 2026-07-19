@@ -25,6 +25,24 @@ const DEFAULT_CONFIG = {
   showSuccessNotifications: false,
 };
 
+/**
+ * The dashboard stores an OAuth access token per platform in a dedicated
+ * cookie (e.g. `token_discord`, `token_fluxer`). The apiClient reads from
+ * whichever cookie is currently active. The active platform dashboard page
+ * calls `setActiveTokenCookie` on mount so all requests in that tree use
+ * the right token automatically.
+ */
+let activeTokenCookie = "token";
+let authRedirectTarget = "/dashboard";
+
+export function setActiveTokenCookie(cookieName: string): void {
+  activeTokenCookie = cookieName;
+}
+
+export function setAuthRedirectTarget(target: string): void {
+  authRedirectTarget = target;
+}
+
 // Error types
 export const ERROR_TYPES = {
   NETWORK: "NETWORK",
@@ -143,7 +161,7 @@ export async function apiRequest(
   };
 
   // Add authentication token if available
-  const token = getCookie("token");
+  const token = getCookie(activeTokenCookie);
   if (token && token !== "undefined") {
     (requestOptions.headers as Record<string, string>).Authorization =
       `Bearer ${token}`;
@@ -257,11 +275,11 @@ export async function apiRequest(
   if (errorType === ERROR_TYPES.AUTH) {
     // Clear the invalid token
     document.cookie =
-      "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      `${activeTokenCookie}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
 
     // Redirect to login after a short delay
     setTimeout(() => {
-      window.location.href = "/dashboard";
+      window.location.href = authRedirectTarget;
     }, 2000);
   }
 
