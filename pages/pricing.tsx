@@ -113,11 +113,11 @@ export default function Pricing() {
           <h2>Three ways to get Orax Plus</h2>
           <div className={styles.ways}>
             <div className={styles.way}>
-              <h3>Vote on Top.gg</h3>
+              <h3>Vote to unlock</h3>
               <p className={styles.wayPrice}>Free</p>
               <p>
-                Vote once a week for Orax on Top.gg. Activation is automatic and
-                lasts until your vote expires.
+                Vote once a week for Orax on Top.gg or Fluxerlist. Activation is
+                automatic and lasts until your vote expires.
               </p>
             </div>
             <div className={styles.way}>
@@ -153,11 +153,11 @@ export default function Pricing() {
             </p>
           </div>
           <div className={styles.faqItem}>
-            <h3>How does the Top.gg vote work?</h3>
+            <h3>How does voting work?</h3>
             <p>
-              Vote for Orax on Top.gg once a week. Orax Plus activates
-              automatically and stays active until the vote expires — just vote
-              again to extend it.
+              Discord servers vote for Orax on Top.gg and Fluxer servers vote on
+              Fluxerlist. Orax Plus activates automatically and stays active
+              until the vote expires — just vote again to extend it.
             </p>
           </div>
           <div className={styles.faqItem}>

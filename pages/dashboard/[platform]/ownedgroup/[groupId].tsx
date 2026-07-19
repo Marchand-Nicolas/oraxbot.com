@@ -68,9 +68,9 @@ export default function OwnedGroup() {
   };
 
   const startOraxPlusVote = async () => {
-    if (!guildId) return;
+    if (!guildId || !platform) return;
 
-    const result = await startVote(guildId);
+    const result = await startVote(guildId, platform);
     if (result.activated) refreshOraxPlusStatus();
     if (result.voteOpened) setIsPollingOraxPlusVote(true);
   };

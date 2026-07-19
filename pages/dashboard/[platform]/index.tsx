@@ -201,19 +201,22 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
   const oraxPlus = guildDatas.oraxPlus;
   const groupLimit = oraxPlus?.limits?.groupsPerGuild || 2;
   const channelLimit = oraxPlus?.limits?.channelsPerGroup || 5;
+  const voteProvider = platform.vote;
+  const voteSource =
+    voteProvider?.provider === "fluxerlist" ? "fluxerlist_vote" : "topgg_vote";
   const votePlanExpiresIn =
-    oraxPlus?.active && oraxPlus.entitlement?.source === "topgg_vote"
+    oraxPlus?.active && oraxPlus.entitlement?.source === voteSource
       ? formatRemainingPlanTime(oraxPlus.entitlement.expiresAt)
       : null;
   const showOraxPlusActions =
-    !oraxPlus?.active || oraxPlus.entitlement?.source === "topgg_vote";
+    !oraxPlus?.active || oraxPlus.entitlement?.source === voteSource;
   const isAtGroupLimit = ownedGroupsCount >= groupLimit;
 
   const startOraxPlusCheckout = (plan?: "monthly" | "lifetime") =>
     startCheckout(guildId as string, undefined, plan);
 
   async function startOraxPlusVote() {
-    const result = await startVote(guildId as string);
+    const result = await startVote(guildId as string, platform);
 
     if (result.activated) {
       setRefreshGuildDatas(true);
@@ -560,8 +563,8 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
                 <p>
                   {oraxPlus?.active
                     ? "This server can use the extended Orax Plus limits."
-                    : platform.supportsTopggVote
-                      ? "Vote once a week on Top.gg, subscribe monthly, or buy lifetime to unlock higher limits for this server. Vote activation is automatic after Top.gg sends the webhook."
+                    : voteProvider
+                      ? `Vote for free on ${voteProvider.provider === "fluxerlist" ? "Fluxerlist" : "Top.gg"}, subscribe monthly, or buy lifetime to unlock higher limits for this server.`
                       : "Subscribe monthly or buy lifetime to unlock higher limits for this server."}
                 </p>
                 {votePlanExpiresIn && (
@@ -585,12 +588,12 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
               </div>
               {showOraxPlusActions && (
                 <div className={styles.planActions}>
-                  {platform.supportsTopggVote && (
+                  {voteProvider && (
                     <button
                       className={styles.secondaryButton}
                       onClick={startOraxPlusVote}
                     >
-                      Vote on Top.gg
+                      {voteProvider.label}
                     </button>
                   )}
                   <button
@@ -701,16 +704,16 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
           description={
             <p>
               This server has reached its current group quota.
-              {platform.supportsTopggVote
-                ? " Vote on Top.gg or subscribe to Orax Plus to unlock more interserver groups."
+              {voteProvider
+                ? ` ${voteProvider.label} or subscribe to Orax Plus to unlock more interserver groups.`
                 : " Subscribe to Orax Plus to unlock more interserver groups."}
             </p>
           }
           actions={[
-            ...(platform.supportsTopggVote
+            ...(voteProvider
               ? [
                   {
-                    label: "Vote on Top.gg",
+                    label: voteProvider.label,
                     variant: "secondary" as const,
                     onClick: () => {
                       setShowGroupLimitModal(false);

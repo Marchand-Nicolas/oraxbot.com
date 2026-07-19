@@ -3,5 +3,6 @@
   "serverLanguages": ["English", "Español", "Français"],
   "inviteLink": "https://discord.com/api/oauth2/authorize?client_id=812298057470967858&permissions=533113138240&scope=bot",
   "fluxerInviteLink": "https://web.fluxer.app/oauth2/authorize?client_id=1527278943076352000&scope=bot&permissions=2251937790028864",
-  "topggVoteUrl": "https://top.gg/bot/812298057470967858/vote"
+  "topggVoteUrl": "https://top.gg/bot/812298057470967858/vote",
+  "fluxerlistVoteUrl": "https://fluxerlist.com/bots/orax"
 }

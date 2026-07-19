@@ -2,11 +2,19 @@ import config from "./config.json";
 import { notify } from "../components/ui/NotificationSystem";
 import type { OraxPlusStatus } from "../types";
 import { platformApi } from "./platformApi";
+import type { PlatformConfig } from "./platforms";
 
 interface OraxPlusVoteResult {
   activated: boolean;
   voteOpened: boolean;
 }
+
+/**
+ * Fluxerlist does not send a vote webhook, so after opening the vote page
+ * we wait this long before asking the backend to grant Orax Plus. The delay
+ * gives the user time to actually cast their vote on fluxerlist.com.
+ */
+const FLUXERLIST_RETRIEVAL_DELAY_MS = 18000;
 
 export function openTopggVote() {
   window.open(config.topggVoteUrl, "_blank");
@@ -18,10 +26,10 @@ export function openTopggVote() {
 
 export async function getOraxPlusStatus(guildId: string) {
   try {
-    const data = await platformApi<{ result?: boolean; oraxPlus?: OraxPlusStatus }>(
-      "get_server_data",
-      { guildId },
-    );
+    const data = await platformApi<{
+      result?: boolean;
+      oraxPlus?: OraxPlusStatus;
+    }>("get_server_data", { guildId });
 
     return data.result ? data.oraxPlus : undefined;
   } catch (error) {
@@ -32,6 +40,24 @@ export async function getOraxPlusStatus(guildId: string) {
 
 export async function startOraxPlusVote(
   guildId: string,
+  platform?: PlatformConfig,
+): Promise<OraxPlusVoteResult> {
+  const provider = platform?.vote?.provider;
+
+  if (provider === "fluxerlist") {
+    return startFluxerlistVote(guildId, platform!);
+  }
+
+  return startTopggVote(guildId, platform);
+}
+
+/**
+ * Top.gg flow: the dashboard starts a vote intent on the backend, opens the
+ * Top.gg vote page, then polls the server until the Top.gg webhook lands.
+ */
+async function startTopggVote(
+  guildId: string,
+  platform?: PlatformConfig,
 ): Promise<OraxPlusVoteResult> {
   const voteWindow = window.open("about:blank", "_blank");
 
@@ -79,6 +105,77 @@ export async function startOraxPlusVote(
         : "Unable to prepare the Top.gg vote.",
     );
     return { activated: false, voteOpened: false };
+  }
+}
+
+let voteRetrievalOverlay: HTMLDivElement | null = null;
+
+function showVoteRetrievalOverlay(label: string) {
+  if (voteRetrievalOverlay) return;
+  const overlay = document.createElement("div");
+  overlay.className = "popup";
+  overlay.innerHTML =
+    '<div class="container" style="text-align:center">' +
+    '<div class="spinner" style="margin:0 auto 16px"></div>' +
+    `<p style="color:#fff;margin:0">Retrieving your ${label} vote…</p>` +
+    "</div>";
+  document.body.appendChild(overlay);
+  voteRetrievalOverlay = overlay;
+}
+
+function hideVoteRetrievalOverlay() {
+  voteRetrievalOverlay?.remove();
+  voteRetrievalOverlay = null;
+}
+
+/**
+ * Fluxerlist flow: there is no webhook, so we open the vote page, show a
+ * "Retrieving vote…" overlay for ~20s, then ask the backend to grant
+ * Orax Plus on a trust basis.
+ */
+async function startFluxerlistVote(
+  guildId: string,
+  platform: PlatformConfig,
+): Promise<OraxPlusVoteResult> {
+  const voteUrl = platform.vote?.url || config.fluxerlistVoteUrl;
+  const label = platform.vote?.label || "Vote on Fluxerlist";
+
+  window.open(voteUrl, "_blank");
+  showVoteRetrievalOverlay(label);
+
+  try {
+    await new Promise((resolve) =>
+      setTimeout(resolve, FLUXERLIST_RETRIEVAL_DELAY_MS),
+    );
+
+    const data = await platformApi<{
+      result?: boolean;
+      expires_at?: string;
+      message?: string;
+    }>("activate_fluxerlist_vote", { guildId });
+
+    if (!data?.result) {
+      throw new Error(
+        data?.message ||
+          "Unable to activate Orax Plus from your Fluxerlist vote.",
+      );
+    }
+
+    notify.success(
+      "Orax Plus activated",
+      "Your Fluxerlist vote was applied to this server.",
+    );
+    return { activated: true, voteOpened: false };
+  } catch (error) {
+    notify.error(
+      "Vote activation failed",
+      error instanceof Error
+        ? error.message
+        : "Unable to activate Orax Plus from your Fluxerlist vote.",
+    );
+    return { activated: false, voteOpened: false };
+  } finally {
+    hideVoteRetrievalOverlay();
   }
 }
 

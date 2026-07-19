@@ -180,16 +180,16 @@ export default function CreateGroupMenu(props: CreateGroupMenuProps) {
           description={
             <p>
               This server has reached its current group quota.
-              {props.platform?.supportsTopggVote
-                ? " Vote on Top.gg or subscribe to Orax Plus to unlock more interserver groups."
+              {props.platform?.vote
+                ? ` ${props.platform.vote.label} or subscribe to Orax Plus to unlock more interserver groups.`
                 : " Subscribe to Orax Plus to unlock more interserver groups."}
             </p>
           }
           actions={[
-            ...(props.platform?.supportsTopggVote
+            ...(props.platform?.vote
               ? [
                   {
-                    label: "Vote on Top.gg",
+                    label: props.platform.vote.label,
                     variant: "secondary" as const,
                     disabled: !props.onStartOraxPlusVote,
                     onClick: () => {

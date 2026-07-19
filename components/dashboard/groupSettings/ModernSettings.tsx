@@ -30,7 +30,7 @@ const ModernSettings = ({
   const { groupId, platform: platformSlug } = router.query;
   const platform =
     typeof platformSlug === "string" ? getPlatform(platformSlug) : undefined;
-  const supportsTopggVote = platform?.supportsTopggVote ?? false;
+  const voteProvider = platform?.vote;
   const [showTranslationModal, setShowTranslationModal] = useState(false);
   const hasOraxPlus = !!oraxPlus?.active;
   const shouldBlockTranslation = !!oraxPlus && !hasOraxPlus;
@@ -182,16 +182,16 @@ const ModernSettings = ({
           description={
             <p>
               Auto translation is an Orax Plus feature.
-              {supportsTopggVote
-                ? " Vote on Top.gg or subscribe to Orax Plus to enable automatic translation for this group."
+              {voteProvider
+                ? ` ${voteProvider.label} or subscribe to Orax Plus to enable automatic translation for this group.`
                 : " Subscribe to Orax Plus to enable automatic translation for this group."}
             </p>
           }
           actions={[
-            ...(supportsTopggVote
+            ...(voteProvider
               ? [
                   {
-                    label: "Vote on Top.gg",
+                    label: voteProvider.label,
                     variant: "secondary" as const,
                     disabled: !onStartOraxPlusVote,
                     onClick: () => {

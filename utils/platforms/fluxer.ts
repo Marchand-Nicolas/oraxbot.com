@@ -40,7 +40,11 @@ const fluxer: PlatformConfig = {
   getInviteUrl: (guildId) =>
     `${config.fluxerInviteLink}&guild_id=${guildId}`,
   addBotLabel: "Add bot",
-  supportsTopggVote: false,
+  vote: {
+    provider: "fluxerlist",
+    url: config.fluxerlistVoteUrl,
+    label: "Vote on Fluxerlist",
+  },
 
   userEndpoint: "https://api.fluxer.app/v1/users/@me",
   guildsEndpoint: "https://api.fluxer.app/v1/users/@me/guilds",
