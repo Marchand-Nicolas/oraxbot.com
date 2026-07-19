@@ -27,7 +27,9 @@
 
 .guildIcon {
   width: 96px;
+  height: 96px;
   border-radius: 1em;
+  font-size: 2rem;
 }
 
 .guilds {

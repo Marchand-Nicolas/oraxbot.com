@@ -53,7 +53,6 @@ const fluxer: PlatformConfig = {
     icon
       ? `https://fluxerusercontent.com/icons/${id}/${icon}.webp?size=96`
       : null,
-  defaultGuildIconUrl: "/assets/default_guild_icon.jpg",
 
   getGuildBackgroundUrl: ({ id, icon }) =>
     icon

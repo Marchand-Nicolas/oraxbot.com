@@ -1,0 +1,11 @@
+.fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #374151;
+  color: #ffffff;
+  font-weight: 600;
+  line-height: 1;
+  user-select: none;
+  box-sizing: border-box;
+}

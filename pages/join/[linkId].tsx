@@ -9,6 +9,7 @@ import popup from "../../utils/popup";
 import meteor from "../../public/icons/meteor.svg";
 import { checkAdminPerms } from "../../utils/permissions";
 import ActionModal from "../../components/ui/ActionModal";
+import GuildIcon from "../../components/GuildIcon";
 import { openTopggVote, startOraxPlusCheckout } from "../../utils/oraxPlus";
 import type { Channel, DiscordGuild, DiscordUser } from "../../types";
 
@@ -52,11 +53,6 @@ export default function JoinGroup() {
       };
   }
 
-  function imgError(guildId: string) {
-    const guildElement = document.getElementById("guild_" + guildId);
-    const img = guildElement?.querySelector("img") as HTMLImageElement | null;
-    if (img) img.src = "/assets/default_guild_icon.jpg";
-  }
   function endImgLoading(guildId: string) {
     const guildElement = document.getElementById("guild_" + guildId);
     guildElement?.classList.remove("loading");
@@ -294,16 +290,15 @@ export default function JoinGroup() {
                             guild!.id === g.id ? styles.selected : null,
                           ].join(" ")}
                         >
-                          <img
+                          <GuildIcon
                             className={styles.guildIcon}
-                            onLoad={() => endImgLoading(g.id)}
-                            onError={() => imgError(g.id)}
-                            src={
+                            iconUrl={
                               g.icon
                                 ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.webp?size=96`
-                                : "/assets/default_guild_icon.jpg"
+                                : null
                             }
-                            alt={g.name + " (guild icon)"}
+                            name={g.name}
+                            onLoad={() => endImgLoading(g.id)}
                           />
                           <p>
                             {g.name.length > 10

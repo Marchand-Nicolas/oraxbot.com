@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import GuildIcon from "../components/GuildIcon";
 import BetaTag from "../components/ui/BetaTag";
 import styles from "../styles/Explore.module.css";
 import config from "../utils/config.json";
@@ -1289,22 +1290,15 @@ export default function Explore() {
                                 }
                                 className={styles.publicServerCard}
                               >
-                                {server.icon ? (
-                                  // eslint-disable-next-line @next/next/no-img-element
-                                  <img
-                                    src={`https://cdn.discordapp.com/icons/${server.guildId}/${server.icon}.webp?size=160&quality=lossless`}
-                                    alt={displayName}
-                                    className={styles.publicServerIcon}
-                                  />
-                                ) : (
-                                  <div
-                                    className={styles.publicServerFallbackIcon}
-                                  >
-                                    {(displayName || "?")
-                                      .charAt(0)
-                                      .toUpperCase()}
-                                  </div>
-                                )}
+                                <GuildIcon
+                                  iconUrl={
+                                    server.icon
+                                      ? `https://cdn.discordapp.com/icons/${server.guildId}/${server.icon}.webp?size=160&quality=lossless`
+                                      : null
+                                  }
+                                  name={displayName}
+                                  className={styles.publicServerIcon}
+                                />
 
                                 <div className={styles.publicServerInfo}>
                                   <p className={styles.publicServerName}>
@@ -1465,20 +1459,19 @@ export default function Explore() {
                             setPublishStep(2);
                           }}
                         >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={
+                          <GuildIcon
+                            iconUrl={
                               g.icon
                                 ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png?size=128`
-                                : "/assets/default_guild_icon.jpg"
+                                : null
                             }
-                            alt={g.name}
+                            name={g.name}
                             className={styles.guildIcon}
                           />
                           <span className={styles.guildName}>{g.name}</span>
                         </button>
                       ) : null,
-                    )}
+                     )}
                     {guilds.length === 0 && (
                       <p className={styles.empty}>
                         No servers found. Make sure you are logged in with the
@@ -1563,20 +1556,19 @@ export default function Explore() {
                             setJoinError("");
                           }}
                         >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={
+                          <GuildIcon
+                            iconUrl={
                               g.icon
                                 ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png?size=128`
-                                : "/assets/default_guild_icon.jpg"
+                                : null
                             }
-                            alt={g.name}
+                            name={g.name}
                             className={styles.guildIcon}
                           />
                           <span className={styles.guildName}>{g.name}</span>
                         </button>
                       ) : null,
-                    )}
+                     )}
                     {guilds.length === 0 && (
                       <p className={styles.empty}>
                         No servers found. Make sure you are logged in with the

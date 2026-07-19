@@ -68,6 +68,7 @@
   transition: 0.4s;
   margin-top: 5px;
   position: relative;
+  font-size: 1.35rem;
 }
 
 .navbar .navGuild {

@@ -293,23 +293,13 @@
   background: rgba(15, 23, 42, 0.62);
 }
 
-.publicServerIcon,
-.publicServerFallbackIcon {
+.publicServerIcon {
   width: 36px;
   height: 36px;
   border-radius: 999px;
   object-fit: cover;
   flex-shrink: 0;
-}
-
-.publicServerFallbackIcon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(37deg, rgb(0, 161, 232) 0%, #8151fc 100%);
-  color: #ffffff;
-  font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .publicServerInfo {
@@ -617,6 +607,7 @@
   height: 56px;
   border-radius: 18px;
   object-fit: cover;
+  font-size: 1.2rem;
 }
 
 .guildName {

@@ -9,6 +9,7 @@ import meteor from "../../../public/icons/meteor.svg";
 import CreateGroupMenu from "../../../components/dashboard/CreateGroupMenu";
 import Settings from "../../../components/dashboard/Settings";
 import Loading from "../../../components/Loading";
+import GuildIcon from "../../../components/GuildIcon";
 import HiddenMenu from "../../../components/ui/hiddenMenu";
 import { notify } from "../../../components/ui/NotificationSystem";
 import ActionModal from "../../../components/ui/ActionModal";
@@ -166,11 +167,6 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
     }
   }, []);
 
-  function imgError(guildId: string) {
-    const guildElement = document.getElementById("guild_" + guildId);
-    const img = guildElement?.querySelector("img");
-    if (img) img.src = platform.defaultGuildIconUrl;
-  }
   function endImgLoading(guildId: string) {
     const guildElement = document.getElementById("guild_" + guildId);
     guildElement?.classList.remove("loading");
@@ -381,15 +377,11 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
                           : null,
                       ].join(" ")}
                     >
-                      <img
+                      <GuildIcon
                         className={styles.guildIcon}
+                        iconUrl={platform.getGuildIconUrl(g)}
+                        name={g.name}
                         onLoad={() => endImgLoading(g.id)}
-                        onError={() => imgError(g.id)}
-                        src={
-                          platform.getGuildIconUrl(g) ||
-                          platform.defaultGuildIconUrl
-                        }
-                        alt={g.name + " (guild icon)"}
                       />
                     </div>
                   </Link>

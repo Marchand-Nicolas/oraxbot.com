@@ -68,12 +68,10 @@ export interface PlatformConfig {
 
   /**
    * Build the URL used as the `src` of a guild icon `<img>`.
-   * Returns null when the guild has no icon (caller falls back to a default).
+   * Returns null when the guild has no icon (caller falls back to a
+   * component that shows the guild's initials).
    */
   getGuildIconUrl: (guild: { id: string; icon: string | null }) => string | null;
-
-  /** URL of the fallback icon shown for guilds without one. */
-  defaultGuildIconUrl: string;
 
   /**
    * CDN-style URL template used for full-bleed backgrounds in the dashboard.
