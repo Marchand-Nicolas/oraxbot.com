@@ -1,5 +1,4 @@
 import styles from "../../../styles/Dashboard.module.css";
-import config from "../../../utils/config.json";
 import type { DiscordUser, Guild, GuildData, GuildSettings } from "../../../types";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/router";
@@ -22,11 +21,11 @@ import {
   setActiveTokenCookie,
   setAuthRedirectTarget,
 } from "../../../utils/apiClient";
-import { getCookie } from "../../../utils/cookies";
 import {
   getPlatform,
   type PlatformConfig,
 } from "../../../utils/platforms";
+import { platformApi } from "../../../utils/platformApi";
 import { usePlatformAuth } from "../../../hooks/usePlatformAuth";
 
 function formatRemainingPlanTime(expiresAt?: string | null) {
@@ -128,22 +127,13 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
   useEffect(() => {
     if (activeGuilds.length === 0) return;
 
-    const token = getCookie(platform.cookieName);
-    if (!token) return;
-
-    fetch(`${config.apiV2}get_servers_data_batch`, {
-      method: "POST",
-      body: JSON.stringify({
+    platformApi<{ result?: boolean; servers?: GuildData[] }>(
+      "get_servers_data_batch",
+      {
         guildIds: activeGuilds.map((g) => g.id),
-        token: token,
-        platform: platform.slug,
-      }),
-      headers: {
-        "Content-Type": "application/json",
       },
-    })
-      .then((res) => res.json())
-      .then((res: { result?: boolean; servers?: GuildData[] }) => {
+    )
+      .then((res) => {
         if (res.result && res.servers) {
           const serversById = res.servers.reduce<Record<string, GuildData>>(
             (acc, server) => {
@@ -323,22 +313,16 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
       if (serverData.settings) setSettings(serverData.settings);
       setLastLoadedGuildId(guild.id);
     } else {
-      fetch(`${config.apiV2}get_server_data`, {
-        method: "POST",
-        body: JSON.stringify({
+      platformApi<{ result?: boolean; settings?: GuildSettings } & GuildData>(
+        "get_server_data",
+        {
           guildId: guild.id,
-          token: getCookie(platform.cookieName),
-          platform: platform.slug,
-        }),
-        headers: {
-          "Content-Type": "application/json",
         },
-      })
-        .then((res) => res.json())
+      )
         .then((res) => {
           if (res.result) {
             setGuildDatas(res);
-            setSettings(res.settings);
+            if (res.settings) setSettings(res.settings);
             setLastLoadedGuildId(guild.id);
           } else {
             setGuildDatas({});
@@ -350,7 +334,7 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
             );
           }
         })
-        .catch((error) => {
+        .catch(() => {
           setGuildDatas({});
           setSettings({});
           notify.error(

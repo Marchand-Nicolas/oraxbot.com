@@ -2,8 +2,7 @@ import styles from "../../../../styles/components/dashboard/groupSettings/advanc
 import fire from "../../../../public/icons/fire.svg";
 import popup from "../../../../utils/popup";
 import { useEffect, useState, type ChangeEvent } from "react";
-import config from "../../../../utils/config.json";
-import { getCookie } from "../../../../utils/cookies";
+import { platformApi } from "../../../../utils/platformApi";
 
 interface ChannelDisableWarningMessageProps {
   guildId?: string | string[];
@@ -21,39 +20,30 @@ const ChannelDisableWarningMessage = ({
     e: ChangeEvent<HTMLInputElement>,
     disableUserWarningMessage: boolean,
   ) => {
-    fetch(`${config.apiV2}set_channel_settings_field`, {
-      method: "POST",
-      body: JSON.stringify({
-        token: getCookie("token"),
-        guildId,
-        channelId,
-        fieldName: "disableUserWarningMessage",
-        fieldValue: disableUserWarningMessage,
-      }),
-    })
-      .then((res) => res.json())
-      .then(() => {
-        e.target.checked = disableUserWarningMessage;
-      });
+    platformApi("set_channel_settings_field", {
+      guildId,
+      channelId,
+      fieldName: "disableUserWarningMessage",
+      fieldValue: disableUserWarningMessage,
+    }).then(() => {
+      e.target.checked = disableUserWarningMessage;
+    });
   };
 
   useEffect(() => {
     if (!guildId || !channelId) return;
-    fetch(`${config.apiV2}get_channel_settings_field`, {
-      method: "POST",
-      body: JSON.stringify({
-        token: getCookie("token"),
+    platformApi<{ success?: boolean; disableUserWarningMessage?: unknown }>(
+      "get_channel_settings_field",
+      {
         guildId,
         channelId,
         fieldName: "disableUserWarningMessage",
-      }),
-    })
-      .then((res) => res.json())
-      .then(
-        (data: { success?: boolean; disableUserWarningMessage?: unknown }) =>
-          data.success &&
-          setDisableUserWarningMessage(!!data.disableUserWarningMessage),
-      );
+      },
+    ).then(
+      (data) =>
+        data.success &&
+        setDisableUserWarningMessage(!!data.disableUserWarningMessage),
+    );
   }, [guildId, channelId]);
 
   return (

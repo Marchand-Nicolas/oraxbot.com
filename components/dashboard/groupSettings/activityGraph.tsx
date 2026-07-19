@@ -2,8 +2,7 @@ import React, { useEffect, useState, type ComponentType } from "react";
 import type { Props as ReactApexChartProps } from "react-apexcharts";
 import type { ApexOptions } from "apexcharts";
 import { useRouter } from "next/router";
-import config from "../../../utils/config.json";
-import { getCookie } from "../../../utils/cookies";
+import { platformApi } from "../../../utils/platformApi";
 import LoadingCircle from "../../LoadingCircle";
 
 type ActivityPoint = {
@@ -44,19 +43,11 @@ const ActivityGraph = () => {
 
   useEffect(() => {
     if (!groupId || !guildId) return;
-    fetch(`${config.apiV2}get_group_activity_data`, {
-      method: "POST",
-      body: JSON.stringify({
-        token: getCookie("token"),
-        groupId,
-        guildId,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
+    platformApi<{ activity?: ActivityPoint[] }>("get_group_activity_data", {
+      groupId,
+      guildId,
     })
-      .then((res) => res.json())
-      .then((data: { activity?: ActivityPoint[] }) => {
+      .then((data) => {
         const activity = data.activity;
         const countsByDate = new Map(
           (activity || []).map((a) => [

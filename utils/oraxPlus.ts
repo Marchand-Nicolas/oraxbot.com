@@ -1,7 +1,7 @@
 import config from "./config.json";
-import { getCookie } from "./cookies";
 import { notify } from "../components/ui/NotificationSystem";
 import type { OraxPlusStatus } from "../types";
+import { platformApi } from "./platformApi";
 
 interface OraxPlusVoteResult {
   activated: boolean;
@@ -18,18 +18,12 @@ export function openTopggVote() {
 
 export async function getOraxPlusStatus(guildId: string) {
   try {
-    const data = await fetch(`${config.apiV2}get_server_data`, {
-      method: "POST",
-      body: JSON.stringify({
-        guildId,
-        token: getCookie("token"),
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }).then((res) => res.json());
+    const data = await platformApi<{ result?: boolean; oraxPlus?: OraxPlusStatus }>(
+      "get_server_data",
+      { guildId },
+    );
 
-    return data.result ? (data.oraxPlus as OraxPlusStatus | undefined) : undefined;
+    return data.result ? data.oraxPlus : undefined;
   } catch (error) {
     console.error("Unable to refresh Orax Plus status:", error);
     return undefined;
@@ -42,18 +36,14 @@ export async function startOraxPlusVote(
   const voteWindow = window.open("about:blank", "_blank");
 
   try {
-    const response = await fetch(`${config.apiV2}start_orax_plus_vote`, {
-      method: "POST",
-      body: JSON.stringify({
-        guildId,
-        token: getCookie("token"),
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    const data = await response.json();
-    if (!response.ok || !data?.result) {
+    const data = await platformApi<{
+      result?: boolean;
+      activated?: boolean;
+      vote_url?: string;
+      message?: string;
+    }>("start_orax_plus_vote", { guildId });
+
+    if (!data?.result) {
       throw new Error(
         data?.message || "Unable to prepare the Top.gg vote for this server.",
       );
@@ -119,24 +109,17 @@ export async function startOraxPlusCheckout(
 ) {
   showCheckoutOverlay();
   try {
-    const response = await fetch(
-      `${config.apiV2}create_orax_plus_checkout_session`,
-      {
-        method: "POST",
-        body: JSON.stringify({
-          guildId,
-          token: getCookie("token"),
-          plan,
-          successUrl: `${window.location.origin}${redirectBase}?guild=${guildId}&orax_plus=success`,
-          cancelUrl: `${window.location.origin}${redirectBase}?guild=${guildId}&orax_plus=cancelled`,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
-    );
-    const data = await response.json();
-    if (!response.ok || !data?.result || !data?.url) {
+    const data = await platformApi<{
+      result?: boolean;
+      url?: string;
+      message?: string;
+    }>("create_orax_plus_checkout_session", {
+      guildId,
+      plan,
+      successUrl: `${window.location.origin}${redirectBase}?guild=${guildId}&orax_plus=success`,
+      cancelUrl: `${window.location.origin}${redirectBase}?guild=${guildId}&orax_plus=cancelled`,
+    });
+    if (!data?.result || !data?.url) {
       throw new Error(data?.message || "Unable to start Stripe Checkout.");
     }
     window.location.href = data.url;

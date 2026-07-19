@@ -7,12 +7,12 @@ import ChannelDisableWarningMessage from "../../../../../../components/dashboard
 import HiddenMenu from "../../../../../../components/ui/hiddenMenu";
 import OptionsField from "../../../../../../components/dashboard/groupSettings/settings/optionField";
 import config from "../../../../../../utils/config.json";
-import { getCookie } from "../../../../../../utils/cookies";
 import {
   setActiveTokenCookie,
   setAuthRedirectTarget,
 } from "../../../../../../utils/apiClient";
 import { getPlatform } from "../../../../../../utils/platforms";
+import { platformApi } from "../../../../../../utils/platformApi";
 
 type TranslationLanguageOption = {
   name: string;
@@ -52,17 +52,12 @@ export default function ChannelSettings() {
   useEffect(() => {
     if (!groupId || !guildId || !platform) return;
 
-    fetch(`${config.apiV2}get_group_settings_field`, {
-      method: "POST",
-      body: JSON.stringify({
-        token: getCookie(platform.cookieName),
-        groupId,
-        guildId,
-        fieldName: "translation",
-      }),
+    platformApi<Record<string, unknown>>("get_group_settings_field", {
+      groupId,
+      guildId,
+      fieldName: "translation",
     })
-      .then((res) => res.json())
-      .then((data: Record<string, unknown>) => {
+      .then((data) => {
         setTranslationEnabled(!!data.translation);
       });
   }, [groupId, guildId, platform]);

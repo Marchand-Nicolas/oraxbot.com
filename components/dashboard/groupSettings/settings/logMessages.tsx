@@ -1,7 +1,7 @@
 import { useEffect, useState, type ChangeEvent } from "react";
 import config from "../../../../utils/config.json";
 import styles from "../../../../styles/components/dashboard/groupSettings/settings.module.css";
-import { getCookie } from "../../../../utils/cookies";
+import { platformApi } from "../../../../utils/platformApi";
 import type { Channel } from "../../../../types";
 
 interface LogMessagesProps {
@@ -15,15 +15,8 @@ const LogMessages = ({ groupId, guildId }: LogMessagesProps) => {
 
   useEffect(() => {
     if (guildId)
-      fetch(`${config.apiV2}get_guild_channels`, {
-        method: "POST",
-        body: JSON.stringify({ guildId }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-        .then((res) => res.json())
-        .then((res: { result?: Channel[] }) => {
+      platformApi<{ result?: Channel[] }>("get_guild_channels", { guildId })
+        .then((res) => {
           setChannels(res.result || []);
         });
   }, [guildId]);
@@ -31,21 +24,15 @@ const LogMessages = ({ groupId, guildId }: LogMessagesProps) => {
   useEffect(() => {
     if (!groupId || !guildId) return;
     // Load the custom usernames pattern
-    fetch(`${config.apiV2}get_group_settings_field`, {
-      method: "POST",
-      body: JSON.stringify({
-        token: getCookie("token"),
+    platformApi<{ logMessagesInChannel?: string }>(
+      "get_group_settings_field",
+      {
         groupId,
         guildId,
         fieldName: "logMessagesInChannel",
-      }),
-      headers: {
-        "Content-Type": "application/json",
       },
-    }).then((res) => {
-      res.json().then((data: { logMessagesInChannel?: string }) => {
-        setLogChannel(data.logMessagesInChannel || "");
-      });
+    ).then((data) => {
+      setLogChannel(data.logMessagesInChannel || "");
     });
   }, [groupId, guildId]);
 
@@ -61,18 +48,11 @@ const LogMessages = ({ groupId, guildId }: LogMessagesProps) => {
         onChange={(e: ChangeEvent<HTMLSelectElement>) => {
           const value = e.target.value;
           setLogChannel(value);
-          fetch(`${config.apiV2}set_group_settings_field`, {
-            method: "POST",
-            body: JSON.stringify({
-              token: getCookie("token"),
-              groupId,
-              guildId,
-              fieldName: "logMessagesInChannel",
-              fieldValue: value,
-            }),
-            headers: {
-              "Content-Type": "application/json",
-            },
+          platformApi("set_group_settings_field", {
+            groupId,
+            guildId,
+            fieldName: "logMessagesInChannel",
+            fieldValue: value,
           });
         }}
       >

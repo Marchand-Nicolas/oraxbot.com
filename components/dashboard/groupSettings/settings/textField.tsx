@@ -1,7 +1,6 @@
 import { useEffect, useState, type ChangeEvent } from "react";
 import config from "../../../../utils/config.json";
-import styles from "../../../../styles/components/dashboard/groupSettings/settings.module.css";
-import { getCookie } from "../../../../utils/cookies";
+import { platformApi } from "../../../../utils/platformApi";
 import TextInput from "../../../ui/textInput";
 
 interface TextFieldProps {
@@ -33,19 +32,13 @@ const TextField = ({
     if (!groupId || !guildId || !fieldName) return;
 
     // Fetch initial field value
-    fetch(apiEndpoint, {
-      method: "POST",
-      body: JSON.stringify({
-        token: getCookie("token"),
-        groupId,
-        guildId,
-        fieldName,
-      }),
-    })
-      .then((res) => res.json())
-      .then((data: Record<string, string>) => {
-        setValue(data[fieldName] || ""); // Ensure it's set to a string
-      });
+    platformApi<Record<string, string>>(apiEndpoint, {
+      groupId,
+      guildId,
+      fieldName,
+    }).then((data) => {
+      setValue(data[fieldName] || ""); // Ensure it's set to a string
+    });
   }, [groupId, guildId, fieldName, apiEndpoint]);
 
   const handleChange = (rawValue: string) => {
@@ -53,15 +46,11 @@ const TextField = ({
     setValue(parsedValue);
 
     // Save the updated value
-    fetch(saveEndpoint, {
-      method: "POST",
-      body: JSON.stringify({
-        token: getCookie("token"),
-        groupId,
-        guildId,
-        fieldName,
-        fieldValue: parsedValue,
-      }),
+    platformApi(saveEndpoint, {
+      groupId,
+      guildId,
+      fieldName,
+      fieldValue: parsedValue,
     });
   };
 

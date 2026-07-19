@@ -1,6 +1,6 @@
 import styles from "../../styles/components/dashboard/Settings.module.css";
 import config from "../../utils/config.json";
-import { getCookie } from "../../utils/cookies";
+import { platformApi } from "../../utils/platformApi";
 import { useEffect, useState, type ChangeEvent } from "react";
 import Command from "./elements/Command";
 import { notify } from "../ui/NotificationSystem";
@@ -63,14 +63,13 @@ export default function Settings({
 
     const saveSettings = async () => {
       try {
-        const data = await fetch(`${config.apiV2}set_server_settings`, {
-          method: "POST",
-          body: JSON.stringify({
-            token: getCookie("token"),
+        const data = await platformApi<{ result?: boolean; error?: string }>(
+          "set_server_settings",
+          {
             guildId: guildId,
             settings: settings,
-          }),
-        }).then((res) => res.json());
+          },
+        );
 
         if (!data.result) {
           throw new Error(data.error || "Failed to save settings");

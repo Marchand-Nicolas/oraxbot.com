@@ -1,7 +1,6 @@
 import { useEffect, useState, type ChangeEvent } from "react";
-import config from "../../../../utils/config.json";
 import styles from "../../../../styles/components/dashboard/groupSettings/settings.module.css";
-import { getCookie } from "../../../../utils/cookies";
+import { platformApi } from "../../../../utils/platformApi";
 import TextInput from "../../../ui/textInput";
 import type { FilterRule } from "../../../../types";
 
@@ -18,20 +17,12 @@ const Filters = ({ groupId, guildId }: FiltersProps) => {
     if (!groupId || !guildId) return;
 
     // Fetch initial filter rules
-    fetch(`${config.apiV2}get_group_settings_field`, {
-      method: "POST",
-      body: JSON.stringify({
-        token: getCookie("token"),
-        groupId,
-        guildId,
-        fieldName: "filterRules",
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
+    platformApi<{ filterRules?: string }>("get_group_settings_field", {
+      groupId,
+      guildId,
+      fieldName: "filterRules",
     })
-      .then((res) => res.json())
-      .then((data: { filterRules?: string }) => {
+      .then((data) => {
         try {
           const rules = data.filterRules ? JSON.parse(data.filterRules) : [];
           setFilterRules(Array.isArray(rules) ? rules : []);
@@ -49,18 +40,11 @@ const Filters = ({ groupId, guildId }: FiltersProps) => {
   }, [groupId, guildId]);
 
   const saveFilterRules = (rules: FilterRule[]) => {
-    fetch(`${config.apiV2}set_group_settings_field`, {
-      method: "POST",
-      body: JSON.stringify({
-        token: getCookie("token"),
-        groupId,
-        guildId,
-        fieldName: "filterRules",
-        fieldValue: JSON.stringify(rules),
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
+    platformApi("set_group_settings_field", {
+      groupId,
+      guildId,
+      fieldName: "filterRules",
+      fieldValue: JSON.stringify(rules),
     });
   };
 
@@ -82,10 +66,7 @@ const Filters = ({ groupId, guildId }: FiltersProps) => {
     saveFilterRules(updatedRules);
   };
 
-  const updateRule = (
-    ruleId: string,
-    patch: Partial<FilterRule>,
-  ) => {
+  const updateRule = (ruleId: string, patch: Partial<FilterRule>) => {
     setFilterRules((prevRules) => {
       const updatedRules = prevRules.map((rule) =>
         rule.id === ruleId ? { ...rule, ...patch } : rule,

@@ -4,8 +4,7 @@ import fire from "../../../public/icons/fire.svg";
 import drop from "../../../public/icons/drop.svg";
 import Image from "next/image";
 import popup from "../../../utils/popup";
-import config from "../../../utils/config.json";
-import { getCookie } from "../../../utils/cookies";
+import { platformApi } from "../../../utils/platformApi";
 import { useRouter } from "next/router";
 import React, { useEffect, useState, type ChangeEvent } from "react";
 import Filters from "./settings/filters";
@@ -18,23 +17,14 @@ const updateDisableUserWarningMessage = (
   guildId: string | string[] | undefined,
   disableUserWarningMessage: boolean,
 ) => {
-  fetch(`${config.apiV2}set_group_settings_field`, {
-    method: "POST",
-    body: JSON.stringify({
-      token: getCookie("token"),
-      groupId,
-      guildId,
-      fieldValue: disableUserWarningMessage,
-      fieldName: "disableUserWarningMessage",
-    }),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
-    .then((res) => res.json())
-    .then(() => {
-      e.target.checked = disableUserWarningMessage;
-    });
+  platformApi("set_group_settings_field", {
+    groupId,
+    guildId,
+    fieldValue: disableUserWarningMessage,
+    fieldName: "disableUserWarningMessage",
+  }).then(() => {
+    e.target.checked = disableUserWarningMessage;
+  });
 };
 
 const ModernAdvancedSettings = () => {
@@ -53,23 +43,14 @@ const ModernAdvancedSettings = () => {
     guildId: string | string[] | undefined,
     disableDeleteSync: boolean,
   ) => {
-    fetch(`${config.apiV2}set_group_settings_field`, {
-      method: "POST",
-      body: JSON.stringify({
-        token: getCookie("token"),
-        groupId,
-        guildId,
-        fieldValue: disableDeleteSync,
-        fieldName: "disableDeleteSync",
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((res) => res.json())
-      .then((data: { success?: boolean }) => {
-        if (data.success) setDisableDeleteSync(disableDeleteSync);
-      });
+    platformApi<{ success?: boolean }>("set_group_settings_field", {
+      groupId,
+      guildId,
+      fieldValue: disableDeleteSync,
+      fieldName: "disableDeleteSync",
+    }).then((data) => {
+      if (data.success) setDisableDeleteSync(disableDeleteSync);
+    });
   };
 
   const updateAnnouncements = (
@@ -78,87 +59,60 @@ const ModernAdvancedSettings = () => {
     guildId: string | string[] | undefined,
     announcements: boolean,
   ) => {
-    fetch(`${config.apiV2}set_group_settings_field`, {
-      method: "POST",
-      body: JSON.stringify({
-        token: getCookie("token"),
-        groupId,
-        guildId,
-        fieldValue: announcements,
-        fieldName: "announcements",
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((res) => res.json())
-      .then((data: { success?: boolean }) => {
-        if (data.success) setAnnouncements(announcements);
-      });
+    platformApi<{ success?: boolean }>("set_group_settings_field", {
+      groupId,
+      guildId,
+      fieldValue: announcements,
+      fieldName: "announcements",
+    }).then((data) => {
+      if (data.success) setAnnouncements(announcements);
+    });
   };
 
   useEffect(() => {
     if (!groupId || !guildId) return;
-    fetch(`${config.apiV2}get_group_settings_field`, {
-      method: "POST",
-      body: JSON.stringify({
-        token: getCookie("token"),
+    platformApi<{ success?: boolean; disableUserWarningMessage?: unknown }>(
+      "get_group_settings_field",
+      {
         groupId,
         guildId,
         fieldName: "disableUserWarningMessage",
-      }),
-      headers: {
-        "Content-Type": "application/json",
       },
-    })
-      .then((res) => res.json())
-      .then(
-        (data: { success?: boolean; disableUserWarningMessage?: unknown }) =>
-          data.success &&
-          setDisableUserWarningMessage(!!data.disableUserWarningMessage),
-      );
+    ).then(
+      (data) =>
+        data.success &&
+        setDisableUserWarningMessage(!!data.disableUserWarningMessage),
+    );
   }, [groupId, guildId]);
 
   useEffect(() => {
     if (!groupId || !guildId) return;
-    fetch(`${config.apiV2}get_group_settings_field`, {
-      method: "POST",
-      body: JSON.stringify({
-        token: getCookie("token"),
+    platformApi<{ success?: boolean; disableDeleteSync?: unknown }>(
+      "get_group_settings_field",
+      {
         groupId,
         guildId,
         fieldName: "disableDeleteSync",
-      }),
-      headers: {
-        "Content-Type": "application/json",
       },
-    })
-      .then((res) => res.json())
-      .then(
-        (data: { success?: boolean; disableDeleteSync?: unknown }) =>
-          data.success && setDisableDeleteSync(!!data.disableDeleteSync),
-      );
+    ).then(
+      (data) =>
+        data.success && setDisableDeleteSync(!!data.disableDeleteSync),
+    );
   }, [groupId, guildId]);
 
   useEffect(() => {
     if (!groupId || !guildId) return;
-    fetch(`${config.apiV2}get_group_settings_field`, {
-      method: "POST",
-      body: JSON.stringify({
-        token: getCookie("token"),
+    platformApi<{ success?: boolean; announcements?: unknown }>(
+      "get_group_settings_field",
+      {
         groupId,
         guildId,
         fieldName: "announcements",
-      }),
-      headers: {
-        "Content-Type": "application/json",
       },
-    })
-      .then((res) => res.json())
-      .then(
-        (data: { success?: boolean; announcements?: unknown }) =>
-          data.success && setAnnouncements(!!data.announcements),
-      );
+    ).then(
+      (data) =>
+        data.success && setAnnouncements(!!data.announcements),
+    );
   }, [groupId, guildId]);
 
   return (
@@ -306,10 +260,9 @@ const ModernAdvancedSettings = () => {
                       {
                         name: "Rename",
                         action: function () {
-                          fetch(`${config.apiV2}rename_interserv_group`, {
-                            method: "POST",
-                            body: JSON.stringify({
-                              token: getCookie("token"),
+                          platformApi<{ result?: boolean }>(
+                            "rename_interserv_group",
+                            {
                               groupId,
                               guildId,
                               newName: (
@@ -317,13 +270,9 @@ const ModernAdvancedSettings = () => {
                                   "renameGroupInput",
                                 ) as HTMLInputElement | null
                               )?.value,
-                            }),
-                            headers: {
-                              "Content-Type": "application/json",
                             },
-                          })
-                            .then((res) => res.json())
-                            .then((datas: { result?: boolean }) => {
+                          )
+                            .then((datas) => {
                               if (datas.result) {
                                 router.push(
                                   `/dashboard/${router.query.platform}?guild=${guildId}`,
@@ -364,19 +313,14 @@ const ModernAdvancedSettings = () => {
                       close: true,
                       customButtonName: "Delete",
                       action: function () {
-                        fetch(`${config.apiV2}delete_interserv_group`, {
-                          method: "POST",
-                          body: JSON.stringify({
-                            token: getCookie("token"),
+                        platformApi<{ result?: boolean }>(
+                          "delete_interserv_group",
+                          {
                             groupId,
                             guildId,
-                          }),
-                          headers: {
-                            "Content-Type": "application/json",
                           },
-                        })
-                          .then((res) => res.json())
-                          .then((datas: { result?: boolean }) => {
+                        )
+                          .then((datas) => {
                             if (datas.result) {
                               router.push(
                                 `/dashboard/${router.query.platform}?guild=${guildId}`,

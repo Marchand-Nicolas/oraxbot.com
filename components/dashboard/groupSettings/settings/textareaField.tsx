@@ -1,7 +1,7 @@
 import { useEffect, useState, type ChangeEvent } from "react";
 import config from "../../../../utils/config.json";
 import styles from "../../../../styles/components/ui/inputs.module.css";
-import { getCookie } from "../../../../utils/cookies";
+import { platformApi } from "../../../../utils/platformApi";
 
 interface TextareaFieldProps {
   label: string;
@@ -32,17 +32,12 @@ const TextareaField = ({
 
   useEffect(() => {
     if (!groupId || !guildId || !fieldName) return;
-    fetch(apiEndpoint, {
-      method: "POST",
-      body: JSON.stringify({
-        token: getCookie("token"),
-        groupId,
-        guildId,
-        fieldName,
-      }),
+    platformApi<Record<string, string>>(apiEndpoint, {
+      groupId,
+      guildId,
+      fieldName,
     })
-      .then((res) => res.json())
-      .then((data: Record<string, string>) => {
+      .then((data) => {
         setValue(data[fieldName] || "");
       });
   }, [groupId, guildId, fieldName, apiEndpoint]);
@@ -50,15 +45,11 @@ const TextareaField = ({
   const handleChange = (rawValue: string) => {
     const parsedValue = parser(rawValue);
     setValue(parsedValue);
-    fetch(saveEndpoint, {
-      method: "POST",
-      body: JSON.stringify({
-        token: getCookie("token"),
-        groupId,
-        guildId,
-        fieldName,
-        fieldValue: parsedValue,
-      }),
+    platformApi(saveEndpoint, {
+      groupId,
+      guildId,
+      fieldName,
+      fieldValue: parsedValue,
     });
   };
 

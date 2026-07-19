@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
 import styles from "../../../styles/dashboard/OwnedGroup.module.css";
-import config from "../../../utils/config.json";
-import { getCookie } from "../../../utils/cookies";
+import { platformApi } from "../../../utils/platformApi";
 import type { LinkedChannel } from "../../../types";
 import {
   getPlatform,
@@ -121,22 +120,13 @@ const unlinkChannel = (
     updater: (channels: LinkedChannel[]) => LinkedChannel[],
   ) => void,
 ) => {
-  fetch(`${config.apiV2}unlink_channel`, {
-    method: "POST",
-    body: JSON.stringify({
-      token: getCookie("token"),
-      groupId,
-      channelId,
-      guildId,
-    }),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
-    .then((res) => res.json())
-    .then(() => {
-      setChannels((channels) =>
-        channels.filter((c) => c.id != channelId),
-      );
-    });
+  platformApi("unlink_channel", {
+    groupId,
+    channelId,
+    guildId,
+  }).then(() => {
+    setChannels((channels) =>
+      channels.filter((c) => c.id != channelId),
+    );
+  });
 };

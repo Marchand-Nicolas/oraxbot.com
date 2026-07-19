@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import styles from "../../../styles/components/dashboard/groupSettings/bannedUsers.module.css";
-import config from "../../../utils/config.json";
-import { getCookie } from "../../../utils/cookies";
+import { platformApi } from "../../../utils/platformApi";
 import { notify } from "../../ui/NotificationSystem";
 import type { BannedUser } from "../../../types";
 
@@ -33,21 +32,12 @@ const BannedUsersWindow = ({ groupId, guildId }: BannedUsersWindowProps) => {
       setLoading(true);
 
       try {
-        const response = await fetch(`${config.apiV2}get_banned_users`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            guildId,
-            token: getCookie("token"),
-            groupId,
-          }),
-        });
+        const data = await platformApi<{ result?: boolean; bannedUsers?: BannedUser[]; error?: string }>(
+          "get_banned_users",
+          { guildId, groupId },
+        );
 
-        const data = await response.json();
-
-        if (!response.ok || !data.result) {
+        if (!data.result) {
           throw new Error(data.error || "Unable to load banned users");
         }
 
@@ -83,22 +73,12 @@ const BannedUsersWindow = ({ groupId, guildId }: BannedUsersWindowProps) => {
     setRemovingUserId(userId);
 
     try {
-      const response = await fetch(`${config.apiV2}remove_banned_user`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          guildId,
-          token: getCookie("token"),
-          groupId,
-          userId,
-        }),
-      });
+      const data = await platformApi<{ result?: boolean; removed?: boolean; error?: string }>(
+        "remove_banned_user",
+        { guildId, groupId, userId },
+      );
 
-      const data = await response.json();
-
-      if (!response.ok || !data.result || !data.removed) {
+      if (!data.result || !data.removed) {
         throw new Error(data.error || "Unable to unban user");
       }
 

@@ -5,7 +5,7 @@ import ActionModal from "../ui/ActionModal";
 import config from "../../utils/config.json";
 import { unmountRoot } from "../../utils/reactRoot";
 import { notify } from "../ui/NotificationSystem";
-import { getCookie } from "../../utils/cookies";
+import { platformApi } from "../../utils/platformApi";
 import type { Channel, OraxPlusStatus } from "../../types";
 import type { PlatformConfig } from "../../utils/platforms";
 
@@ -127,20 +127,15 @@ export default function CreateGroupMenu(props: CreateGroupMenuProps) {
                 notify.error("Validation Error", "Please select a channel");
                 return;
               }
-              fetch(`${config.apiV2}create_group`, {
-                method: "POST",
-                body: JSON.stringify({
+              platformApi<{ error?: number; customError?: string }>(
+                "create_group",
+                {
                   guildId: props.guildId,
                   channelId: selectedChannelId,
                   groupName: groupName,
-                  token: getCookie("token"),
-                }),
-                headers: {
-                  "Content-Type": "application/json",
                 },
-              })
-                .then((res) => res.json())
-                .then((data: { error?: number; customError?: string }) => {
+              )
+                .then((data) => {
                   if (data.error) {
                     let errorMessage: string;
                     switch (data.error) {

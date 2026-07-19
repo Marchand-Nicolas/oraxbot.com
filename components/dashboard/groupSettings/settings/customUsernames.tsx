@@ -1,7 +1,6 @@
 import { useEffect, useState, type ChangeEvent } from "react";
 import TextInput from "../../../ui/textInput";
-import config from "../../../../utils/config.json";
-import { getCookie } from "../../../../utils/cookies";
+import { platformApi } from "../../../../utils/platformApi";
 
 interface CustomUsernamesProps {
   groupId?: string | string[];
@@ -15,39 +14,24 @@ const CustomUsernames = ({ groupId, guildId }: CustomUsernamesProps) => {
   useEffect(() => {
     if (!groupId || !guildId) return;
     // Load the custom usernames pattern
-    fetch(`${config.apiV2}get_custom_usernames_pattern`, {
-      method: "POST",
-      body: JSON.stringify({
-        token: getCookie("token"),
-        groupId,
-        guildId,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }).then((res) =>
-      res.json().then((data: { customUsernamesPattern?: string }) => {
-        setPattern(data.customUsernamesPattern || "");
-      }),
-    );
+    platformApi<{ customUsernamesPattern?: string }>(
+      "get_custom_usernames_pattern",
+      { groupId, guildId },
+    ).then((data) => {
+      setPattern(data.customUsernamesPattern || "");
+    });
 
     // Load the custom user picture URL
-    fetch(`${config.apiV2}get_group_settings_field`, {
-      method: "POST",
-      body: JSON.stringify({
-        token: getCookie("token"),
+    platformApi<{ customUserPPUrl?: string }>(
+      "get_group_settings_field",
+      {
         groupId,
         guildId,
         fieldName: "customUserPPUrl",
-      }),
-      headers: {
-        "Content-Type": "application/json",
       },
-    }).then((res) =>
-      res.json().then((data: { customUserPPUrl?: string }) => {
-        setUserPpUrl(data.customUserPPUrl || "");
-      }),
-    );
+    ).then((data) => {
+      setUserPpUrl(data.customUserPPUrl || "");
+    });
   }, [groupId, guildId]);
 
   return (
@@ -65,17 +49,10 @@ const CustomUsernames = ({ groupId, guildId }: CustomUsernamesProps) => {
         onChange={(e: ChangeEvent<HTMLInputElement>) => {
           const newPattern = e.target.value;
           setPattern(newPattern);
-          fetch(`${config.apiV2}set_custom_usernames_pattern`, {
-            method: "POST",
-            body: JSON.stringify({
-              token: getCookie("token"),
-              groupId,
-              guildId,
-              customUsernamesPattern: newPattern,
-            }),
-            headers: {
-              "Content-Type": "application/json",
-            },
+          platformApi("set_custom_usernames_pattern", {
+            groupId,
+            guildId,
+            customUsernamesPattern: newPattern,
           });
         }}
         value={pattern}
@@ -93,18 +70,11 @@ const CustomUsernames = ({ groupId, guildId }: CustomUsernamesProps) => {
         onChange={(e: ChangeEvent<HTMLInputElement>) => {
           const newUrl = e.target.value;
           setUserPpUrl(newUrl);
-          fetch(`${config.apiV2}set_group_settings_field`, {
-            method: "POST",
-            body: JSON.stringify({
-              token: getCookie("token"),
-              groupId,
-              guildId,
-              fieldName: "customUserPPUrl",
-              fieldValue: newUrl,
-            }),
-            headers: {
-              "Content-Type": "application/json",
-            },
+          platformApi("set_group_settings_field", {
+            groupId,
+            guildId,
+            fieldName: "customUserPPUrl",
+            fieldValue: newUrl,
           });
         }}
         value={userPpUrl}

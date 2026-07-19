@@ -1,7 +1,7 @@
 import { useEffect, useState, type ChangeEvent } from "react";
 import config from "../../../../utils/config.json";
 import styles from "../../../../styles/components/dashboard/groupSettings/settings.module.css";
-import { getCookie } from "../../../../utils/cookies";
+import { platformApi } from "../../../../utils/platformApi";
 
 interface OptionsFieldProps {
   label: string;
@@ -41,18 +41,13 @@ const OptionsField = ({
     if (!guildId || !fieldName) return;
 
     // Fetch initial field value
-    fetch(effectiveGetEndpoint, {
-      method: "POST",
-      body: JSON.stringify({
-        token: getCookie("token"),
-        groupId,
-        guildId,
-        channelId,
-        fieldName,
-      }),
+    platformApi<Record<string, unknown>>(effectiveGetEndpoint, {
+      groupId,
+      guildId,
+      channelId,
+      fieldName,
     })
-      .then((res) => res.json())
-      .then((data: Record<string, unknown>) => {
+      .then((data) => {
         setFieldValue(
           typeof data[fieldName] != "undefined"
             ? String(data[fieldName])
@@ -62,12 +57,13 @@ const OptionsField = ({
 
     // Fetch dynamic options if not provided
     if (options.length === 0) {
-      fetch(`${config.apiV2}get_guild_channels`, {
-        method: "POST",
-        body: JSON.stringify({ guildId }),
-      })
-        .then((res) => res.json())
-        .then((res: { result?: { id: string; name: string }[] }) => {
+      platformApi<{ result?: { id: string; name: string }[] }>(
+        `${config.apiV2}get_guild_channels`,
+        {
+          guildId,
+        },
+      )
+        .then((res) => {
           setAvailableOptions(
             (res.result || []).map((c) => ({ id: c.id, name: c.name })),
           );
@@ -86,16 +82,12 @@ const OptionsField = ({
 
   const handleChange = (value: string) => {
     setFieldValue(value);
-    fetch(effectiveSetEndpoint, {
-      method: "POST",
-      body: JSON.stringify({
-        token: getCookie("token"),
-        groupId,
-        guildId,
-        channelId,
-        fieldName,
-        fieldValue: value,
-      }),
+    platformApi(effectiveSetEndpoint, {
+      groupId,
+      guildId,
+      channelId,
+      fieldName,
+      fieldValue: value,
     });
   };
 

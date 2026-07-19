@@ -2,8 +2,6 @@ import { useRouter } from "next/router";
 import dashboardStyles from "../../../../styles/Dashboard.module.css";
 import styles from "../../../../styles/dashboard/OwnedGroup.module.css";
 import { useCallback, useEffect, useRef, useState } from "react";
-import config from "../../../../utils/config.json";
-import { getCookie } from "../../../../utils/cookies";
 import {
   getOraxPlusStatus,
   startOraxPlusCheckout as startCheckout,
@@ -24,6 +22,7 @@ import {
   setAuthRedirectTarget,
 } from "../../../../utils/apiClient";
 import { getPlatform } from "../../../../utils/platforms";
+import { platformApi } from "../../../../utils/platformApi";
 
 export default function OwnedGroup() {
   const router = useRouter();
@@ -78,19 +77,15 @@ export default function OwnedGroup() {
 
   useEffect(() => {
     if (groupId && platform) {
-      fetch(`${config.apiV2}get_admin_group_data`, {
-        method: "POST",
-        body: JSON.stringify({
-          token: getCookie(platform.cookieName),
-          groupId,
-          guildId,
-          platform: platform.slug,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
+      platformApi<{
+        result?: boolean;
+        link?: string;
+        channels?: LinkedChannel[];
+        oraxPlus?: OraxPlusStatus;
+      }>("get_admin_group_data", {
+        groupId,
+        guildId,
       })
-        .then((res) => res.json())
         .then((datas) => {
           if (datas.result) {
             setLink(
@@ -98,7 +93,7 @@ export default function OwnedGroup() {
                 "/join/" +
                 datas.link,
             );
-            setChannels(datas.channels);
+            setChannels(datas.channels || []);
             setOraxPlus(datas.oraxPlus);
             setLoading(false);
           }
@@ -236,16 +231,13 @@ export default function OwnedGroup() {
             {!loading && platform && (
               <button
                 onClick={() =>
-                  fetch(`${config.apiV2}generate_interserv_group_link`, {
-                    method: "POST",
-                    body: JSON.stringify({
-                      token: getCookie(platform.cookieName),
+                  platformApi<{ result?: boolean; link?: string }>(
+                    "generate_interserv_group_link",
+                    {
                       groupId: Number(groupId),
                       guildId,
-                      platform: platform.slug,
-                    }),
-                  })
-                    .then((res) => res.json())
+                    },
+                  )
                     .then((datas) => {
                       if (datas.result) {
                         setLink(

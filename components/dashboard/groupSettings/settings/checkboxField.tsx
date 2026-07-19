@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import config from "../../../../utils/config.json";
 import styles from "../../../../styles/components/dashboard/groupSettings/settings.module.css";
-import { getCookie } from "../../../../utils/cookies";
+import { platformApi } from "../../../../utils/platformApi";
 
 interface CheckboxFieldProps {
   label: string;
@@ -33,15 +33,11 @@ const CheckboxField = ({
 
   const saveValue = useCallback(
     (fieldValue: boolean) => {
-      fetch(saveEndpoint, {
-        method: "POST",
-        body: JSON.stringify({
-          token: getCookie("token"),
-          groupId,
-          guildId,
-          fieldName,
-          fieldValue,
-        }),
+      platformApi(saveEndpoint, {
+        groupId,
+        guildId,
+        fieldName,
+        fieldValue,
       });
     },
     [fieldName, groupId, guildId, saveEndpoint],
@@ -51,17 +47,12 @@ const CheckboxField = ({
     if (!groupId || !guildId || !fieldName) return;
 
     // Fetch initial field value
-    fetch(apiEndpoint, {
-      method: "POST",
-      body: JSON.stringify({
-        token: getCookie("token"),
-        groupId,
-        guildId,
-        fieldName,
-      }),
+    platformApi<Record<string, unknown>>(apiEndpoint, {
+      groupId,
+      guildId,
+      fieldName,
     })
-      .then((res) => res.json())
-      .then((data: Record<string, unknown>) => {
+      .then((data) => {
         const fieldValue = !!data[fieldName];
         if (forceUnchecked && fieldValue) saveValue(false);
         setIsChecked(forceUnchecked ? false : fieldValue);
