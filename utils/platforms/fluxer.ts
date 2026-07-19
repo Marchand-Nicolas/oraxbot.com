@@ -51,13 +51,13 @@ const fluxer: PlatformConfig = {
 
   getGuildIconUrl: ({ id, icon }) =>
     icon
-      ? `https://cdn.fluxer.app/icons/${id}/${icon}.webp?size=96`
+      ? `https://fluxerusercontent.com/icons/${id}/${icon}.webp?size=96`
       : null,
   defaultGuildIconUrl: "/assets/default_guild_icon.jpg",
 
   getGuildBackgroundUrl: ({ id, icon }) =>
     icon
-      ? `https://cdn.fluxer.app/icons/${id}/${icon}.webp?size=96`
+      ? `https://fluxerusercontent.com/icons/${id}/${icon}.webp?size=96`
       : null,
 
   cookieName: "token_fluxer",
