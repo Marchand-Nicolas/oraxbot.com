@@ -155,7 +155,9 @@
   opacity: 0;
   pointer-events: none;
   transform: translateX(-50%) translateY(4px);
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
 }
 
 .oraxPlusTooltipText::after {
@@ -327,6 +329,11 @@
   transform: none;
 }
 
+.channelIcon {
+  width: 16px;
+  margin-right: 5px;
+}
+
 .buttonContainerDisabled p,
 .buttonContainerDisabled .channelIcon,
 .buttonContainerDisabled .disabledButton {
@@ -402,13 +409,14 @@
   margin-right: auto !important;
 }
 
-.buttonContainer svg {
+.buttonContainer a svg,
+.removeChannelIcon {
   width: 20px;
   cursor: pointer;
   transition: 0.2s;
 }
 
-.buttonContainer svg:hover {
+.buttonContainer a:hover {
   color: var(--secondary);
 }
 

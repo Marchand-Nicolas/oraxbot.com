@@ -25,6 +25,8 @@ export interface LinkedChannel {
   name: string;
   guildName?: string;
   available?: boolean;
+  /** Numeric platform type (0 = Discord, 2 = Fluxer). */
+  platform?: number;
   [key: string]: unknown;
 }
 

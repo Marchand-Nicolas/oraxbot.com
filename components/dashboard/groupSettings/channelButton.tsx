@@ -4,6 +4,10 @@ import styles from "../../../styles/dashboard/OwnedGroup.module.css";
 import config from "../../../utils/config.json";
 import { getCookie } from "../../../utils/cookies";
 import type { LinkedChannel } from "../../../types";
+import {
+  getPlatform,
+  getPlatformByType,
+} from "../../../utils/platforms";
 
 interface ChannelButtonProps {
   channel: LinkedChannel;
@@ -24,8 +28,15 @@ const ChannelButton = ({
 }: ChannelButtonProps) => {
   const router = useRouter();
   const platformSlug = router.query.platform;
-  const platform =
-    typeof platformSlug === "string" ? platformSlug : undefined;
+  const dashboardPlatform =
+    typeof platformSlug === "string"
+      ? getPlatform(platformSlug)
+      : undefined;
+  const channelPlatform = getPlatformByType(channel.platform);
+  const showPlatformLogo =
+    channelPlatform &&
+    dashboardPlatform &&
+    channelPlatform.slug !== dashboardPlatform.slug;
   const available = channel.available !== false;
   return (
     <div
@@ -33,24 +44,32 @@ const ChannelButton = ({
     >
       <p>{channel.guildName}</p>
       <div>
-        <svg
-          className={styles.channelIcon}
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M5.25 8.25h15m-16.5 7.5h15m-1.8-13.5l-3.9 19.5m-2.1-19.5l-3.9 19.5"
+        {showPlatformLogo ? (
+          <img
+            src={channelPlatform!.logoPath}
+            alt=""
+            className={styles.channelIcon}
           />
-        </svg>
+        ) : (
+          <svg
+            className={styles.channelIcon}
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M5.25 8.25h15m-16.5 7.5h15m-1.8-13.5l-3.9 19.5m-2.1-19.5l-3.9 19.5"
+            />
+          </svg>
+        )}
         <p className={styles.channelName}>{channel.name}</p>
       </div>
       <div className={styles.channelButtons}>
         <Link
-          href={`/dashboard/${platform}/ownedgroup/channelSettings/${guildId}/${channel.id}?icon=${icon}&groupId=${groupId}`}
+          href={`/dashboard/${dashboardPlatform?.slug}/ownedgroup/channelSettings/${guildId}/${channel.id}?icon=${icon}&groupId=${groupId}`}
         >
           <svg
             fill="none"
