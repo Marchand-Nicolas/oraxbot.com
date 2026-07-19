@@ -169,7 +169,9 @@ export default function OwnedGroup() {
           <div className={styles.headerGrid}>
             <div>
               <div className="line">
-                <Link href={"../?guild=" + guildId}>
+                <Link
+                  href={`/dashboard/${platform?.slug ?? ""}?guild=${guildId ?? ""}`}
+                >
                   <svg
                     className={styles.back}
                     fill="none"

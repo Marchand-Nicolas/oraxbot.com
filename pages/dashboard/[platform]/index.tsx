@@ -382,7 +382,10 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
               })
               .map((g) =>
                 platform.isAdmin(g) ? (
-                  <Link key={"nav_guild_" + g.id} href={"?guild=" + g.id}>
+                  <Link
+                    key={"nav_guild_" + g.id}
+                    href={`/dashboard/${platform.slug}?guild=${g.id}`}
+                  >
                     <div
                       id={"guild_" + g.id}
                       className={[
