@@ -49,7 +49,6 @@ function formatRemainingPlanTime(expiresAt?: string | null) {
 }
 
 export default function Dashboard() {
-  const serverIp = config.serverIp;
   const [user, setUser] = useState<DiscordUser | undefined>(undefined);
   const [guilds, setGuilds] = useState<Guild[]>([]);
   const [guildDatas, setGuildDatas] = useState<GuildData>({});
@@ -99,7 +98,7 @@ export default function Dashboard() {
     if (!token || token === "undefined" || state) {
       const code = params.get("code");
       if (code) {
-        fetch(`${serverIp}login`, {
+        fetch(`${config.apiV2}exchange_discord_oauth_code`, {
           method: "POST",
           body: JSON.stringify({ token: code }),
           headers: {

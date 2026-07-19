@@ -15,7 +15,7 @@ const LogMessages = ({ groupId, guildId }: LogMessagesProps) => {
 
   useEffect(() => {
     if (guildId)
-      fetch(`${config.serverIp}get_guild_channels`, {
+      fetch(`${config.apiV2}get_guild_channels`, {
         method: "POST",
         body: JSON.stringify({ guildId }),
         headers: {

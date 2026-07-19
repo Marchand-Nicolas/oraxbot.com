@@ -97,7 +97,7 @@ const unlinkChannel = (
     updater: (channels: LinkedChannel[]) => LinkedChannel[],
   ) => void,
 ) => {
-  fetch(`${config.serverIp}unlink_channel`, {
+  fetch(`${config.apiV2}unlink_channel`, {
     method: "POST",
     body: JSON.stringify({
       token: getCookie("token"),

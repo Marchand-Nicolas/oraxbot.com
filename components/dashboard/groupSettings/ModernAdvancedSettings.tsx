@@ -362,7 +362,7 @@ const ModernAdvancedSettings = () => {
                       close: true,
                       customButtonName: "Delete",
                       action: function () {
-                        fetch(`${config.serverIp}delete_interserv_group`, {
+                        fetch(`${config.apiV2}delete_interserv_group`, {
                           method: "POST",
                           body: JSON.stringify({
                             token: getCookie("token"),

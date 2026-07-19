@@ -211,7 +211,7 @@ export default function OwnedGroup() {
             {!loading && (
               <button
                 onClick={() =>
-                  fetch(`${config.serverIp}generate_interserv_group_link`, {
+                  fetch(`${config.apiV2}generate_interserv_group_link`, {
                     method: "POST",
                     body: `{ "token": "${getCookie(
                       "token",

@@ -5,6 +5,7 @@ import ActionModal from "../ui/ActionModal";
 import config from "../../utils/config.json";
 import { unmountRoot } from "../../utils/reactRoot";
 import { notify } from "../ui/NotificationSystem";
+import { getCookie } from "../../utils/cookies";
 import type { Channel, OraxPlusStatus } from "../../types";
 
 interface CreateGroupMenuProps {
@@ -17,7 +18,6 @@ interface CreateGroupMenuProps {
 }
 
 export default function CreateGroupMenu(props: CreateGroupMenuProps) {
-  const serverIp = config.serverIp;
   const [channels, setChannels] = useState<Channel[]>([]);
   const [showGroupLimitModal, setShowGroupLimitModal] = useState(false);
   const groupLimit = props.oraxPlus?.limits?.groupsPerGuild || 2;
@@ -26,7 +26,7 @@ export default function CreateGroupMenu(props: CreateGroupMenuProps) {
 
   useEffect(() => {
     if (props.guildId) {
-      fetch(`${serverIp}get_guild_channels`, {
+      fetch(`${config.apiV2}get_guild_channels`, {
         method: "POST",
         body: JSON.stringify({ guildId: props.guildId }),
         headers: {
@@ -47,7 +47,7 @@ export default function CreateGroupMenu(props: CreateGroupMenuProps) {
     } else {
       console.warn("No guildId provided to CreateGroupMenu");
     }
-  }, [props.guildId, serverIp]);
+  }, [props.guildId]);
 
   return (
     <>
@@ -125,12 +125,13 @@ export default function CreateGroupMenu(props: CreateGroupMenuProps) {
                 notify.error("Validation Error", "Please select a channel");
                 return;
               }
-              fetch(`${serverIp}create_group`, {
+              fetch(`${config.apiV2}create_group`, {
                 method: "POST",
                 body: JSON.stringify({
                   guildId: props.guildId,
                   channelId: selectedChannelId,
                   groupName: groupName,
+                  token: getCookie("token"),
                 }),
                 headers: {
                   "Content-Type": "application/json",

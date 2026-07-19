@@ -62,7 +62,7 @@ const OptionsField = ({
 
     // Fetch dynamic options if not provided
     if (options.length === 0) {
-      fetch(`${config.serverIp}get_guild_channels`, {
+      fetch(`${config.apiV2}get_guild_channels`, {
         method: "POST",
         body: JSON.stringify({ guildId }),
       })

@@ -69,7 +69,7 @@ export default function PublishGroup() {
 
     async function loadChannels() {
       try {
-        const res = await fetch(`${config.serverIp}get_guild_channels`, {
+        const res = await fetch(`${config.apiV2}get_guild_channels`, {
           method: "POST",
           body: JSON.stringify({ guildId }),
           headers: {

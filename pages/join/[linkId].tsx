@@ -63,7 +63,7 @@ export default function JoinGroup() {
   }
 
   useEffect(() => {
-    fetch(`${config.serverIp}preview_group`, {
+    fetch(`${config.apiV2}preview_group`, {
       method: "POST",
       body: JSON.stringify({ linkId }),
       headers: {
@@ -91,7 +91,7 @@ export default function JoinGroup() {
     if (!token || token === "undefined") {
       const code = new URLSearchParams(window.location.search).get("code");
       if (code) {
-        fetch(`${config.serverIp}login`, {
+        fetch(`${config.apiV2}exchange_discord_oauth_code`, {
           method: "POST",
           body: JSON.stringify({ token: code }),
           headers: {
