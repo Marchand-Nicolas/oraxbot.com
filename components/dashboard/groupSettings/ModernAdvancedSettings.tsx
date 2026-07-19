@@ -325,7 +325,9 @@ const ModernAdvancedSettings = () => {
                             .then((res) => res.json())
                             .then((datas: { result?: boolean }) => {
                               if (datas.result) {
-                                router.push("../?guild=" + guildId);
+                                router.push(
+                                  `/dashboard/${router.query.platform}?guild=${guildId}`,
+                                );
                               }
                             });
                         },
@@ -376,7 +378,9 @@ const ModernAdvancedSettings = () => {
                           .then((res) => res.json())
                           .then((datas: { result?: boolean }) => {
                             if (datas.result) {
-                              router.push("../?guild=" + guildId);
+                              router.push(
+                                `/dashboard/${router.query.platform}?guild=${guildId}`,
+                              );
                             }
                           });
                       },

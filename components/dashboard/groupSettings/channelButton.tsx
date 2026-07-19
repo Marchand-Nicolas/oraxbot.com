@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useRouter } from "next/router";
 import styles from "../../../styles/dashboard/OwnedGroup.module.css";
 import config from "../../../utils/config.json";
 import { getCookie } from "../../../utils/cookies";
@@ -21,6 +22,10 @@ const ChannelButton = ({
   setChannels,
   icon,
 }: ChannelButtonProps) => {
+  const router = useRouter();
+  const platformSlug = router.query.platform;
+  const platform =
+    typeof platformSlug === "string" ? platformSlug : undefined;
   const available = channel.available !== false;
   return (
     <div
@@ -45,7 +50,7 @@ const ChannelButton = ({
       </div>
       <div className={styles.channelButtons}>
         <Link
-          href={`./channelSettings/${guildId}/${channel.id}?icon=${icon}&groupId=${groupId}`}
+          href={`/dashboard/${platform}/ownedgroup/channelSettings/${guildId}/${channel.id}?icon=${icon}&groupId=${groupId}`}
         >
           <svg
             fill="none"
