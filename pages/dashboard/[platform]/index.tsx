@@ -28,6 +28,7 @@ import {
   type PlatformConfig,
 } from "../../../utils/platforms";
 import { platformApi } from "../../../utils/platformApi";
+import config from "../../../utils/config.json";
 import { usePlatformAuth } from "../../../hooks/usePlatformAuth";
 
 function formatRemainingPlanTime(expiresAt?: string | null) {
@@ -602,7 +603,7 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
                     className={styles.primaryButton}
                     onClick={() => startOraxPlusCheckout("monthly")}
                   >
-                    Subscribe $2.99/mo
+                    {`Subscribe $${config.oraxPlusMonthlyPrice}/mo`}
                   </button>
                   <button
                     className={styles.primaryButton}
@@ -726,7 +727,7 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
                 ]
               : []),
             {
-              label: "Subscribe $2.99/mo",
+              label: `Subscribe $${config.oraxPlusMonthlyPrice}/mo`,
               variant: "primary" as const,
               onClick: () => {
                 setShowGroupLimitModal(false);

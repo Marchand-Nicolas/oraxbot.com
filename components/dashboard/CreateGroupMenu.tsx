@@ -200,7 +200,7 @@ export default function CreateGroupMenu(props: CreateGroupMenuProps) {
                 ]
               : []),
             {
-              label: "Subscribe $2.99/mo",
+              label: `Subscribe $${config.oraxPlusMonthlyPrice}/mo`,
               variant: "primary",
               disabled: !props.onStartOraxPlusCheckout,
               onClick: () => {

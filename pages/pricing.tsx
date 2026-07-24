@@ -69,7 +69,7 @@ export default function Pricing() {
             <span className={styles.tierBadge}>Most popular</span>
             <p className={styles.tierName}>Orax Plus</p>
             <div className={styles.price}>
-              <span className={styles.priceAmount}>from $2.99</span>
+              <span className={styles.priceAmount}>{`from $${config.oraxPlusMonthlyPrice}`}</span>
               <span className={styles.pricePeriod}>/ mo</span>
             </div>
             <p className={styles.freeVoteNote}>
@@ -133,7 +133,7 @@ export default function Pricing() {
             </div>
             <div className={styles.way}>
               <h3>Monthly subscription</h3>
-              <p className={styles.wayPrice}>$2.99 / month</p>
+              <p className={styles.wayPrice}>{`$${config.oraxPlusMonthlyPrice} / month`}</p>
               <p>
                 A recurring monthly subscription billed securely through Stripe.
                 Cancel anytime.

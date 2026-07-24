@@ -10,6 +10,7 @@ import TextField from "./settings/textField";
 import CheckboxField from "./settings/checkboxField";
 import TextareaField from "./settings/textareaField";
 import { getPlatform } from "../../../utils/platforms";
+import config from "../../../utils/config.json";
 
 interface ModernSettingsProps {
   oraxPlus?: OraxPlusStatus;
@@ -202,7 +203,7 @@ const ModernSettings = ({
                 ]
               : []),
             {
-              label: "Subscribe $2.99/mo",
+              label: `Subscribe $${config.oraxPlusMonthlyPrice}/mo`,
               variant: "primary",
               disabled: !onStartOraxPlusCheckout,
               onClick: () => {

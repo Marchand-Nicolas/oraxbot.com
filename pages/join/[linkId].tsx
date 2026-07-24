@@ -351,8 +351,7 @@ export default function JoinGroup() {
                 </p>
                 {isGroupOwner ? (
                   <p style={{ fontSize: "14px", opacity: 0.8 }}>
-                    Subscribe to Orax Plus ($2.99/mo) to raise the limit to{" "}
-                    {channelLimitData.maxLimit} channels per group.
+                    {`Subscribe to Orax Plus ($${config.oraxPlusMonthlyPrice}/mo) to raise the limit to `}{channelLimitData.maxLimit} channels per group.
                   </p>
                 ) : (
                   <p style={{ fontSize: "14px", opacity: 0.8 }}>
@@ -373,7 +372,7 @@ export default function JoinGroup() {
             },
             {
               label: isGroupOwner
-                ? "Subscribe $2.99/mo"
+                ? `Subscribe $${config.oraxPlusMonthlyPrice}/mo`
                 : "Subscribe (owner only)",
               variant: "secondary",
               disabled: !isGroupOwner,
