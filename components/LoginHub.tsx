@@ -117,7 +117,15 @@ export default function LoginHub({
     if (autoRedirect) {
       const activePlatform = detectActivePlatform();
       if (activePlatform) {
-        window.location.href = `/dashboard/${activePlatform.slug}`;
+        const forwardParams = new URLSearchParams();
+        const guild = params.get("guild");
+        const oraxPlus = params.get("orax_plus");
+        if (guild) forwardParams.set("guild", guild);
+        if (oraxPlus) forwardParams.set("orax_plus", oraxPlus);
+        const query = forwardParams.toString();
+        window.location.href = `/dashboard/${activePlatform.slug}${
+          query ? `?${query}` : ""
+        }`;
         return;
       }
     }
