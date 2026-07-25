@@ -10,9 +10,7 @@ interface SettingsProps {
   guild: Guild;
   guildId: string | string[] | undefined;
   settings: GuildSettings;
-  setSettings: (
-    updater: (prevState: GuildSettings) => GuildSettings,
-  ) => void;
+  setSettings: (updater: (prevState: GuildSettings) => GuildSettings) => void;
 }
 
 export default function Settings({
@@ -28,9 +26,8 @@ export default function Settings({
     field: string,
   ) => {
     const target = e.target as HTMLInputElement | HTMLSelectElement;
-    let newValue: string | number | boolean = "selectedIndex" in target
-      ? target.selectedIndex
-      : target.value;
+    let newValue: string | number | boolean =
+      "selectedIndex" in target ? target.selectedIndex : target.value;
     switch (target.type) {
       case "checkbox":
         newValue = (target as HTMLInputElement).checked;
@@ -41,9 +38,7 @@ export default function Settings({
           const element = document.getElementById(
             "inviteLink",
           ) as HTMLInputElement | null;
-          newValue = (newValue as string)
-            .split("https://discord.gg/")
-            .join("");
+          newValue = (newValue as string).split("https://discord.gg/").join("");
           if ((newValue as string).length > 200)
             return notify.error("Invalid link");
           if (element) element.value = newValue as string;
@@ -87,7 +82,7 @@ export default function Settings({
 
   return (
     <>
-      <h2>⚙️ Settings</h2>
+      <h2>⚙️ Server settings</h2>
       <div className={[styles.parameter, "line"].join(" ")}>
         <p className={styles.parameterName}>Language</p>
         <select
