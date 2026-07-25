@@ -1,5 +1,10 @@
 import styles from "../../../styles/Dashboard.module.css";
-import type { DiscordUser, Guild, GuildData, GuildSettings } from "../../../types";
+import type {
+  DiscordUser,
+  Guild,
+  GuildData,
+  GuildSettings,
+} from "../../../types";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
@@ -14,6 +19,7 @@ import GuildIcon from "../../../components/GuildIcon";
 import HiddenMenu from "../../../components/ui/hiddenMenu";
 import { notify } from "../../../components/ui/NotificationSystem";
 import ActionModal from "../../../components/ui/ActionModal";
+import OraxPlusSuccessModal from "../../../components/ui/OraxPlusSuccessModal";
 import ErrorBoundary from "../../../components/ui/ErrorBoundary";
 import {
   startOraxPlusCheckout as startCheckout,
@@ -23,10 +29,7 @@ import {
   setActiveTokenCookie,
   setAuthRedirectTarget,
 } from "../../../utils/apiClient";
-import {
-  getPlatform,
-  type PlatformConfig,
-} from "../../../utils/platforms";
+import { getPlatform, type PlatformConfig } from "../../../utils/platforms";
 import { platformApi } from "../../../utils/platformApi";
 import config from "../../../utils/config.json";
 import { usePlatformAuth } from "../../../hooks/usePlatformAuth";
@@ -103,6 +106,7 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
   const [refreshGuildDatas, setRefreshGuildDatas] = useState(false);
   const [isPollingOraxPlusVote, setIsPollingOraxPlusVote] = useState(false);
   const [showGroupLimitModal, setShowGroupLimitModal] = useState(false);
+  const [showOraxPlusSuccess, setShowOraxPlusSuccess] = useState(false);
   const [voteBaselineExpiresAt, setVoteBaselineExpiresAt] = useState<
     string | null
   >(null);
@@ -159,10 +163,7 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
     const params = new URLSearchParams(window.location.search);
     const oraxPlusResult = params.get("orax_plus");
     if (oraxPlusResult === "success") {
-      notify.success(
-        "Payment received",
-        "Orax Plus will activate as soon as Stripe confirms the subscription.",
-      );
+      setShowOraxPlusSuccess(true);
       setTimeout(() => setRefreshGuildDatas(true), 1500);
     } else if (oraxPlusResult === "cancelled") {
       notify.error("Checkout cancelled", "Orax Plus was not activated.");
@@ -354,7 +355,9 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
       {activeUser && <UserMenu user={activeUser} platform={platform} />}
       <div
         style={{
-          backgroundImage: backgroundImage ? `url('${backgroundImage}')` : undefined,
+          backgroundImage: backgroundImage
+            ? `url('${backgroundImage}')`
+            : undefined,
         }}
         className={styles.background}
       />
@@ -404,11 +407,7 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
       <div className={styles.page}>
         <h1 className={styles.title}>{guild.name}</h1>
         <div className={styles.actionsContainer}>
-          <a
-            href={platform.supportUrl}
-            target="_blank"
-            rel="noreferrer"
-          >
+          <a href={platform.supportUrl} target="_blank" rel="noreferrer">
             <button className={styles.button}>
               Support{" "}
               <strong>
@@ -532,7 +531,7 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
                   action: function () {
                     window.open(inviteUrl);
                   },
-                })
+                });
               }}
               className={styles.button}
             >
@@ -745,6 +744,9 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
           ]}
           onClose={() => setShowGroupLimitModal(false)}
         />
+      )}
+      {showOraxPlusSuccess && (
+        <OraxPlusSuccessModal onClose={() => setShowOraxPlusSuccess(false)} />
       )}
       {loading && <Loading />}
     </>
