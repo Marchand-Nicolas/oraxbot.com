@@ -612,6 +612,11 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
                   </button>
                 </div>
               )}
+              <p className={styles.planFootnote}>
+                15-day refund guarantee. Need to move Orax Plus to another
+                server? <a href="mailto:support@oraxbot.com">Contact support</a>{" "}
+                to transfer it anytime.
+              </p>
             </section>
             <ErrorBoundary>
               {guildDatas.ownedGroups && guildDatas.ownedGroups.length ? (

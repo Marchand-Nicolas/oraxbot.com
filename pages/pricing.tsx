@@ -179,10 +179,20 @@ export default function Pricing() {
             </p>
           </div>
           <div className={styles.faqItem}>
+            <h3>Can I get a refund?</h3>
+            <p>
+              Yes. If you&apos;re not satisfied, you can request a full refund
+              within 15 days of your purchase by contacting{" "}
+              <a href="mailto:support@oraxbot.com">support@oraxbot.com</a>.
+            </p>
+          </div>
+          <div className={styles.faqItem}>
             <h3>Is Orax Plus per server or per account?</h3>
             <p>
               Orax Plus is activated per Discord server. Each server you want to
-              upgrade needs its own Orax Plus plan.
+              upgrade needs its own Orax Plus plan. Need to move it elsewhere?
+              You can transfer your Orax Plus to another server anytime — just{" "}
+              <a href="mailto:support@oraxbot.com">contact support</a>.
             </p>
           </div>
           <div className={styles.faqMore}>
