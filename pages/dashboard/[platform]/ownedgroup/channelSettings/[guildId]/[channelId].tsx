@@ -135,7 +135,7 @@ export default function ChannelSettings() {
                 <div className={groupStyles.settingItem}>
                   <OptionsField
                     label="Translation language"
-                    description="Auto translate is enabled, so all messages sent to this channel will be translated to the selected language."
+                    description="Auto translate is enabled, so all messages sent to this channel will be translated to the selected language. Need another language? Don't hesitate to contact support and we'll add it for you."
                     fieldName="translationLanguage"
                     groupId={groupId}
                     guildId={guildId}
