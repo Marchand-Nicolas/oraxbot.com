@@ -230,3 +230,16 @@ export async function startOraxPlusCheckout(
     );
   }
 }
+
+/**
+ * Move an active Orax Plus entitlement from the server it was purchased on
+ * to a different server the user admins. The backend only accepts the
+ * request when the purchase is less than 24 hours old and the caller has
+ * admin permissions on the destination server.
+ */
+export async function changeOraxPlusServer(guildId: string) {
+  return platformApi<{ result?: boolean; message?: string }>(
+    "change_orax_plus_server",
+    { guildId },
+  );
+}

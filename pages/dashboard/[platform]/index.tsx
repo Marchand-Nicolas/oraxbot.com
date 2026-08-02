@@ -19,11 +19,12 @@ import GuildIcon from "../../../components/GuildIcon";
 import HiddenMenu from "../../../components/ui/hiddenMenu";
 import { notify } from "../../../components/ui/NotificationSystem";
 import ActionModal from "../../../components/ui/ActionModal";
-import OraxPlusSuccessModal from "../../../components/ui/OraxPlusSuccessModal";
+import OraxPlusApplyModal from "../../../components/ui/OraxPlusApplyModal";
 import ErrorBoundary from "../../../components/ui/ErrorBoundary";
 import {
   startOraxPlusCheckout as startCheckout,
   startOraxPlusVote as startVote,
+  changeOraxPlusServer,
 } from "../../../utils/oraxPlus";
 import {
   setActiveTokenCookie,
@@ -106,12 +107,16 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
   const [refreshGuildDatas, setRefreshGuildDatas] = useState(false);
   const [isPollingOraxPlusVote, setIsPollingOraxPlusVote] = useState(false);
   const [showGroupLimitModal, setShowGroupLimitModal] = useState(false);
-  const [showOraxPlusSuccess, setShowOraxPlusSuccess] = useState(false);
+  const [showOraxPlusApply, setShowOraxPlusApply] = useState(false);
+  const [purchaseGuildId, setPurchaseGuildId] = useState<string>("");
+  const [isWaitingForActivation, setIsWaitingForActivation] = useState(false);
+  const [applySubmitting, setApplySubmitting] = useState(false);
   const [voteBaselineExpiresAt, setVoteBaselineExpiresAt] = useState<
     string | null
   >(null);
   const [lastLoadedGuildId, setLastLoadedGuildId] = useState("");
   const votePollAttemptsRef = useRef(0);
+  const activationPollAttemptsRef = useRef(0);
 
   // Mirror the auth hook's loaded data into local state so the rest of the
   // component (originally written with setUser/setGuilds calls) keeps working.
@@ -163,8 +168,19 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
     const params = new URLSearchParams(window.location.search);
     const oraxPlusResult = params.get("orax_plus");
     if (oraxPlusResult === "success") {
-      setShowOraxPlusSuccess(true);
-      setTimeout(() => setRefreshGuildDatas(true), 1500);
+      const guildFromUrl = params.get("guild");
+      if (guildFromUrl) {
+        setPurchaseGuildId(guildFromUrl);
+        setIsWaitingForActivation(true);
+      }
+      const cleaned = new URLSearchParams(window.location.search);
+      cleaned.delete("orax_plus");
+      const search = cleaned.toString();
+      const newUrl =
+        window.location.pathname +
+        (search ? `?${search}` : "") +
+        window.location.hash;
+      window.history.replaceState({}, "", newUrl);
     } else if (oraxPlusResult === "cancelled") {
       notify.error("Checkout cancelled", "Orax Plus was not activated.");
     }
@@ -199,6 +215,9 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
         permissions_new: "4398046511103",
       };
   }
+
+  const purchaseGuild =
+    activeGuilds.find((g) => g.id === purchaseGuildId) ?? undefined;
 
   const ownedGroupsCount = guildDatas.ownedGroups?.length || 0;
   const oraxPlus = guildDatas.oraxPlus;
@@ -291,6 +310,88 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
     oraxPlus?.entitlement?.expiresAt,
     voteBaselineExpiresAt,
   ]);
+
+  useEffect(() => {
+    if (!isWaitingForActivation || !purchaseGuildId) return;
+    if (guild?.id !== purchaseGuildId) {
+      setIsWaitingForActivation(false);
+      return;
+    }
+
+    activationPollAttemptsRef.current = 0;
+    setRefreshGuildDatas(true);
+
+    const intervalId = window.setInterval(() => {
+      activationPollAttemptsRef.current += 1;
+      setRefreshGuildDatas(true);
+
+      if (activationPollAttemptsRef.current >= 24) {
+        window.clearInterval(intervalId);
+        setIsWaitingForActivation(false);
+        notify.error(
+          "Activation taking longer than expected",
+          "Orax Plus should appear on the selected server within a minute or two. If it doesn't, please refresh the page or contact support.",
+          { duration: 8000 },
+        );
+      }
+    }, 5000);
+
+    return () => window.clearInterval(intervalId);
+  }, [guild?.id, isWaitingForActivation, purchaseGuildId]);
+
+  useEffect(() => {
+    if (!isWaitingForActivation) return;
+    if (guild?.id !== purchaseGuildId) return;
+
+    const status = guildDatas.oraxPlus;
+    if (!status?.active) return;
+    const source = status.entitlement?.source;
+    if (source !== "stripe" && source !== "stripe_lifetime") return;
+
+    setIsWaitingForActivation(false);
+    setShowOraxPlusApply(true);
+  }, [guild?.id, isWaitingForActivation, purchaseGuildId, guildDatas.oraxPlus]);
+
+  async function handleApplyConfirm(selectedGuildId: string) {
+    if (selectedGuildId === purchaseGuildId) {
+      setShowOraxPlusApply(false);
+      return;
+    }
+
+    setApplySubmitting(true);
+    try {
+      const res = await changeOraxPlusServer(selectedGuildId);
+      if (res?.result) {
+        notify.success(
+          "Orax Plus transferred",
+          "Your plan has been moved to the selected server.",
+        );
+        setShowOraxPlusApply(false);
+        setPurchaseGuildId("");
+        setBatchGuildDatas({});
+      } else {
+        notify.error(
+          "Transfer failed",
+          res?.message ||
+            "Unable to transfer Orax Plus to that server. Please try again or contact support.",
+        );
+      }
+    } catch (error) {
+      notify.error(
+        "Transfer failed",
+        error instanceof Error
+          ? error.message
+          : "Unable to transfer Orax Plus to that server. Please try again or contact support.",
+      );
+    } finally {
+      setApplySubmitting(false);
+    }
+  }
+
+  function handleApplyClose() {
+    if (applySubmitting) return;
+    setShowOraxPlusApply(false);
+  }
 
   useEffect(() => {
     if (!guild) return;
@@ -750,8 +851,15 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
           onClose={() => setShowGroupLimitModal(false)}
         />
       )}
-      {showOraxPlusSuccess && (
-        <OraxPlusSuccessModal onClose={() => setShowOraxPlusSuccess(false)} />
+      {showOraxPlusApply && purchaseGuild && (
+        <OraxPlusApplyModal
+          purchaseGuild={purchaseGuild}
+          adminGuilds={activeGuilds}
+          platform={platform}
+          submitting={applySubmitting}
+          onConfirm={handleApplyConfirm}
+          onClose={handleApplyClose}
+        />
       )}
       {loading && <Loading />}
     </>
