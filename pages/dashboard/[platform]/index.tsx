@@ -313,7 +313,12 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
 
   useEffect(() => {
     if (!isWaitingForActivation || !purchaseGuildId) return;
-    if (guild?.id !== purchaseGuildId) {
+    // Wait until the dashboard has resolved the active guild list — on the
+    // first render after returning from Stripe, `guild?.id` is still the
+    // empty-string fallback because `activeGuilds` hasn't been populated
+    // by `usePlatformAuth` yet.
+    if (!guild?.id) return;
+    if (guild.id !== purchaseGuildId) {
       setIsWaitingForActivation(false);
       return;
     }
@@ -341,7 +346,8 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
 
   useEffect(() => {
     if (!isWaitingForActivation) return;
-    if (guild?.id !== purchaseGuildId) return;
+    if (!guild?.id) return;
+    if (guild.id !== purchaseGuildId) return;
 
     const status = guildDatas.oraxPlus;
     if (!status?.active) return;
