@@ -109,7 +109,7 @@ export interface FilterRule {
   value: string;
 }
 
-export interface BannedUser {
+export interface MutedUser {
   id: string;
   username: string;
   avatar?: string;

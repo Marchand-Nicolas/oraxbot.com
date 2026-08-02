@@ -73,7 +73,7 @@
   white-space: nowrap;
 }
 
-.unbanButton {
+.unmuteButton {
   width: 38px !important;
   min-width: 38px;
   height: 38px;
@@ -96,18 +96,18 @@
   margin-left: auto;
 }
 
-.unbanButton:hover:not(:disabled) {
+.unmuteButton:hover:not(:disabled) {
   background: rgba(252, 81, 81, 0.28);
   color: #ffffff;
   transform: translateY(-1px);
 }
 
-.unbanButton:disabled {
+.unmuteButton:disabled {
   opacity: 0.65;
   cursor: wait;
 }
 
-.unbanButton svg {
+.unmuteButton svg {
   width: 18px;
   height: 18px;
 }
@@ -117,7 +117,7 @@
     grid-template-columns: 40px 1fr;
   }
 
-  .unbanButton {
+  .unmuteButton {
     justify-self: end;
     width: 38px !important;
     max-width: 38px;

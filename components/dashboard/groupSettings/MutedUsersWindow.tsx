@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import styles from "../../../styles/components/dashboard/groupSettings/bannedUsers.module.css";
+import styles from "../../../styles/components/dashboard/groupSettings/mutedUsers.module.css";
 import { platformApi } from "../../../utils/platformApi";
 import { notify } from "../../ui/NotificationSystem";
-import type { BannedUser } from "../../../types";
+import type { MutedUser } from "../../../types";
 
 const defaultAvatar = (userId: string): string => {
   try {
@@ -13,14 +13,14 @@ const defaultAvatar = (userId: string): string => {
   }
 };
 
-interface BannedUsersWindowProps {
+interface MutedUsersWindowProps {
   groupId?: string | string[];
   guildId?: string | string[];
 }
 
-const BannedUsersWindow = ({ groupId, guildId }: BannedUsersWindowProps) => {
+const MutedUsersWindow = ({ groupId, guildId }: MutedUsersWindowProps) => {
   const [loading, setLoading] = useState(true);
-  const [bannedUsers, setBannedUsers] = useState<BannedUser[]>([]);
+  const [mutedUsers, setMutedUsers] = useState<MutedUser[]>([]);
   const [removingUserId, setRemovingUserId] = useState("");
 
   useEffect(() => {
@@ -28,32 +28,32 @@ const BannedUsersWindow = ({ groupId, guildId }: BannedUsersWindowProps) => {
 
     let isMounted = true;
 
-    const loadBannedUsers = async () => {
+    const loadMutedUsers = async () => {
       setLoading(true);
 
       try {
-        const data = await platformApi<{ result?: boolean; bannedUsers?: BannedUser[]; error?: string }>(
-          "get_banned_users",
+        const data = await platformApi<{ result?: boolean; mutedUsers?: MutedUser[]; error?: string }>(
+          "get_muted_users",
           { guildId, groupId },
         );
 
         if (!data.result) {
-          throw new Error(data.error || "Unable to load banned users");
+          throw new Error(data.error || "Unable to load muted users");
         }
 
         if (isMounted) {
-          setBannedUsers(
-            Array.isArray(data.bannedUsers) ? data.bannedUsers : [],
+          setMutedUsers(
+            Array.isArray(data.mutedUsers) ? data.mutedUsers : [],
           );
         }
       } catch (error) {
-        console.error("Failed to load banned users:", error);
+        console.error("Failed to load muted users:", error);
         notify.error(
-          "Failed to load banned users",
-          "Unable to fetch the banned user list. Please try again.",
+          "Failed to load muted users",
+          "Unable to fetch the muted user list. Please try again.",
         );
         if (isMounted) {
-          setBannedUsers([]);
+          setMutedUsers([]);
         }
       } finally {
         if (isMounted) {
@@ -62,38 +62,38 @@ const BannedUsersWindow = ({ groupId, guildId }: BannedUsersWindowProps) => {
       }
     };
 
-    loadBannedUsers();
+    loadMutedUsers();
 
     return () => {
       isMounted = false;
     };
   }, [groupId, guildId]);
 
-  const unbanUser = async (userId: string) => {
+  const unmuteUser = async (userId: string) => {
     setRemovingUserId(userId);
 
     try {
       const data = await platformApi<{ result?: boolean; removed?: boolean; error?: string }>(
-        "remove_banned_user",
+        "remove_muted_user",
         { guildId, groupId, userId },
       );
 
       if (!data.result || !data.removed) {
-        throw new Error(data.error || "Unable to unban user");
+        throw new Error(data.error || "Unable to unmute user");
       }
 
-      setBannedUsers((currentUsers) =>
+      setMutedUsers((currentUsers) =>
         currentUsers.filter((user) => user.id !== userId),
       );
       notify.success(
-        "User unbanned",
-        "The user has been removed from the ban list.",
+        "User unmuted",
+        "The user has been removed from the mute list.",
       );
     } catch (error) {
-      console.error("Failed to unban user:", error);
+      console.error("Failed to unmute user:", error);
       notify.error(
-        "Failed to unban user",
-        "Unable to remove that user from the ban list. Please try again.",
+        "Failed to unmute user",
+        "Unable to remove that user from the mute list. Please try again.",
       );
     } finally {
       setRemovingUserId("");
@@ -103,17 +103,17 @@ const BannedUsersWindow = ({ groupId, guildId }: BannedUsersWindowProps) => {
   return (
     <div className={styles.window}>
       <p className={styles.description}>
-        Manage the users banned from this group. Use the trash icon to unban
+        Manage the users muted in this group. Use the trash icon to unmute
         them.
       </p>
 
       {loading ? (
-        <div className={styles.state}>Loading banned users...</div>
-      ) : bannedUsers.length === 0 ? (
-        <div className={styles.state}>No users are currently banned.</div>
+        <div className={styles.state}>Loading muted users...</div>
+      ) : mutedUsers.length === 0 ? (
+        <div className={styles.state}>No users are currently muted.</div>
       ) : (
         <div className={styles.list}>
-          {bannedUsers.map((user) => {
+          {mutedUsers.map((user) => {
             const avatar = user.avatar
               ? user.avatar.startsWith("http")
                 ? user.avatar
@@ -136,10 +136,10 @@ const BannedUsersWindow = ({ groupId, guildId }: BannedUsersWindowProps) => {
                 </div>
                 <button
                   type="button"
-                  className={styles.unbanButton}
-                  onClick={() => unbanUser(user.id)}
+                  className={styles.unmuteButton}
+                  onClick={() => unmuteUser(user.id)}
                   disabled={removingUserId === user.id}
-                  aria-label={`Unban ${user.username}`}
+                  aria-label={`Unmute ${user.username}`}
                 >
                   <svg
                     fill="none"
@@ -150,7 +150,7 @@ const BannedUsersWindow = ({ groupId, guildId }: BannedUsersWindowProps) => {
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      d="M6 7h12m-1 0-.867 12.142A2.25 2.25 0 0 1 13.893 21H10.11a2.25 2.25 0 0 1-2.24-1.858L7 7m3-3h4m-4 0a1 1 0 0 0-1 1v1h6V5a1 1 0 0 0-1-1m-4 0h4m-6 4h8"
+                      d="M6 7h12m-1 0-.867 12.142A2 2 0 0 1 13.893 21H10.11a2 2 0 0 1-2.24-1.858L7 7m3-3h4m-4 0a1 1 0 0 0-1 1v1h6V5a1 1 0 0 0-1-1m-4 0h4m-6 4h8"
                     />
                   </svg>
                 </button>
@@ -163,4 +163,4 @@ const BannedUsersWindow = ({ groupId, guildId }: BannedUsersWindowProps) => {
   );
 };
 
-export default BannedUsersWindow;
+export default MutedUsersWindow;

@@ -9,7 +9,7 @@ import { useRouter } from "next/router";
 import React, { useEffect, useState, type ChangeEvent } from "react";
 import Filters from "./settings/filters";
 import TextField from "./settings/textField";
-import BannedUsersWindow from "./BannedUsersWindow";
+import MutedUsersWindow from "./MutedUsersWindow";
 
 const updateDisableUserWarningMessage = (
   e: ChangeEvent<HTMLInputElement>,
@@ -339,8 +339,8 @@ const ModernAdvancedSettings = () => {
               <button
                 onClick={() =>
                   popup(
-                    "Banned users",
-                    <BannedUsersWindow groupId={groupId} guildId={guildId} />,
+                    "Muted users",
+                    <MutedUsersWindow groupId={groupId} guildId={guildId} />,
                     "default",
                     {
                       close: true,
@@ -350,7 +350,7 @@ const ModernAdvancedSettings = () => {
                 }
                 className="button round normal"
               >
-                View banned users
+                View muted users
               </button>
             </div>
           </div>
