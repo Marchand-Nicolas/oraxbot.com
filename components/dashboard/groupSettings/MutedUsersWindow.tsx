@@ -4,6 +4,7 @@ import styles from "../../../styles/components/dashboard/groupSettings/mutedUser
 import { platformApi } from "../../../utils/platformApi";
 import { notify } from "../../ui/NotificationSystem";
 import type { MutedUser } from "../../../types";
+import { t } from "../../../utils/i18n";
 
 const defaultAvatar = (userId: string): string => {
   try {
@@ -49,8 +50,8 @@ const MutedUsersWindow = ({ groupId, guildId }: MutedUsersWindowProps) => {
       } catch (error) {
         console.error("Failed to load muted users:", error);
         notify.error(
-          "Failed to load muted users",
-          "Unable to fetch the muted user list. Please try again.",
+          t("mutedUsers.loadFailedTitle"),
+          t("mutedUsers.loadFailedDesc"),
         );
         if (isMounted) {
           setMutedUsers([]);
@@ -86,14 +87,14 @@ const MutedUsersWindow = ({ groupId, guildId }: MutedUsersWindowProps) => {
         currentUsers.filter((user) => user.id !== userId),
       );
       notify.success(
-        "User unmuted",
-        "The user has been removed from the mute list.",
+        t("mutedUsers.unmutedTitle"),
+        t("mutedUsers.unmutedDesc"),
       );
     } catch (error) {
       console.error("Failed to unmute user:", error);
       notify.error(
-        "Failed to unmute user",
-        "Unable to remove that user from the mute list. Please try again.",
+        t("mutedUsers.unmuteFailedTitle"),
+        t("mutedUsers.unmuteFailedDesc"),
       );
     } finally {
       setRemovingUserId("");
@@ -103,14 +104,13 @@ const MutedUsersWindow = ({ groupId, guildId }: MutedUsersWindowProps) => {
   return (
     <div className={styles.window}>
       <p className={styles.description}>
-        Manage the users muted in this group. Use the trash icon to unmute
-        them.
+        {t("mutedUsers.desc")}
       </p>
 
       {loading ? (
-        <div className={styles.state}>Loading muted users...</div>
+        <div className={styles.state}>{t("mutedUsers.loading")}</div>
       ) : mutedUsers.length === 0 ? (
-        <div className={styles.state}>No users are currently muted.</div>
+        <div className={styles.state}>{t("mutedUsers.empty")}</div>
       ) : (
         <div className={styles.list}>
           {mutedUsers.map((user) => {

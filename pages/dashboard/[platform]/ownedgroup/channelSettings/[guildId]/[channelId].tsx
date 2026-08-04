@@ -13,6 +13,12 @@ import {
 } from "../../../../../../utils/apiClient";
 import { getPlatform } from "../../../../../../utils/platforms";
 import { platformApi } from "../../../../../../utils/platformApi";
+import {
+  getLanguageByIndex,
+  setGlobalLanguage,
+  t,
+} from "../../../../../../utils/i18n";
+import { LanguageProvider } from "../../../../../../hooks/useLanguage";
 
 type TranslationLanguageOption = {
   name: string;
@@ -39,6 +45,7 @@ export default function ChannelSettings() {
   const guildIcon = params.get("icon");
   const groupId = params.get("groupId") || undefined;
   const [translationEnabled, setTranslationEnabled] = useState(false);
+  const [lang, setLang] = useState<"en" | "es" | "fr">("en");
   const [translationLanguageOptions, setTranslationLanguageOptions] = useState<
     TranslationLanguageOption[]
   >(fallbackTranslationLanguageOptions);
@@ -61,6 +68,19 @@ export default function ChannelSettings() {
         setTranslationEnabled(!!data.translation);
       });
   }, [groupId, guildId, platform]);
+
+  useEffect(() => {
+    if (!guildId) return;
+    platformApi<{ settings?: { lang?: number } }>("get_server_data", {
+      guildId,
+    })
+      .then((data) => {
+        const resolved = getLanguageByIndex(data.settings?.lang ?? 0);
+        setLang(resolved);
+        setGlobalLanguage(resolved);
+      })
+      .catch(() => undefined);
+  }, [guildId]);
 
   useEffect(() => {
     fetch(`${config.apiV2}get_translation_languages`)
@@ -99,7 +119,7 @@ export default function ChannelSettings() {
       : null;
 
   return (
-    <>
+    <LanguageProvider lang={lang}>
       <div
         style={{
           backgroundImage: backgroundIconUrl
@@ -109,24 +129,24 @@ export default function ChannelSettings() {
         className={dashboardStyles.background}
       />
       <div className={groupStyles.page}>
-        <BackButton buttonName="Channel settings" />
+        <BackButton buttonName={t("channelSettings.backButton")} />
         <div className={groupStyles.settingsContainer}>
           <div className={groupStyles.settingsGrid}>
             <div className={groupStyles.settingsColumn}>
               <h3 className={groupStyles.sectionTitle}>
-                Channel configuration
+                {t("channelSettings.channelConfig")}
               </h3>
               <div className={groupStyles.settingItem}>
                 <OptionsField
-                  label="Message direction"
-                  description="Incoming only: receive messages from the interserver, but do not send messages from this channel to others. Outgoing only: send messages from this channel to the interserver, but do not receive messages here."
+                  label={t("channelSettings.messageDirection")}
+                  description={t("channelSettings.messageDirectionDesc")}
                   fieldName="messageDirection"
                   guildId={guildId}
                   channelId={channelId}
                   options={[
-                    { name: "All messages (default)", value: "allMessages" },
-                    { name: "Incoming only", value: "incomingOnly" },
-                    { name: "Outgoing only", value: "outgoingOnly" },
+                    { name: t("channelSettings.directionAll"), value: "allMessages" },
+                    { name: t("channelSettings.directionIncoming"), value: "incomingOnly" },
+                    { name: t("channelSettings.directionOutgoing"), value: "outgoingOnly" },
                   ]}
                 />
               </div>
@@ -134,8 +154,8 @@ export default function ChannelSettings() {
               {translationEnabled && (
                 <div className={groupStyles.settingItem}>
                   <OptionsField
-                    label="Translation language"
-                    description="Auto translate is enabled, so all messages sent to this channel will be translated to the selected language. Need another language? Don't hesitate to contact support and we'll add it for you."
+                    label={t("channelSettings.translationLanguage")}
+                    description={t("channelSettings.translationLanguageDesc")}
                     fieldName="translationLanguage"
                     groupId={groupId}
                     guildId={guildId}
@@ -147,7 +167,7 @@ export default function ChannelSettings() {
             </div>
 
             <div className={groupStyles.settingsColumn}>
-              <HiddenMenu title={"Override group settings"}>
+              <HiddenMenu title={t("channelSettings.overrideGroup")}>
                 <ChannelDisableWarningMessage
                   guildId={guildId}
                   channelId={channelId}
@@ -157,6 +177,6 @@ export default function ChannelSettings() {
           </div>
         </div>
       </div>
-    </>
+    </LanguageProvider>
   );
 }

@@ -7,6 +7,7 @@ import {
   getPlatform,
   getPlatformByType,
 } from "../../../utils/platforms";
+import { t } from "../../../utils/i18n";
 
 interface ChannelButtonProps {
   channel: LinkedChannel;
@@ -102,8 +103,7 @@ const ChannelButton = ({
       </div>
       {!available && (
         <span className={styles.tooltip}>
-          The bot is no longer present on this server or this channel no longer
-          exists
+          {t("groups.botMissingTooltip")}
         </span>
       )}
     </div>

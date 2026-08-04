@@ -34,6 +34,13 @@ import { getPlatform, type PlatformConfig } from "../../../utils/platforms";
 import { platformApi } from "../../../utils/platformApi";
 import config from "../../../utils/config.json";
 import { usePlatformAuth } from "../../../hooks/usePlatformAuth";
+import {
+  getLanguageByIndex,
+  setGlobalLanguage,
+  getVoteLabel,
+  t as tt,
+} from "../../../utils/i18n";
+import { LanguageProvider } from "../../../hooks/useLanguage";
 
 function formatRemainingPlanTime(expiresAt?: string | null) {
   if (!expiresAt) return null;
@@ -42,7 +49,7 @@ function formatRemainingPlanTime(expiresAt?: string | null) {
   if (Number.isNaN(expiresAtTime)) return null;
 
   const remainingMs = expiresAtTime - Date.now();
-  if (remainingMs <= 0) return "less than a minute";
+  if (remainingMs <= 0) return tt("time.lessThanMinute");
 
   const minute = 60 * 1000;
   const hour = 60 * minute;
@@ -50,16 +57,22 @@ function formatRemainingPlanTime(expiresAt?: string | null) {
 
   if (remainingMs >= day) {
     const days = Math.ceil(remainingMs / day);
-    return `${days} day${days === 1 ? "" : "s"}`;
+    return days === 1
+      ? tt("time.oneDay", { count: days })
+      : tt("time.multipleDays", { count: days });
   }
 
   if (remainingMs >= hour) {
     const hours = Math.ceil(remainingMs / hour);
-    return `${hours} hour${hours === 1 ? "" : "s"}`;
+    return hours === 1
+      ? tt("time.oneHour", { count: hours })
+      : tt("time.multipleHours", { count: hours });
   }
 
   const minutes = Math.ceil(remainingMs / minute);
-  return `${minutes} minute${minutes === 1 ? "" : "s"}`;
+  return minutes === 1
+    ? tt("time.oneMinute", { count: minutes })
+    : tt("time.multipleMinutes", { count: minutes });
 }
 
 /**
@@ -182,7 +195,7 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
         window.location.hash;
       window.history.replaceState({}, "", newUrl);
     } else if (oraxPlusResult === "cancelled") {
-      notify.error("Checkout cancelled", "Orax Plus was not activated.");
+      notify.error(tt("notifications.checkoutCancelledTitle"), tt("notifications.checkoutCancelledDesc"));
     }
   }, []);
 
@@ -224,6 +237,11 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
   const groupLimit = oraxPlus?.limits?.groupsPerGuild || 2;
   const channelLimit = oraxPlus?.limits?.channelsPerGroup || 5;
   const voteProvider = platform.vote;
+  const lang = getLanguageByIndex(settings.lang ?? 0);
+  setGlobalLanguage(lang);
+  const voteLabelText = voteProvider
+    ? getVoteLabel(lang, voteProvider.provider)
+    : "";
   const voteSource =
     voteProvider?.provider === "fluxerlist" ? "fluxerlist_vote" : "topgg_vote";
   const votePlanExpiresIn =
@@ -266,8 +284,8 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
         setIsPollingOraxPlusVote(false);
         setVoteBaselineExpiresAt(null);
         notify.error(
-          "Vote not detected yet",
-          "Top.gg may still be processing the vote. Refresh the dashboard in a moment if Orax Plus does not appear.",
+          tt("oraxPlus.voteNotDetectedTitle"),
+          tt("oraxPlus.voteNotDetectedDesc", { context: tt("nav.support").toLowerCase() }),
           { duration: 8000 },
         );
       }
@@ -297,10 +315,10 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
       setIsPollingOraxPlusVote(false);
       setVoteBaselineExpiresAt(null);
       notify.success(
-        "Orax Plus activated",
+        tt("oraxPlus.activatedTitle"),
         voteBaselineExpiresAt
-          ? "Your Top.gg vote extended this server's plan."
-          : "Your Top.gg vote was applied to this server.",
+          ? tt("oraxPlus.activatedExtendedDesc")
+          : tt("oraxPlus.activatedNewDesc"),
       );
     }
   }, [
@@ -334,8 +352,8 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
         window.clearInterval(intervalId);
         setIsWaitingForActivation(false);
         notify.error(
-          "Activation taking longer than expected",
-          "Orax Plus should appear on the selected server within a minute or two. If it doesn't, please refresh the page or contact support.",
+          tt("oraxPlus.activationTimeoutTitle"),
+          tt("oraxPlus.activationTimeoutDesc"),
           { duration: 8000 },
         );
       }
@@ -369,25 +387,24 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
       const res = await changeOraxPlusServer(selectedGuildId);
       if (res?.result) {
         notify.success(
-          "Orax Plus transferred",
-          "Your plan has been moved to the selected server.",
+          tt("oraxPlus.transferTitle"),
+          tt("oraxPlus.transferDesc"),
         );
         setShowOraxPlusApply(false);
         setPurchaseGuildId("");
         setBatchGuildDatas({});
       } else {
         notify.error(
-          "Transfer failed",
-          res?.message ||
-            "Unable to transfer Orax Plus to that server. Please try again or contact support.",
+          tt("oraxPlus.transferFailedTitle"),
+          res?.message || tt("oraxPlus.transferFailedDesc"),
         );
       }
     } catch (error) {
       notify.error(
-        "Transfer failed",
+        tt("oraxPlus.transferFailedTitle"),
         error instanceof Error
           ? error.message
-          : "Unable to transfer Orax Plus to that server. Please try again or contact support.",
+          : tt("oraxPlus.transferFailedDesc"),
       );
     } finally {
       setApplySubmitting(false);
@@ -437,8 +454,8 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
             setGuildDatas({});
             setSettings({});
             notify.error(
-              "Server Data Error",
-              "Unable to load server configuration. Some features may not work properly.",
+              tt("notifications.serverDataErrorTitle"),
+              tt("notifications.serverDataErrorDesc"),
               { duration: 8000 },
             );
           }
@@ -447,8 +464,8 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
           setGuildDatas({});
           setSettings({});
           notify.error(
-            "Server Data Error",
-            "Unable to load server configuration. Some features may not work properly.",
+            tt("notifications.serverDataErrorTitle"),
+            tt("notifications.serverDataErrorDesc"),
             { duration: 8000 },
           );
         });
@@ -458,7 +475,7 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
   const backgroundImage = platform.getGuildBackgroundUrl(guild);
 
   return (
-    <>
+    <LanguageProvider lang={lang}>
       {activeUser && <UserMenu user={activeUser} platform={platform} />}
       <div
         style={{
@@ -516,9 +533,9 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
         <div className={styles.actionsContainer}>
           <a href={platform.supportUrl} target="_blank" rel="noreferrer">
             <button className={styles.button}>
-              Support{" "}
+              {tt("nav.support")}{" "}
               <strong>
-                <svg
+<svg
                   fill="none"
                   viewBox="0 0 24 24"
                   strokeWidth={1.5}
@@ -541,7 +558,7 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
                 rel="noreferrer"
               >
                 <button className={styles.button}>
-                  Tip ❤️{" "}
+                  {tt("nav.tip")} ❤️{" "}
                   <strong>
                     <svg
                       fill="none"
@@ -579,7 +596,7 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
                 }}
                 className={styles.button}
               >
-                Create an interserver group
+                {tt("nav.createGroup")}
                 <strong>
                   <svg
                     fill="none"
@@ -597,7 +614,7 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
               </button>
               <Link href="/explore" target="_blank" rel="noreferrer">
                 <button className={styles.button}>
-                  Explore groups
+                  {tt("nav.exploreGroups")}
                   <strong>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -622,18 +639,7 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
               onClick={() => {
                 const inviteUrl = platform.getInviteUrl(guild.id);
                 if (!inviteUrl) return;
-                popup("Invite the bot", `Warning`, "warning", {
-                  content: (
-                    <p className="content">
-                      It is necessary for Orax to access the content of the
-                      messages in order to synchronize them between channels. By
-                      inviting Orax, it will be able to read all the messages of
-                      your server.<br></br>
-                      For security and privacy reasons, we suggest you to give
-                      it the permission to read the messages only in the
-                      channels it is used in.
-                    </p>
-                  ),
+                popup(tt("nav.inviteBotWarningTitle"), tt("nav.inviteBotWarningBody"), "warning", {
                   icon: meteor,
                   action: function () {
                     window.open(inviteUrl);
@@ -666,20 +672,24 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
             <section className={styles.oraxPlusPanel}>
               <div>
                 <span className={styles.planBadge}>
-                  {oraxPlus?.active ? "Orax Plus" : "Free plan"}
+                  {oraxPlus?.active ? tt("oraxPlus.badgeActive") : tt("oraxPlus.badgeFree")}
                 </span>
-                <h2>Orax Plus</h2>
+                <h2>{tt("oraxPlus.title")}</h2>
                 <p>
                   {oraxPlus?.active
-                    ? "This server has the extended Orax Plus limits, auto-translate, the /resync command, and priority message delivery."
+                    ? tt("oraxPlus.activeDesc")
                     : voteProvider
-                      ? `Vote for free on ${voteProvider.provider === "fluxerlist" ? "Fluxerlist" : "Top.gg"}, subscribe monthly, or buy lifetime to unlock higher limits, auto-translate, /resync, and priority message delivery.`
-                      : "Subscribe monthly or buy lifetime to unlock higher limits, auto-translate, /resync, and priority message delivery."}
+                      ? tt("oraxPlus.freeDescVote", {
+                          provider:
+                            voteProvider.provider === "fluxerlist"
+                              ? "Fluxerlist"
+                              : "Top.gg",
+                        })
+                      : tt("oraxPlus.freeDescNoVote")}
                 </p>
                 {votePlanExpiresIn && (
                   <p className={styles.planRenewalNote}>
-                    Expires in {votePlanExpiresIn}, vote again to extend your
-                    plan.
+                    {tt("oraxPlus.voteExpiresIn", { time: votePlanExpiresIn })}
                   </p>
                 )}
               </div>
@@ -688,11 +698,11 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
                   <strong>
                     {ownedGroupsCount}/{groupLimit}
                   </strong>
-                  <span>owned groups</span>
+                  <span>{tt("oraxPlus.ownedGroups")}</span>
                 </div>
                 <div>
                   <strong>{channelLimit}</strong>
-                  <span>channels per group</span>
+                  <span>{tt("oraxPlus.channelsPerGroup")}</span>
                 </div>
               </div>
               {showOraxPlusActions && (
@@ -702,33 +712,33 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
                       className={styles.secondaryButton}
                       onClick={startOraxPlusVote}
                     >
-                      {voteProvider.label}
+                      {voteLabelText}
                     </button>
                   )}
                   <button
                     className={styles.primaryButton}
                     onClick={() => startOraxPlusCheckout("monthly")}
                   >
-                    {`Subscribe $${config.oraxPlusMonthlyPrice}/mo`}
+                    {tt("oraxPlus.subscribe", { price: config.oraxPlusMonthlyPrice })}
                   </button>
                   <button
                     className={styles.primaryButton}
                     onClick={() => startOraxPlusCheckout("lifetime")}
                   >
-                    Lifetime $19.99
+                    {tt("oraxPlus.lifetime")}
                   </button>
                 </div>
               )}
               <p className={styles.planFootnote}>
-                15-day refund guarantee. Need to move Orax Plus to another
-                server? <a href="mailto:support@oraxbot.com">Contact support</a>{" "}
-                to transfer it anytime.
+                {tt("oraxPlus.footnotePrefix")}
+                <a href="mailto:support@oraxbot.com">{tt("oraxPlus.footnoteLink")}</a>{" "}
+                {tt("oraxPlus.footnoteSuffix")}
               </p>
             </section>
             <ErrorBoundary>
               {guildDatas.ownedGroups && guildDatas.ownedGroups.length ? (
                 <section className={styles.groupContainer}>
-                  <h2>📺 Owned groups</h2>
+                  <h2>📺 {tt("groups.ownedTitle")}</h2>
                   <div className="line wrap gap-1">
                     {guildDatas.ownedGroups?.map((group) => (
                       <Link
@@ -743,12 +753,12 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
               ) : (
                 <section className={styles.emptyGroupContainer}>
                   <h2>
-                    This server does not own any group. You can either create
-                    one or explore groups{" "}
+                    {tt("groups.emptyTitle")}{" "}
+                    {tt("groups.emptyDescPrefix")}
                     <Link className="underline" href="/explore">
-                      here
+                      {tt("groups.emptyDescLink")}
                     </Link>
-                    .
+                    {tt("groups.emptyDescSuffix")}
                   </h2>
                 </section>
               )}
@@ -762,17 +772,15 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
                 setSettings={setSettings}
               />
             </ErrorBoundary>
-            <HiddenMenu title="🚫 Service limits">
+            <HiddenMenu title={`🚫 ${tt("serviceLimits.title")}`}>
               <section className={styles.section}>
-                <p className="hint">
-                  Free servers can own up to 2 groups and link up to 5 channels
-                  per group. Orax Plus raises this server to 100 groups and 50
-                  channels per group, and unlocks auto-translate, priority
-                  message delivery, and the &apos;/resync&apos; command.
-                </p>
+                <p className="hint">{tt("serviceLimits.desc")}</p>
                 <div className="line wrap">
                   <p>
-                    {ownedGroupsCount}/{groupLimit} owned groups
+                    {tt("serviceLimits.ownedGroupsProgress", {
+                      owned: ownedGroupsCount,
+                      limit: groupLimit,
+                    })}
                   </p>
                   <div className={[styles.progress, "progress"].join(" ")}>
                     <div
@@ -788,8 +796,11 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
                 {guildDatas.ownedGroups?.map((group) => (
                   <div key={"group_" + group.id} className="line wrap">
                     <p>
-                      {group.name} : {group.linkedChannels.length || "0"}/
-                      {channelLimit} connected channels
+                      {tt("serviceLimits.channelsProgress", {
+                        name: group.name,
+                        count: group.linkedChannels.length || 0,
+                        limit: channelLimit,
+                      })}
                     </p>
                     <div className={[styles.progress, "progress"].join(" ")}>
                       <div
@@ -815,20 +826,19 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
       </div>
       {showGroupLimitModal && (
         <ActionModal
-          title="Group limit reached"
+          title={tt("oraxPlus.groupLimitTitle")}
           description={
             <p>
-              This server has reached its current group quota.
               {voteProvider
-                ? ` ${voteProvider.label} or subscribe to Orax Plus to unlock more interserver groups.`
-                : " Subscribe to Orax Plus to unlock more interserver groups."}
+                ? tt("oraxPlus.groupLimitDesc", { vote: voteLabelText })
+                : tt("oraxPlus.groupLimitDescNoVote").trim()}
             </p>
           }
           actions={[
             ...(voteProvider
               ? [
                   {
-                    label: voteProvider.label,
+                    label: voteLabelText,
                     variant: "secondary" as const,
                     onClick: () => {
                       setShowGroupLimitModal(false);
@@ -838,7 +848,7 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
                 ]
               : []),
             {
-              label: `Subscribe $${config.oraxPlusMonthlyPrice}/mo`,
+              label: tt("oraxPlus.subscribe", { price: config.oraxPlusMonthlyPrice }),
               variant: "primary" as const,
               onClick: () => {
                 setShowGroupLimitModal(false);
@@ -846,7 +856,7 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
               },
             },
             {
-              label: "Lifetime $19.99",
+              label: tt("oraxPlus.lifetime"),
               variant: "primary" as const,
               onClick: () => {
                 setShowGroupLimitModal(false);
@@ -868,6 +878,6 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
         />
       )}
       {loading && <Loading />}
-    </>
+    </LanguageProvider>
   );
 }

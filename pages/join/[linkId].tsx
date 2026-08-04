@@ -12,6 +12,7 @@ import ActionModal from "../../components/ui/ActionModal";
 import GuildIcon from "../../components/GuildIcon";
 import { openTopggVote, startOraxPlusCheckout } from "../../utils/oraxPlus";
 import type { Channel, DiscordGuild, DiscordUser } from "../../types";
+import { t } from "../../utils/i18n";
 
 interface ChannelLimitData {
   current: number;
@@ -337,7 +338,7 @@ export default function JoinGroup() {
 
               <div style={{ marginTop: "16px" }}>
                 <p style={{ fontWeight: 600, marginBottom: "4px" }}>
-                  Vote on Top.gg
+                  {t("vote.topgg")}
                 </p>
                 <p style={{ fontSize: "14px", opacity: 0.8 }}>
                   Vote for Orax on Top.gg to join this group right away, even
@@ -363,7 +364,7 @@ export default function JoinGroup() {
           }
           actions={[
             {
-              label: "Vote on Top.gg",
+              label: t("vote.topgg"),
               variant: "primary",
               onClick: () => {
                 setShowChannelLimitModal(false);

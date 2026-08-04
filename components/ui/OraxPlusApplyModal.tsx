@@ -7,6 +7,7 @@ import GuildIcon from "../GuildIcon";
 import styles from "../../styles/components/ui/OraxPlusApplyModal.module.css";
 import type { Guild } from "../../types";
 import type { PlatformConfig } from "../../utils/platforms/types";
+import { t } from "../../utils/i18n";
 
 const CONFETTI_COLORS = ["#00a1e8", "#8151fc", "#ffffff", "#ffd166"];
 
@@ -142,8 +143,8 @@ export default function OraxPlusApplyModal({
           </div>
           <h2 id="orax-apply-title">
             {isUnchanged
-              ? "Apply Orax Plus to this server?"
-              : "Are you sure you want to apply Orax Plus to this server?"}
+              ? t("oraxPlus.applySameTitle")
+              : t("oraxPlus.applyDifferentTitle")}
           </h2>
           <div className={styles.targetServer}>
             <GuildIcon
@@ -154,15 +155,13 @@ export default function OraxPlusApplyModal({
             <span className={styles.guildName}>{selectedGuild.name}</span>
           </div>
           <p className={styles.subtitle}>
-            Orax Plus was activated on <strong>{purchaseGuild.name}</strong>.
-            {canTransfer
-              ? " Pick a different server below if you'd rather use it there."
-              : ""}
+            {t("oraxPlus.applySubtitle", { server: purchaseGuild.name })}
+            {canTransfer ? t("oraxPlus.applySubtitleTransfer") : ""}
           </p>
           {canTransfer && (
             <label className={styles.selectWrapper}>
               <span className={styles.selectLabel}>
-                Transfer to a different server
+                {t("oraxPlus.applyTransferLabel")}
               </span>
               <select
                 className={styles.select}
@@ -171,7 +170,7 @@ export default function OraxPlusApplyModal({
                 disabled={submitting}
               >
                 <option value={purchaseGuild.id}>
-                  {purchaseGuild.name} (current)
+                  {purchaseGuild.name} {t("oraxPlus.applyCurrent")}
                 </option>
                 {otherGuilds.map((g) => (
                   <option key={g.id} value={g.id}>
@@ -188,10 +187,10 @@ export default function OraxPlusApplyModal({
             disabled={submitting}
           >
             {submitting
-              ? "Applying..."
+              ? t("oraxPlus.applying")
               : isUnchanged
-                ? "Continue"
-                : "Apply to this server"}
+                ? t("oraxPlus.applyContinue")
+                : t("oraxPlus.applyToServer")}
           </button>
         </section>
       </div>

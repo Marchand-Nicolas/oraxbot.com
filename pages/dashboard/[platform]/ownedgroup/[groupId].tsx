@@ -22,6 +22,12 @@ import {
 } from "../../../../utils/apiClient";
 import { getPlatform } from "../../../../utils/platforms";
 import { platformApi } from "../../../../utils/platformApi";
+import {
+  getLanguageByIndex,
+  setGlobalLanguage,
+  t,
+} from "../../../../utils/i18n";
+import { LanguageProvider } from "../../../../hooks/useLanguage";
 
 export default function OwnedGroup() {
   const router = useRouter();
@@ -32,6 +38,7 @@ export default function OwnedGroup() {
   const [channels, setChannels] = useState<LinkedChannel[]>([]);
   const [oraxPlus, setOraxPlus] = useState<OraxPlusStatus | undefined>();
   const [loading, setLoading] = useState(true);
+  const [lang, setLang] = useState<"en" | "es" | "fr">("en");
   const [copied, setCopied] = useState(false);
   const [isPollingOraxPlusVote, setIsPollingOraxPlusVote] = useState(false);
   const votePollAttemptsRef = useRef(0);
@@ -102,6 +109,19 @@ export default function OwnedGroup() {
   }, [groupId, guildId, platform]);
 
   useEffect(() => {
+    if (!guildId) return;
+    platformApi<{ settings?: { lang?: number } }>("get_server_data", {
+      guildId,
+    })
+      .then((data) => {
+        const resolved = getLanguageByIndex(data.settings?.lang ?? 0);
+        setLang(resolved);
+        setGlobalLanguage(resolved);
+      })
+      .catch(() => undefined);
+  }, [guildId]);
+
+  useEffect(() => {
     if (!isPollingOraxPlusVote || !guildId) return;
 
     votePollAttemptsRef.current = 0;
@@ -115,8 +135,8 @@ export default function OwnedGroup() {
         window.clearInterval(intervalId);
         setIsPollingOraxPlusVote(false);
         notify.error(
-          "Vote not detected yet",
-          "Top.gg may still be processing the vote. Refresh this page in a moment if Orax Plus does not appear.",
+          t("oraxPlus.voteNotDetectedTitle"),
+          t("oraxPlus.voteNotDetectedDesc", { context: t("common.okay").toLowerCase() }),
           { duration: 8000 },
         );
       }
@@ -130,8 +150,8 @@ export default function OwnedGroup() {
 
     setIsPollingOraxPlusVote(false);
     notify.success(
-      "Orax Plus activated",
-      "Your Top.gg vote was applied to this server.",
+      t("oraxPlus.activatedTitle"),
+      t("oraxPlus.activatedNewDesc"),
     );
   }, [isPollingOraxPlusVote, oraxPlus?.active]);
 
@@ -149,7 +169,7 @@ export default function OwnedGroup() {
       : null;
 
   return (
-    <>
+    <LanguageProvider lang={lang}>
       <div
         style={{
           backgroundImage: backgroundIconUrl
@@ -189,14 +209,14 @@ export default function OwnedGroup() {
               ) : (
                 <div className={styles.inviteLinkSection}>
                   <div className={styles.inviteLinkRow}>
-                    <p style={{ margin: 0, fontWeight: "600" }}>Invite link:</p>
+                    <p style={{ margin: 0, fontWeight: "600" }}>{t("groups.inviteLink")}</p>
                     <a
                       className={styles.inviteLink}
                       href={link ? link : "#"}
                       target="_blank"
                       rel="noreferrer"
                     >
-                      {link ? link : "No invitation link found"}
+                      {link ? link : t("groups.noInviteLink")}
                     </a>
                     <svg
                       onClick={() => {
@@ -226,7 +246,7 @@ export default function OwnedGroup() {
                     </svg>
                     {copied && (
                       <span style={{ color: "#4ade80", fontWeight: "600" }}>
-                        Copied!
+                        {t("groups.copied")}
                       </span>
                     )}
                   </div>
@@ -256,7 +276,7 @@ export default function OwnedGroup() {
                 }
                 className={styles.regenerateInviteLink}
               >
-                Regenerate invite link
+                {t("groups.regenerateInvite")}
               </button>
             )}
           </div>
@@ -266,7 +286,7 @@ export default function OwnedGroup() {
         {(channels.length || loading) && (
           <div className={styles.channelsSection}>
             <h2 style={{ margin: "0 0 16px 0", color: "#ffffff" }}>
-              Linked channels
+              {t("groups.linkedChannels")}
             </h2>
             {loading ? (
               <div className={styles.channelsGrid}>
@@ -303,10 +323,10 @@ export default function OwnedGroup() {
               style={{ textAlign: "center", padding: "40px" }}
             >
               <h2 style={{ color: "#ffffff", marginBottom: "16px" }}>
-                No channels linked to this group
+                {t("groups.noChannelsTitle")}
               </h2>
               <p style={{ color: "#cccccc", margin: 0 }}>
-                Use or share the invite link to start adding more channels
+                {t("groups.noChannelsDesc")}
               </p>
             </div>
           </div>
@@ -347,7 +367,7 @@ export default function OwnedGroup() {
             target="_blank"
             rel="noreferrer"
           >
-            Suggest a feature
+            {t("groups.suggestFeature")}
           </a>
           <span> • </span>
           <a
@@ -355,14 +375,14 @@ export default function OwnedGroup() {
             target="_blank"
             rel="noreferrer"
           >
-            Tip
+            {t("nav.tip")}
           </a>
           <span> • </span>
           <a href="https://docs.oraxbot.com" target="_blank" rel="noreferrer">
-            Docs
+            {t("groups.docs")}
           </a>
         </footer>
       </div>
-    </>
+    </LanguageProvider>
   );
 }

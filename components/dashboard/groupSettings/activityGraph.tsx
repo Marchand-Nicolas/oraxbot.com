@@ -4,6 +4,7 @@ import type { ApexOptions } from "apexcharts";
 import { useRouter } from "next/router";
 import { platformApi } from "../../../utils/platformApi";
 import LoadingCircle from "../../LoadingCircle";
+import { t } from "../../../utils/i18n";
 
 type ActivityPoint = {
   date: string;
@@ -139,15 +140,15 @@ const ActivityGraph = () => {
 
   const series: ApexOptions["series"] = [
     {
-      name: "Messages sent in the interserv",
+      name: t("activityGraph.seriesName"),
       data: messages,
     },
   ];
 
   return (
     <>
-      <h2>Activity graph (30 days)</h2>
-      <span>{totalCount} messages sent in the last 30 days.</span>
+      <h2>{t("activityGraph.title")}</h2>
+      <span>{t("activityGraph.messagesCount", { count: totalCount })}</span>
       {loading || !ApexChart ? (
         <LoadingCircle />
       ) : (

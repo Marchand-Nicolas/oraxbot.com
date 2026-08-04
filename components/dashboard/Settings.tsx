@@ -5,6 +5,7 @@ import { useEffect, useState, type ChangeEvent } from "react";
 import Command from "./elements/Command";
 import { notify } from "../ui/NotificationSystem";
 import type { Guild, GuildSettings } from "../../types";
+import { t } from "../../utils/i18n";
 
 interface SettingsProps {
   guild: Guild;
@@ -40,7 +41,7 @@ export default function Settings({
           ) as HTMLInputElement | null;
           newValue = (newValue as string).split("https://discord.gg/").join("");
           if ((newValue as string).length > 200)
-            return notify.error("Invalid link");
+            return notify.error(t("settings.invalidLink"));
           if (element) element.value = newValue as string;
         }
         break;
@@ -72,8 +73,8 @@ export default function Settings({
       } catch (error) {
         console.error("Failed to save settings:", error);
         notify.error(
-          "Settings Save Failed",
-          "Unable to save your settings. Please try again.",
+          t("settings.saveFailedTitle"),
+          t("settings.saveFailedDesc"),
         );
       }
     };
@@ -82,9 +83,9 @@ export default function Settings({
 
   return (
     <>
-      <h2>⚙️ Server settings</h2>
+      <h2>⚙️ {t("settings.serverTitle")}</h2>
       <div className={[styles.parameter, "line"].join(" ")}>
-        <p className={styles.parameterName}>Language</p>
+        <p className={styles.parameterName}>{t("settings.language")}</p>
         <select
           key={"guild_" + guildId + "_" + settings.lang}
           id="selectLang"
@@ -100,7 +101,7 @@ export default function Settings({
         </select>
       </div>
       <div className={[styles.parameter, "line"].join(" ")}>
-        <p className={styles.parameterName}>Public</p>
+        <p className={styles.parameterName}>{t("settings.public")}</p>
         <input
           checked={settings.public as boolean}
           onChange={(e) => updateSettings(e, "public")}
@@ -110,15 +111,13 @@ export default function Settings({
       {settings.public ? (
         <>
           <p className="information">
-            <strong>Your server is public:</strong>
+            <strong>{t("settings.publicInfo")}</strong>
             <br />
-            this means that members of your interserver group(s) will be able to
-            join <strong>{guild.name}</strong> using the{" "}
-            <Command name="channel-infos" /> command
+            {t("settings.publicInfoDesc", { server: guild.name })}
           </p>
           <div className={[styles.parameter, "line wrap"].join(" ")}>
-            <p className={styles.parameterName}>Public link</p>
-            <p className="hint">discord.gg/</p>
+            <p className={styles.parameterName}>{t("settings.publicLink")}</p>
+            <p className="hint">{t("settings.publicLinkHint")}</p>
             <input
               id="inviteLink"
               type="text"
@@ -130,7 +129,7 @@ export default function Settings({
             />
           </div>
           <div className={[styles.parameter, "line"].join(" ")}>
-            <p className={styles.parameterName}>Public name</p>
+            <p className={styles.parameterName}>{t("settings.publicName")}</p>
             <input
               id="publicName"
               type="text"

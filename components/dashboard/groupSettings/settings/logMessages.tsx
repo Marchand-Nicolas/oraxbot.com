@@ -3,6 +3,7 @@ import config from "../../../../utils/config.json";
 import styles from "../../../../styles/components/dashboard/groupSettings/settings.module.css";
 import { platformApi } from "../../../../utils/platformApi";
 import type { Channel } from "../../../../types";
+import { t } from "../../../../utils/i18n";
 
 interface LogMessagesProps {
   groupId?: string | string[];
@@ -39,7 +40,7 @@ const LogMessages = ({ groupId, guildId }: LogMessagesProps) => {
   return (
     <>
       <label>
-        <strong>Log interserv messages in the following channel:</strong>
+        <strong>{t("groupSettings.logMessagesLabel")}</strong>
       </label>
       <select
         id="selectChannel"
@@ -56,7 +57,7 @@ const LogMessages = ({ groupId, guildId }: LogMessagesProps) => {
           });
         }}
       >
-        <option value="">No log (disabled)</option>
+        <option value="">{t("groupSettings.noLog")}</option>
         {channels.map((channel, index) => (
           <option key={"option_" + index} value={channel.id}>
             {channel.name}

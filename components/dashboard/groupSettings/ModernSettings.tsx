@@ -12,6 +12,7 @@ import CheckboxField from "./settings/checkboxField";
 import TextareaField from "./settings/textareaField";
 import { getPlatform } from "../../../utils/platforms";
 import config from "../../../utils/config.json";
+import { t, getVoteLabel, getGlobalLanguage } from "../../../utils/i18n";
 
 interface ModernSettingsProps {
   oraxPlus?: OraxPlusStatus;
@@ -33,6 +34,9 @@ const ModernSettings = ({
   const platform =
     typeof platformSlug === "string" ? getPlatform(platformSlug) : undefined;
   const voteProvider = platform?.vote;
+  const voteLabelText = voteProvider
+    ? getVoteLabel(getGlobalLanguage(), voteProvider.provider)
+    : "";
   const [showTranslationModal, setShowTranslationModal] = useState(false);
   const hasOraxPlus = !!oraxPlus?.active;
   const shouldBlockTranslation = !!oraxPlus && !hasOraxPlus;
@@ -49,11 +53,11 @@ const ModernSettings = ({
 
   return (
     <div className={styles.settingsContainer}>
-      <h2 className={styles.sectionTitle}>Settings</h2>
+      <h2 className={styles.sectionTitle}>{t("groupSettings.settingsTitle")}</h2>
       <div className={styles.settingsGrid}>
         {/* Basic Configuration Column */}
         <div className={styles.settingsColumn}>
-          <h3 className={styles.sectionTitle}>Basic Configuration</h3>
+          <h3 className={styles.sectionTitle}>{t("groupSettings.basicConfig")}</h3>
 
           <div className={styles.settingItem}>
             <CustomUsernames groupId={groupId} guildId={guildId} />
@@ -61,23 +65,23 @@ const ModernSettings = ({
 
           <div className={styles.settingItem}>
             <OptionsField
-              label="Replies style"
+              label={t("groupSettings.repliesStyle")}
               fieldName="replyStyle"
               groupId={groupId}
               guildId={guildId}
               options={[
-                { name: "Embed", value: "embed" },
-                { name: "Quote (Discord's legacy)", value: "quote" },
-                { name: "Quote without jump button", value: "quoteNoButton" },
-                { name: "Embed without jump button", value: "embedNoButton" },
+                { name: t("groupSettings.repliesEmbed"), value: "embed" },
+                { name: t("groupSettings.repliesQuote"), value: "quote" },
+                { name: t("groupSettings.repliesQuoteNoButton"), value: "quoteNoButton" },
+                { name: t("groupSettings.repliesEmbedNoButton"), value: "embedNoButton" },
               ]}
             />
           </div>
 
           <div className={styles.settingItem}>
             <CheckboxField
-              label="Allow @everyone and @here"
-              description="Allow people to ping @everyone and @here in the interserver."
+              label={t("groupSettings.allowEveryone")}
+              description={t("groupSettings.allowEveryoneDesc")}
               fieldName="allowEveryone"
               groupId={groupId}
               guildId={guildId}
@@ -86,8 +90,8 @@ const ModernSettings = ({
 
           <div className={styles.settingItem}>
             <CheckboxField
-              label="Sync role mentions across servers"
-              description="Allow @Role pings to notify matching roles across linked servers (names must exactly match)."
+              label={t("groupSettings.syncMentions")}
+              description={t("groupSettings.syncMentionsDesc")}
               fieldName="syncMentions"
               groupId={groupId}
               guildId={guildId}
@@ -96,8 +100,8 @@ const ModernSettings = ({
 
           <div className={styles.settingItem}>
             <CheckboxField
-              label="Translation"
-              description="Automatically translate synced messages. Target language can be selected in every channel's settings."
+              label={t("groupSettings.translation")}
+              description={t("groupSettings.translationDesc")}
               fieldName="translation"
               groupId={groupId}
               guildId={guildId}
@@ -106,12 +110,12 @@ const ModernSettings = ({
               labelAdornment={
                 <span
                   className={styles.oraxPlusTooltip}
-                  aria-label="Orax Plus only"
+                  aria-label={t("oraxPlus.only")}
                   tabIndex={0}
                 >
                   <StarIcon className={styles.oraxPlusIcon} />
                   <span className={styles.oraxPlusTooltipText} role="tooltip">
-                    Orax Plus only
+                    {t("oraxPlus.only")}
                   </span>
                 </span>
               }
@@ -121,40 +125,40 @@ const ModernSettings = ({
 
         {/* Moderation Column */}
         <div className={styles.settingsColumn}>
-          <h3 className={styles.sectionTitle}>Moderation & Security</h3>
+          <h3 className={styles.sectionTitle}>{t("groupSettings.moderationSecurity")}</h3>
 
           <div className={styles.settingItem}>
             <TextField
-              label="Moderators"
-              description="By default Orax considers all members with the 'Manage Messages' permission as moderators. You can override this behaviour by writing a list of comma separated usernames."
+              label={t("groupSettings.moderators")}
+              description={t("groupSettings.moderatorsDesc")}
               fieldName="moderators"
               groupId={groupId}
               guildId={guildId}
-              placeholder="Enter usernames separated by commas..."
+              placeholder={t("groupSettings.moderatorsPlaceholder")}
               parser={(value) => value.replace(" ", ",")}
             />
           </div>
 
           <div className={styles.settingItem}>
             <TextField
-              label="Blacklist"
-              description="Prevent messages containing certain words from being sent in the interserver. Comma separated."
+              label={t("groupSettings.blacklist")}
+              description={t("groupSettings.blacklistDesc")}
               fieldName="wordBlacklist"
               groupId={groupId}
               guildId={guildId}
-              placeholder="Enter words separated by commas..."
+              placeholder={t("groupSettings.blacklistPlaceholder")}
               parser={(value) => value.replace(" ", ",")}
             />
           </div>
 
           <div className={styles.settingItem}>
             <TextareaField
-              label="Interserv rules"
-              description='These rules are displayed to users with the "/rules" command.'
+              label={t("groupSettings.interservRules")}
+              description={t("groupSettings.interservRulesDesc")}
               fieldName="rules"
               groupId={groupId}
               guildId={guildId}
-              placeholder="Write the interserv rules here..."
+              placeholder={t("groupSettings.interservRulesPlaceholder")}
               rows={8}
             />
           </div>
@@ -166,20 +170,19 @@ const ModernSettings = ({
       </div>
       {showTranslationModal && (
         <ActionModal
-          title="Orax Plus required"
+          title={t("oraxPlus.requiredTitle")}
           description={
             <p>
-              Auto translation is an Orax Plus feature.
               {voteProvider
-                ? ` ${voteProvider.label} or subscribe to Orax Plus to enable automatic translation for this group.`
-                : " Subscribe to Orax Plus to enable automatic translation for this group."}
+                ? t("oraxPlus.requiredDesc", { vote: voteLabelText })
+                : t("oraxPlus.requiredDescNoVote").trim()}
             </p>
           }
           actions={[
             ...(voteProvider
               ? [
                   {
-                    label: voteProvider.label,
+                    label: voteLabelText,
                     variant: "secondary" as const,
                     disabled: !onStartOraxPlusVote,
                     onClick: () => {
@@ -190,7 +193,7 @@ const ModernSettings = ({
                 ]
               : []),
             {
-              label: `Subscribe $${config.oraxPlusMonthlyPrice}/mo`,
+              label: t("oraxPlus.subscribe", { price: config.oraxPlusMonthlyPrice }),
               variant: "primary",
               disabled: !onStartOraxPlusCheckout,
               onClick: () => {
@@ -199,7 +202,7 @@ const ModernSettings = ({
               },
             },
             {
-              label: "Lifetime $19.99",
+              label: t("oraxPlus.lifetime"),
               variant: "primary",
               disabled: !onStartOraxPlusCheckout,
               onClick: () => {

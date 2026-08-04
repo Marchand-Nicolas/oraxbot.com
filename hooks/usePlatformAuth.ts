@@ -12,6 +12,7 @@ import {
   filterAdminGuilds,
   persistPlatformToken,
 } from "../utils/platforms/oauth";
+import { t } from "../utils/i18n";
 
 export interface PlatformAuthState {
   user: DiscordUser | undefined;
@@ -80,8 +81,8 @@ export function usePlatformAuth(platform: PlatformConfig): UsePlatformAuthResult
           if (cancelled) return;
           if (!response.access_token || response.access_token === "undefined") {
             notify.error(
-              "Login Failed",
-              "Invalid authentication response. Redirecting...",
+              t("notifications.loginFailedTitle"),
+              t("notifications.loginFailedDesc"),
             );
             setTimeout(() => {
               window.location.href = `/dashboard/${platform.slug}`;
@@ -107,8 +108,8 @@ export function usePlatformAuth(platform: PlatformConfig): UsePlatformAuthResult
         .catch(() => {
           if (cancelled) return;
           notify.error(
-            "Login Failed",
-            "Unable to complete authentication. Please try again.",
+            t("notifications.loginFailedTitle"),
+            t("notifications.loginFailedRetry"),
           );
           setTimeout(() => {
             window.location.href = `/dashboard/${platform.slug}`;
@@ -174,19 +175,19 @@ export function usePlatformAuth(platform: PlatformConfig): UsePlatformAuthResult
           }
         } catch {
           if (!cancelled) {
-            notify.error(
-              "Data Loading Failed",
-              `Unable to load your ${platform.label} guilds. Please try refreshing the page.`,
-            );
+notify.error(
+            t("notifications.dataLoadFailedTitle"),
+            t("notifications.dataLoadFailedGuilds", { platform: platform.label }),
+          );
             setState((prev) => ({ ...prev, loading: false }));
           }
         }
       } catch {
         if (!cancelled) {
-          notify.error(
-            "Data Loading Failed",
-            `Unable to load your ${platform.label} profile. Please try refreshing the page.`,
-          );
+notify.error(
+          t("notifications.dataLoadFailedTitle"),
+          t("notifications.dataLoadFailedProfile", { platform: platform.label }),
+        );
           setState((prev) => ({ ...prev, loading: false }));
         }
       }

@@ -6,6 +6,7 @@ import { platformList, type PlatformConfig } from "../../utils/platforms";
 import { clearPlatformToken } from "../../utils/platforms/oauth";
 import { removeStorage } from "../../utils/storage";
 import type { DiscordUser } from "../../types";
+import { t } from "../../utils/i18n";
 
 interface UserMenuProps {
   user: DiscordUser;
@@ -40,7 +41,7 @@ export default function UserMenu({ user, platform }: UserMenuProps) {
     };
   }, [open]);
 
-  const displayName = user.global_name || user.username || "User";
+  const displayName = user.global_name || user.username || t("nav.user");
   const avatarUrl = platform.getUserIconUrl({
     id: user.id,
     avatar: user.avatar,
@@ -128,7 +129,7 @@ export default function UserMenu({ user, platform }: UserMenuProps) {
           {otherPlatforms.length > 0 && (
             <>
               <div className={styles.divider} />
-              <p className={styles.sectionLabel}>Switch platform</p>
+              <p className={styles.sectionLabel}>{t("nav.switchPlatform")}</p>
               {otherPlatforms.map((other) => (
                 <Link
                   key={other.slug}
@@ -175,7 +176,7 @@ export default function UserMenu({ user, platform }: UserMenuProps) {
                 />
               </svg>
             </span>
-            <span>Log out</span>
+            <span>{t("nav.logout")}</span>
           </button>
         </div>
       )}

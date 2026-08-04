@@ -3,6 +3,7 @@ import fire from "../../../../public/icons/fire.svg";
 import popup from "../../../../utils/popup";
 import { useEffect, useState, type ChangeEvent } from "react";
 import { platformApi } from "../../../../utils/platformApi";
+import { t } from "../../../../utils/i18n";
 
 interface ChannelDisableWarningMessageProps {
   guildId?: string | string[];
@@ -57,8 +58,8 @@ const ChannelDisableWarningMessage = ({
           else {
             e.target.checked = false;
             popup(
-              "This could be dangerous",
-              `For privacy reasons, it is necessary to warn users that their messages might be synchronised. You can add this to the server rules, for example.`,
+              t("groupSettings.dangerousTitle"),
+              t("groupSettings.dangerousDesc"),
               "default",
               {
                 icon: fire.src
@@ -70,14 +71,14 @@ const ChannelDisableWarningMessage = ({
                   : undefined,
                 buttons: [
                   {
-                    name: "Cancel",
+                    name: t("common.cancel"),
                     className: "normal",
                     action: () => {
                       e.target.checked = false;
                     },
                   },
                   {
-                    name: "Continue",
+                    name: t("common.continue"),
                     className: "dangerous",
                     action: () => {
                       updateDisableUserWarningMessage(e, true);
@@ -92,7 +93,7 @@ const ChannelDisableWarningMessage = ({
         id="remove-user-warning-message"
       />
       <label htmlFor="remove-user-warning-message">
-        Disable user warning message
+        {t("groupSettings.disableUserWarning")}
       </label>
     </div>
   );

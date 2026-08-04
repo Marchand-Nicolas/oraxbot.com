@@ -2,6 +2,7 @@ import { useEffect, useState, type ChangeEvent } from "react";
 import config from "../../../../utils/config.json";
 import styles from "../../../../styles/components/dashboard/groupSettings/settings.module.css";
 import { platformApi } from "../../../../utils/platformApi";
+import { t } from "../../../../utils/i18n";
 
 interface OptionsFieldProps {
   label: string;
@@ -109,7 +110,7 @@ const OptionsField = ({
         }
         id={fieldName}
       >
-        <option value="">Select an option</option>
+        <option value="">{t("channelSettings.selectOption")}</option>
         {availableOptions.map((option, index) => (
           <option key={`option_${index}`} value={option.id || option.value}>
             {option.name || option.label}

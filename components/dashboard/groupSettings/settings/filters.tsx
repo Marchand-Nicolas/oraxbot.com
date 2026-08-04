@@ -3,6 +3,7 @@ import styles from "../../../../styles/components/dashboard/groupSettings/settin
 import { platformApi } from "../../../../utils/platformApi";
 import TextInput from "../../../ui/textInput";
 import type { FilterRule } from "../../../../types";
+import { t } from "../../../../utils/i18n";
 
 interface FiltersProps {
   groupId?: string | string[];
@@ -77,31 +78,27 @@ const Filters = ({ groupId, guildId }: FiltersProps) => {
   };
 
   if (isLoading) {
-    return (
-      <>
-        <label>
-          <strong>Message Filters</strong>
-        </label>
-        <label>Loading filter rules...</label>
-      </>
-    );
-  }
+return (
+        <>
+          <label>
+            <strong>{t("filters.title")}</strong>
+          </label>
+          <label>{t("filters.loading")}</label>
+        </>
+      );
+    }
 
   return (
     <>
       <label>
-        <strong>Message Filters</strong>
+        <strong>{t("filters.title")}</strong>
       </label>
-      <label>
-        Configure rules to filter which messages are forwarded in the
-        interserver. Messages must match at least one include rule (if any) and
-        no exclude rules.
-      </label>
+      <label>{t("filters.desc")}</label>
 
       <div style={{ marginTop: "1rem" }}>
         {filterRules.length === 0 ? (
           <div className={styles.emptyFilters}>
-            <p>No filter rules configured. All messages will be forwarded.</p>
+            <p>{t("filters.noRules")}</p>
           </div>
         ) : (
           filterRules.map((rule) => (
@@ -120,9 +117,9 @@ const Filters = ({ groupId, guildId }: FiltersProps) => {
                 className={styles.filterRuleSelect}
                 style={{ width: "120px" }}
               >
-                <option value="keyword">Keyword</option>
-                <option value="media">Media</option>
-                <option value="author">Author</option>
+                <option value="keyword">{t("filters.keyword")}</option>
+                <option value="media">{t("filters.media")}</option>
+                <option value="author">{t("filters.author")}</option>
               </select>
 
               <select
@@ -135,13 +132,13 @@ const Filters = ({ groupId, guildId }: FiltersProps) => {
                 className={styles.filterRuleSelect}
                 style={{ width: "100px" }}
               >
-                <option value="include">Include</option>
-                <option value="exclude">Exclude</option>
+                <option value="include">{t("filters.include")}</option>
+                <option value="exclude">{t("filters.exclude")}</option>
               </select>
 
               {rule.type === "keyword" ? (
                 <TextInput
-                  placeholder="Enter keywords (comma separated)"
+                  placeholder={t("filters.enterKeywords")}
                   value={rule.value}
                   onChange={(e: ChangeEvent<HTMLInputElement>) =>
                     updateRule(rule.id, { value: e.target.value })
@@ -157,10 +154,10 @@ const Filters = ({ groupId, guildId }: FiltersProps) => {
                   className={styles.filterRuleSelect}
                   style={{ flex: 1 }}
                 >
-                  <option value="">Select author type</option>
-                  <option value="human">Human</option>
-                  <option value="webhook">Webhook</option>
-                  <option value="bot">Bot</option>
+                  <option value="">{t("filters.selectAuthorType")}</option>
+                  <option value="human">{t("common.human")}</option>
+                  <option value="webhook">{t("common.webhook")}</option>
+                  <option value="bot">{t("common.bot")}</option>
                 </select>
               ) : (
                 <select
@@ -171,12 +168,12 @@ const Filters = ({ groupId, guildId }: FiltersProps) => {
                   className={styles.filterRuleSelect}
                   style={{ flex: 1 }}
                 >
-                  <option value="">Select media type</option>
-                  <option value="images">Images</option>
-                  <option value="videos">Videos</option>
-                  <option value="attachments">Files/Attachments</option>
-                  <option value="links">Links</option>
-                  <option value="embeds">Embeds</option>
+                  <option value="">{t("filters.selectMediaType")}</option>
+                  <option value="images">{t("filters.images")}</option>
+                  <option value="videos">{t("filters.videos")}</option>
+                  <option value="attachments">{t("filters.attachments")}</option>
+                  <option value="links">{t("filters.links")}</option>
+                  <option value="embeds">{t("filters.embeds")}</option>
                 </select>
               )}
 
@@ -184,40 +181,35 @@ const Filters = ({ groupId, guildId }: FiltersProps) => {
                 onClick={() => removeRule(rule.id)}
                 className={styles.removeRuleButton}
               >
-                Remove
+                {t("common.remove")}
               </button>
             </div>
           ))
         )}
 
         <button onClick={addRule} className={styles.addRuleButton}>
-          + Add Filter Rule
+          {t("filters.addRule")}
         </button>
       </div>
 
       {filterRules.length > 0 && (
         <div className={styles.filterHelp}>
-          <strong>How it works:</strong>
+          <strong>{t("filters.howItWorks")}</strong>
           <ul>
             <li>
-              <strong>Include rules:</strong> Only messages matching these rules
-              will be forwarded (if no include rules, all messages pass)
+              <strong>{t("filters.include")}:</strong> {t("filters.includeDesc")}
             </li>
             <li>
-              <strong>Exclude rules:</strong> Messages matching these rules will
-              never be forwarded
+              <strong>{t("filters.exclude")}:</strong> {t("filters.excludeDesc")}
             </li>
             <li>
-              <strong>Keywords:</strong> Comma-separated words to match in
-              message content
+              <strong>{t("filters.keyword")}:</strong> {t("filters.keywordsDesc")}
             </li>
             <li>
-              <strong>Media:</strong> Filter based on message attachments and
-              content type
+              <strong>{t("filters.media")}:</strong> {t("filters.mediaDesc")}
             </li>
             <li>
-              <strong>Author:</strong> Filter based on the message author type
-              (human, webhook, or bot)
+              <strong>{t("filters.author")}:</strong> {t("filters.authorDesc")}
             </li>
           </ul>
         </div>

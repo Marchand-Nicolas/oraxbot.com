@@ -3,6 +3,7 @@ import { notify } from "../components/ui/NotificationSystem";
 import type { OraxPlusStatus } from "../types";
 import { platformApi } from "./platformApi";
 import type { PlatformConfig } from "./platforms";
+import { t, voteLabel } from "./i18n";
 
 interface OraxPlusVoteResult {
   activated: boolean;
@@ -19,8 +20,8 @@ const FLUXERLIST_RETRIEVAL_DELAY_MS = 18000;
 export function openTopggVote() {
   window.open(config.topggVoteUrl, "_blank");
   notify.info(
-    "Vote on Top.gg",
-    "Come back here after voting to join the group.",
+    t("oraxPlus.voteOpenedTitle"),
+    t("oraxPlus.voteOpenedDesc"),
   );
 }
 
@@ -78,8 +79,8 @@ async function startTopggVote(
     if (data.activated) {
       voteWindow?.close();
       notify.success(
-        "Orax Plus activated",
-        "Your latest Top.gg vote was applied to this server.",
+        t("oraxPlus.activatedTitle"),
+        t("oraxPlus.activatedTopggDesc"),
       );
       return { activated: true, voteOpened: false };
     }
@@ -92,18 +93,18 @@ async function startTopggVote(
       window.location.href = voteUrl;
     }
     notify.success(
-      "Vote opened",
-      "Orax Plus will activate automatically when Top.gg sends the vote.",
+      t("oraxPlus.activatedTitle"),
+      t("oraxPlus.activatedTopggDesc"),
     );
     return { activated: false, voteOpened: true };
   } catch (error) {
-    voteWindow?.close();
-    notify.error(
-      "Vote setup failed",
-      error instanceof Error
-        ? error.message
-        : "Unable to prepare the Top.gg vote.",
-    );
+voteWindow?.close();
+      notify.error(
+        t("oraxPlus.voteSetupFailedTitle"),
+        error instanceof Error
+          ? error.message
+          : "Unable to prepare the Top.gg vote.",
+      );
     return { activated: false, voteOpened: false };
   }
 }
@@ -138,7 +139,7 @@ async function startFluxerlistVote(
   platform: PlatformConfig,
 ): Promise<OraxPlusVoteResult> {
   const voteUrl = platform.vote?.url || config.fluxerlistVoteUrl;
-  const label = platform.vote?.label || "Vote on Fluxerlist";
+  const label = voteLabel(platform.vote?.provider || "fluxerlist");
 
   window.open(voteUrl, "_blank");
   showVoteRetrievalOverlay(label);
@@ -162,13 +163,13 @@ async function startFluxerlistVote(
     }
 
     notify.success(
-      "Orax Plus activated",
-      "Your Fluxerlist vote was applied to this server.",
+      t("oraxPlus.activatedTitle"),
+      t("oraxPlus.activatedFluxerDesc"),
     );
     return { activated: true, voteOpened: false };
   } catch (error) {
     notify.error(
-      "Vote activation failed",
+      t("oraxPlus.voteActivationFailedTitle"),
       error instanceof Error
         ? error.message
         : "Unable to activate Orax Plus from your Fluxerlist vote.",
@@ -221,13 +222,13 @@ export async function startOraxPlusCheckout(
     }
     window.location.href = data.url;
   } catch (error) {
-    hideCheckoutOverlay();
-    notify.error(
-      "Checkout failed",
-      error instanceof Error
-        ? error.message
-        : "Unable to start Orax Plus checkout.",
-    );
+hideCheckoutOverlay();
+      notify.error(
+        t("oraxPlus.checkoutFailedTitle"),
+        error instanceof Error
+          ? error.message
+          : "Unable to start Orax Plus checkout.",
+      );
   }
 }
 

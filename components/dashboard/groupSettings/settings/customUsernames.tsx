@@ -1,6 +1,7 @@
 import { useEffect, useState, type ChangeEvent } from "react";
 import TextInput from "../../../ui/textInput";
 import { platformApi } from "../../../../utils/platformApi";
+import { t } from "../../../../utils/i18n";
 
 interface CustomUsernamesProps {
   groupId?: string | string[];
@@ -37,15 +38,18 @@ const CustomUsernames = ({ groupId, guildId }: CustomUsernamesProps) => {
   return (
     <>
       <label htmlFor="custom-usernames-pattern">
-        <strong>Custom usernames pattern:</strong>
+        <strong>{t("groupSettings.customUsernamesPattern")}</strong>
       </label>
       <label>
-        You can use <code>{`{username}`}</code>, <code>{`{nickname}`}</code>,{" "}
-        <code>{`{serverName}`}</code> and <code>{`{role}`}</code> to customize
-        the usernames dynamically.
+        {t("groupSettings.customUsernamesDesc", {
+          username: "{username}",
+          nickname: "{nickname}",
+          serverName: "{serverName}",
+          role: "{role}",
+        })}
       </label>
       <TextInput
-        placeholder="{username} [{serverName}]"
+        placeholder={t("groupSettings.customUsernamesPlaceholder")}
         onChange={(e: ChangeEvent<HTMLInputElement>) => {
           const newPattern = e.target.value;
           setPattern(newPattern);
@@ -59,14 +63,15 @@ const CustomUsernames = ({ groupId, guildId }: CustomUsernamesProps) => {
         id="custom-usernames-pattern"
       />
       <label htmlFor="custom-user-pp-url" style={{ marginTop: "1.5rem" }}>
-        <strong>Custom user picture url:</strong>
+        <strong>{t("groupSettings.customPictureLabel")}</strong>
       </label>
       <label>
-        You can use <code>{`{userAvatarUrl}`}</code> to customize the profile
-        pictures dynamically.
+        {t("groupSettings.customPictureDesc", {
+          userAvatarUrl: "{userAvatarUrl}",
+        })}
       </label>
       <TextInput
-        placeholder="https://example.com/users/{userAvatarUrl}"
+        placeholder={t("groupSettings.customPicturePlaceholder")}
         onChange={(e: ChangeEvent<HTMLInputElement>) => {
           const newUrl = e.target.value;
           setUserPpUrl(newUrl);

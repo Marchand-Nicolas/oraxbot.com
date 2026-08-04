@@ -10,6 +10,7 @@ import React, { useEffect, useState, type ChangeEvent } from "react";
 import Filters from "./settings/filters";
 import TextField from "./settings/textField";
 import MutedUsersWindow from "./MutedUsersWindow";
+import { t } from "../../../utils/i18n";
 
 const updateDisableUserWarningMessage = (
   e: ChangeEvent<HTMLInputElement>,
@@ -117,11 +118,11 @@ const ModernAdvancedSettings = () => {
 
   return (
     <div className={styles.settingsContainer}>
-      <h2 className={styles.sectionTitle}>Advanced Settings</h2>
+      <h2 className={styles.sectionTitle}>{t("groupSettings.advancedTitle")}</h2>
       <div className={styles.settingsGrid}>
         {/* Privacy & Sync Column */}
         <div className={styles.settingsColumn}>
-          <h3 className={styles.sectionTitle}>Privacy & Synchronization</h3>
+          <h3 className={styles.sectionTitle}>{t("groupSettings.privacySync")}</h3>
 
           <div className={styles.settingItem}>
             <div className={advancedStyles.line}>
@@ -135,8 +136,8 @@ const ModernAdvancedSettings = () => {
                   else {
                     e.target.checked = false;
                     popup(
-                      "This could be dangerous",
-                      `For privacy reasons, it is necessary to warn users that their messages might be synchronised. You can add this to the server rules, for example.`,
+                      t("groupSettings.dangerousTitle"),
+                      t("groupSettings.dangerousDesc"),
                       "default",
                       {
                         icon: fire.src
@@ -148,14 +149,14 @@ const ModernAdvancedSettings = () => {
                           : undefined,
                         buttons: [
                           {
-                            name: "Cancel",
+                            name: t("common.cancel"),
                             className: "normal",
                             action: () => {
                               e.target.checked = false;
                             },
                           },
                           {
-                            name: "Continue",
+                            name: t("common.continue"),
                             className: "dangerous",
                             action: () => {
                               updateDisableUserWarningMessage(
@@ -175,7 +176,7 @@ const ModernAdvancedSettings = () => {
                 id="remove-user-warning-message"
               />
               <label htmlFor="remove-user-warning-message">
-                Disable user warning message
+                {t("groupSettings.disableUserWarning")}
               </label>
             </div>
             <div className={advancedStyles.illustrationContainer}>
@@ -192,12 +193,12 @@ const ModernAdvancedSettings = () => {
 
           <div className={styles.settingItem}>
             <TextField
-              label="Custom warning message"
-              description="Override the default user warning text shown in synced channels."
+              label={t("groupSettings.customWarningMsg")}
+              description={t("groupSettings.customWarningMsgDesc")}
               fieldName="customWarningMessage"
               groupId={groupId}
               guildId={guildId}
-              placeholder="e.g., Messages here may be shared across servers."
+              placeholder={t("groupSettings.customWarningMsgPlaceholder")}
             />
           </div>
 
@@ -217,7 +218,7 @@ const ModernAdvancedSettings = () => {
                 id="disable-delete-sync"
               />
               <label htmlFor="disable-delete-sync">
-                Disable message deletion sync
+                {t("groupSettings.disableDeleteSync")}
               </label>
             </div>
           </div>
@@ -225,7 +226,7 @@ const ModernAdvancedSettings = () => {
 
         {/* Filters Column */}
         <div className={styles.settingsColumn}>
-          <h3 className={styles.sectionTitle}>Message Filtering</h3>
+          <h3 className={styles.sectionTitle}>{t("groupSettings.messageFiltering")}</h3>
 
           <div className={styles.settingItem}>
             <Filters groupId={groupId} guildId={guildId} />
@@ -234,7 +235,7 @@ const ModernAdvancedSettings = () => {
 
         {/* Group Management Column */}
         <div className={styles.settingsColumn}>
-          <h3 className={styles.sectionTitle}>Group Management</h3>
+          <h3 className={styles.sectionTitle}>{t("groupSettings.groupManagement")}</h3>
 
           <div className={styles.settingItem}>
             <div
@@ -243,7 +244,7 @@ const ModernAdvancedSettings = () => {
             >
               <button
                 onClick={() =>
-                  popup("Rename the group", <div></div>, "error", {
+                  popup(t("groupSettings.renameGroup"), <div></div>, "error", {
                     icon: drop.src
                       ? {
                           src: drop.src,
@@ -254,11 +255,11 @@ const ModernAdvancedSettings = () => {
                     close: true,
                     buttons: [
                       {
-                        name: "Cancel",
+                        name: t("common.cancel"),
                         className: "border normal",
                       },
                       {
-                        name: "Rename",
+                        name: t("common.rename"),
                         action: function () {
                           platformApi<{ result?: boolean }>(
                             "rename_interserv_group",
@@ -286,21 +287,21 @@ const ModernAdvancedSettings = () => {
                       <input
                         id="renameGroupInput"
                         className="textInput normal"
-                        placeholder="New group name"
+                        placeholder={t("groupSettings.newGroupNamePlaceholder")}
                       />
                     ),
                   })
                 }
                 className="button round normal"
               >
-                Rename the group
+                {t("groupSettings.renameGroup")}
               </button>
 
               <button
                 onClick={() =>
                   popup(
-                    "Delete the group",
-                    "This action is irreversible. All channels linked to your group will be unlinked.",
+                    t("groupSettings.deleteGroup"),
+                    t("groupSettings.deleteGroupDesc"),
                     "error",
                     {
                       icon: fire.src
@@ -311,7 +312,7 @@ const ModernAdvancedSettings = () => {
                           }
                         : undefined,
                       close: true,
-                      customButtonName: "Delete",
+                      customButtonName: t("common.delete"),
                       action: function () {
                         platformApi<{ result?: boolean }>(
                           "delete_interserv_group",
@@ -333,24 +334,24 @@ const ModernAdvancedSettings = () => {
                 }
                 className="button round dangerous"
               >
-                Delete the group
+                {t("groupSettings.deleteGroup")}
               </button>
 
               <button
                 onClick={() =>
                   popup(
-                    "Muted users",
+                    t("groupSettings.mutedUsersTitle"),
                     <MutedUsersWindow groupId={groupId} guildId={guildId} />,
                     "default",
                     {
                       close: true,
-                      customButtonName: "Close",
+                      customButtonName: t("common.close"),
                     },
                   )
                 }
                 className="button round normal"
               >
-                View muted users
+                {t("groupSettings.viewMutedUsers")}
               </button>
             </div>
           </div>

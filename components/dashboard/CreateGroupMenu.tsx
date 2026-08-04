@@ -8,6 +8,7 @@ import { notify } from "../ui/NotificationSystem";
 import { platformApi } from "../../utils/platformApi";
 import type { Channel, OraxPlusStatus } from "../../types";
 import type { PlatformConfig } from "../../utils/platforms";
+import { t, getVoteLabel, getGlobalLanguage } from "../../utils/i18n";
 
 interface CreateGroupMenuProps {
   guildId: string | string[] | undefined;
@@ -25,6 +26,9 @@ export default function CreateGroupMenu(props: CreateGroupMenuProps) {
   const groupLimit = props.oraxPlus?.limits?.groupsPerGuild || 2;
   const ownedGroupsCount = props.ownedGroupsCount || 0;
   const isAtGroupLimit = ownedGroupsCount >= groupLimit;
+  const voteLabelText = props.platform?.vote
+    ? getVoteLabel(getGlobalLanguage(), props.platform.vote.provider)
+    : "";
 
   useEffect(() => {
     if (props.guildId) {
@@ -41,8 +45,8 @@ export default function CreateGroupMenu(props: CreateGroupMenuProps) {
         })
         .catch(() => {
           notify.error(
-            "Channel Loading Failed",
-            "Unable to load server channels. Please try again.",
+            t("createGroup.channelLoadFailedTitle"),
+            t("createGroup.channelLoadFailedDesc"),
           );
           setChannels([]);
         });
@@ -62,26 +66,24 @@ export default function CreateGroupMenu(props: CreateGroupMenuProps) {
             height={50}
             width={50}
           />
-          <h2 style={{ marginLeft: "15px" }}>Create a new group</h2>
+          <h2 style={{ marginLeft: "15px" }}>{t("createGroup.title")}</h2>
         </div>
         <br></br>
         <p className={styles.quotaHint}>
-          {ownedGroupsCount}/{groupLimit} owned groups
-          {props.oraxPlus?.active ? " with Orax Plus" : " on the free plan"}
+          {props.oraxPlus?.active
+            ? t("createGroup.quotaWithPlus", { owned: ownedGroupsCount, limit: groupLimit })
+            : t("createGroup.quotaFree", { owned: ownedGroupsCount, limit: groupLimit })}
         </p>
         {isAtGroupLimit && (
-          <p className={styles.limitWarning}>
-            This server has reached its current group limit. Activate Orax Plus
-            from the dashboard to create more groups.
-          </p>
+          <p className={styles.limitWarning}>{t("createGroup.limitWarning")}</p>
         )}
         <input
           id="groupName"
           className="textInput"
-          placeholder="Group name"
+          placeholder={t("createGroup.groupNamePlaceholder")}
           disabled={isAtGroupLimit}
         ></input>
-        <p className="description">First linked channel</p>
+        <p className="description">{t("createGroup.firstChannel")}</p>
         <select
           id="selectChannel"
           className={["textInput", styles.textInput].join(" ")}
@@ -102,7 +104,7 @@ export default function CreateGroupMenu(props: CreateGroupMenuProps) {
               unmountRoot(document.getElementById("menu"));
             }}
           >
-            Cancel
+            {t("common.cancel")}
           </button>
           <button
             className="default"
@@ -120,11 +122,11 @@ export default function CreateGroupMenu(props: CreateGroupMenuProps) {
               const groupName = groupNameEl?.value ?? "";
               const selectedChannelId = selectedChannelEl?.value ?? "";
               if (!groupName) {
-                notify.error("Validation Error", "Please enter a group name");
+                notify.error(t("createGroup.validationTitle"), t("createGroup.enterGroupName"));
                 return;
               }
               if (!selectedChannelId) {
-                notify.error("Validation Error", "Please select a channel");
+                notify.error(t("createGroup.validationTitle"), t("createGroup.selectChannel"));
                 return;
               }
               platformApi<{ error?: number; customError?: string }>(
@@ -140,56 +142,56 @@ export default function CreateGroupMenu(props: CreateGroupMenuProps) {
                     let errorMessage: string;
                     switch (data.error) {
                       case 1:
-                        errorMessage =
-                          'You must give the "Manage Webhooks" permission to the bot';
+                        errorMessage = t("createGroup.manageWebhooksError");
                         break;
                       case 2:
-                        errorMessage = `This server has reached its group limit (${ownedGroupsCount}/${groupLimit}).`;
+                        errorMessage = t("createGroup.groupLimitError", {
+                          owned: ownedGroupsCount,
+                          limit: groupLimit,
+                        });
                         break;
                       default:
-                        errorMessage = `Unknown error; Error code: ${data.error}${
-                          data.customError
-                            ? "; Custom error: " + data.customError
-                            : ""
-                        }`;
+                        errorMessage = t("createGroup.unknownError", { code: data.error }) +
+                          (data.customError
+                            ? t("createGroup.customErrorSuffix", { error: data.customError })
+                            : "");
                         break;
                     }
-                    notify.error("Group Creation Failed", errorMessage);
+                    notify.error(t("createGroup.creationFailedTitle"), errorMessage);
                   } else {
-                    notify.success("Success", "Group created successfully!");
+                    notify.success(t("createGroup.successTitle"), t("createGroup.successDesc"));
                     unmountRoot(document.getElementById("menu"));
                     props.setRefreshGuildDatas(true);
                   }
                 })
                 .catch(() => {
                   notify.error(
-                    "Group Creation Failed",
-                    "Unable to create group. Please try again.",
+                    t("createGroup.creationFailedTitle"),
+                    t("createGroup.creationFailedDesc"),
                   );
                 });
             }}
           >
-            Create
+            {t("common.create")}
           </button>
         </div>
       </div>
       </div>
       {showGroupLimitModal && (
         <ActionModal
-          title="Group limit reached"
+          title={t("oraxPlus.groupLimitTitle")}
           description={
             <p>
-              This server has reached its current group quota.
               {props.platform?.vote
-                ? ` ${props.platform.vote.label} or subscribe to Orax Plus to unlock more interserver groups.`
-                : " Subscribe to Orax Plus to unlock more interserver groups."}
+                ? t("oraxPlus.groupLimitDesc", { vote: voteLabelText })
+                : t("oraxPlus.groupLimitDescNoVote").trim()}
             </p>
           }
           actions={[
             ...(props.platform?.vote
               ? [
                   {
-                    label: props.platform.vote.label,
+                    label: voteLabelText,
                     variant: "secondary" as const,
                     disabled: !props.onStartOraxPlusVote,
                     onClick: () => {
@@ -200,7 +202,7 @@ export default function CreateGroupMenu(props: CreateGroupMenuProps) {
                 ]
               : []),
             {
-              label: `Subscribe $${config.oraxPlusMonthlyPrice}/mo`,
+              label: t("oraxPlus.subscribe", { price: config.oraxPlusMonthlyPrice }),
               variant: "primary",
               disabled: !props.onStartOraxPlusCheckout,
               onClick: () => {
@@ -209,7 +211,7 @@ export default function CreateGroupMenu(props: CreateGroupMenuProps) {
               },
             },
             {
-              label: "Lifetime $19.99",
+              label: t("oraxPlus.lifetime"),
               variant: "primary",
               disabled: !props.onStartOraxPlusCheckout,
               onClick: () => {
