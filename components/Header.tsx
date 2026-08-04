@@ -2,8 +2,17 @@ import Image from "next/image";
 import Link from "next/link";
 import styles from "../styles/components/Header.module.css";
 import { useEffect } from "react";
+import { createTranslator, type LanguageCode } from "../utils/i18n";
 
-export default function NavBar({ theme = "light" }: { theme?: string }) {
+export default function NavBar({
+  theme = "light",
+  lang = "en",
+}: {
+  theme?: string;
+  lang?: LanguageCode;
+}) {
+  const t = createTranslator(lang);
+
   useEffect(() => {
     const nav = document.querySelector("nav");
 
@@ -28,21 +37,22 @@ export default function NavBar({ theme = "light" }: { theme?: string }) {
       className={`${styles.nav} ${theme === "dark" ? styles.navDark : styles.navLight}`}
     >
       <Link href="/" className="line">
-        <Image src="/logo.png" alt="Orax logo" width={50} height={50} />
-        <strong className={styles.title}>Orax bot</strong>
+        <Image src="/logo.png" alt={t("home.ogImageAlt")} width={50} height={50} />
+        <strong className={styles.title}>{t("siteHeader.brand")}</strong>
       </Link>
       <Link href="/pricing" className={styles.navLink}>
-        Pricing <span className={styles.freeTag}>Free</span>
+        {t("siteHeader.pricing")}{" "}
+        <span className={styles.freeTag}>{t("siteHeader.free")}</span>
       </Link>
       <a href="https://ko-fi.com/A0A51KMQ7J" target="_blank" className={styles.kofi}>
         <img
           height={36}
           src="https://storage.ko-fi.com/cdn/kofi5.png?v=6"
-          alt="Buy Me a Coffee at ko-fi.com"
+          alt={t("siteHeader.kofiAlt")}
         />
       </a>
       <Link href="/login" className={styles.discordLogin}>
-        Login
+        {t("siteHeader.login")}
       </Link>
     </nav>
   );

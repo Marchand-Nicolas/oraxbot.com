@@ -129,4 +129,57 @@ export function voteLabel(provider: VoteProviderType): string {
   return getVoteLabel(globalLang, provider);
 }
 
+/**
+ * Public-site constants shared by every localized page component.
+ */
+export const SITE_URL = "https://oraxbot.com";
+export const SITE_NAME = "Orax";
+export const SITE_LOGO_URL = `${SITE_URL}/logo.png`;
+
+/** All languages the public site ships in. Used to emit hreflang links. */
+export const SUPPORTED_LANGS: readonly LanguageCode[] = [
+  "en",
+  "fr",
+  "es",
+] as const;
+
+/**
+ * Maps a `LanguageCode` to its BCP-47 `og:locale` value. Used for OpenGraph
+ * and Twitter metadata.
+ */
+export const LOCALE_MAP: Record<LanguageCode, string> = {
+  en: "en_US",
+  fr: "fr_FR",
+  es: "es_ES",
+};
+
+const DEFAULT_LANG_FOR_URL: LanguageCode = "en";
+
+/**
+ * Builds a localized URL for a given language code on the public site.
+ * English stays at the root, others are placed under their subdirectory.
+ *
+ * Example:
+ *   localizedPath("en", "/pricing") -> "/pricing"
+ *   localizedPath("fr", "/pricing") -> "/fr/pricing"
+ */
+export function localizedPath(
+  lang: LanguageCode,
+  path: string,
+): string {
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  if (lang === DEFAULT_LANG_FOR_URL) {
+    return normalized === "/" ? "/" : normalized;
+  }
+  return normalized === "/" ? `/${lang}/` : `/${lang}${normalized}`;
+}
+
+/** Same as {@link localizedPath} but returns an absolute URL. */
+export function localizedUrl(
+  lang: LanguageCode,
+  path: string,
+): string {
+  return `${SITE_URL}${localizedPath(lang, path)}`;
+}
+
 export type { LanguageCode, TranslationKey, TranslateFn, TranslateParams };

@@ -5,5 +5,5 @@ import LoginHub from "../../components/LoginHub";
  * users, so the platform chooser is always shown.
  */
 export default function LoginPage() {
-  return <LoginHub />;
+  return <LoginHub lang="en" />;
 }

@@ -315,6 +315,8 @@ const fr: Translation = {
     loginFailedDesc: "Réponse d'authentification invalide. Redirection…",
     loginFailedRetry:
       "Impossible de terminer l'authentification. Veuillez réessayer.",
+    loginFailedPlatformDesc:
+      "Nous n'avons pas pu déterminer avec quelle plateforme vous avez essayé de vous connecter.",
     dataLoadFailedTitle: "Échec du chargement des données",
     dataLoadFailedGuilds:
       "Impossible de charger vos serveurs {platform}. Veuillez actualiser la page.",
@@ -340,6 +342,152 @@ const fr: Translation = {
     multipleHours: "{count} heures",
     oneMinute: "{count} minute",
     multipleMinutes: "{count} minutes",
+  },
+
+  siteHeader: {
+    brand: "Orax bot",
+    pricing: "Tarifs",
+    free: "Gratuit",
+    login: "Connexion",
+    kofiAlt: "Soutenez-moi sur Ko-fi",
+  },
+
+  siteFooter: {
+    docs: "Documentation",
+    tos: "CGU",
+    github: "GitHub",
+  },
+
+  home: {
+    metaTitle:
+      "Orax — Synchronisez vos salons entre plusieurs serveurs Discord",
+    metaDescription:
+      "Orax vous permet de synchroniser les salons entre plusieurs serveurs Discord afin que vos communautés puissent discuter, partager des événements et collaborer sans quitter leur propre serveur.",
+    metaKeywords:
+      "bot Discord, synchronisation de salons, chat interserveur, intégration Discord, Orax, Interserv, pont entre serveurs",
+    ogImageAlt: "Logo Orax",
+    brand: "Orax",
+    heroTitle:
+      "Synchronisez vos salons entre plusieurs serveurs Discord",
+    heroDescription:
+      "Connectez vos communautés pour qu'elles puissent discuter, partager des événements et collaborer — sans quitter leur propre serveur",
+    cta: "Ajouter à Discord",
+    scrollToFeatures: "Voir les fonctionnalités",
+    feature1Title: "Connectez plusieurs salons entre eux",
+    feature1Description:
+      "Orax vous permet de synchroniser des salons entre plusieurs serveurs différents, favorisant les discussions entre membres de divers serveurs, les événements, etc., sans forcer tout le monde à rejoindre un serveur spécifique pour échanger.",
+    feature2Title: "Comme un vrai chat",
+    feature2Description:
+      "Tout fonctionne comme dans un salon normal : vous pouvez envoyer, modifier et supprimer des messages, et tout sera répliqué sur les autres serveurs Discord.",
+    waveAlt: "Séparateur décoratif en vague",
+    syncChannelsAlt:
+      "Salons Orax synchronisés affichés côte à côte sur deux serveurs Discord",
+    slashCommandAlt: "Exemple de commande slash",
+    dashboard: "Tableau de bord",
+    resourcesTitle: "Ressources et liens",
+    cardDocsTitle: "Documentation →",
+    cardDocsDescription:
+      "Apprenez à utiliser le bot grâce à notre documentation",
+    cardTipTitle: "Soutenir →",
+    cardTipDescription:
+      "Soutenez mon travail via mon Ko-fi récemment créé ✨",
+    cardSupportTitle: "Serveur de support →",
+    cardSupportDescription:
+      "Une question ? Un problème ? Une suggestion ? Contactez-nous",
+    cardExploreTitle: "Explorer →",
+    cardExploreDescription: "Découvrez les groupes publics",
+    switchLanguage: "Langue",
+  },
+
+  pricing: {
+    metaTitle: "Tarifs — Orax",
+    metaDescription:
+      "Orax est gratuit. Débloquez Orax Plus pour augmenter vos limites en votant sur Top.gg, en vous abonnant chaque mois ou en achetant un plan à vie.",
+    metaKeywords:
+      "tarifs Orax, Orax Plus, bot Discord premium, bot Discord gratuit, vote Top.gg",
+    ogImageAlt: "Logo Orax",
+    pageTitle: "Tarifs",
+    pageSubtitle:
+      "Orax est gratuit pour tous. Débloquez Orax Plus pour augmenter les limites de votre serveur — votez gratuitement sur Top.gg, abonnez-vous chaque mois ou achetez un plan à vie.",
+    tierFreeName: "Gratuit",
+    tierFreeDescription:
+      "Tout ce dont vous avez besoin pour commencer à connecter vos communautés.",
+    tierFreeFeature1: "Jusqu'à 2 groupes interserveurs par serveur",
+    tierFreeFeature2: "Jusqu'à 5 salons synchronisés par groupe",
+    tierFreeFeature3: "Support communautaire",
+    tierFreeCta: "Ajouter à Discord",
+    tierPlusBadge: "Le plus populaire",
+    tierPlusName: "Orax Plus",
+    tierPlusDescription:
+      "Pour les utilisateurs avancés et les grandes communautés qui ont besoin de plus.",
+    tierPlusFeature1: "Jusqu'à 100 groupes interserveurs par serveur",
+    tierPlusFeature2: "Jusqu'à 50 salons synchronisés par groupe",
+    tierPlusFeature3: "Traduction automatique",
+    tierPlusFeature4: "Commande /resync",
+    tierPlusFeature5: "Livraison prioritaire des messages",
+    tierPlusFeature6: "Support prioritaire par e-mail",
+    tierPlusCta: "Obtenir Orax Plus",
+    freeVoteNotePrefix: "ou obtenez-le",
+    freeVoteNoteStrong: "gratuitement",
+    freeVoteNoteSuffix: "en votant sur Top.gg",
+    fromPrice: "à partir de {price}",
+    perMonth: "/ mois",
+    waysSectionTitle: "Trois façons d'obtenir Orax Plus",
+    waysVoteTitle: "Voter pour débloquer",
+    waysVotePrice: "Gratuit",
+    waysVoteDescription:
+      "Votez une fois par semaine pour Orax sur Top.gg ou Fluxerlist. L'activation est automatique et dure jusqu'à l'expiration de votre vote.",
+    waysMonthlyTitle: "Abonnement mensuel",
+    waysMonthlyPrice: "{price} / mois",
+    waysMonthlyDescription:
+      "Un abonnement mensuel récurrent facturé en toute sécurité via Stripe. Annulable à tout moment.",
+    waysLifetimeTitle: "À vie",
+    waysLifetimePrice: "19,99 $ une fois",
+    waysLifetimeDescription:
+      "Payez une fois et conservez Orax Plus pour toujours sur ce serveur. Aucun frais récurrent.",
+    waysNote:
+      "Orax Plus est activé par serveur Discord. Ouvrez le tableau de bord, sélectionnez votre serveur et choisissez la façon dont vous souhaitez le débloquer.",
+    faqTitle: "Questions fréquentes",
+    faq1Question: "Orax est-il vraiment gratuit ?",
+    faq1Answer:
+      "Oui. Le plan gratuit vous permet de créer des groupes interserveurs et de synchroniser des salons sans frais. Orax Plus est entièrement optionnel.",
+    faq2Question: "Comment fonctionne le vote ?",
+    faq2Answer:
+      "Les serveurs Discord votent pour Orax sur Top.gg et les serveurs Fluxer votent sur Fluxerlist. Orax Plus s'active automatiquement et reste actif jusqu'à l'expiration du vote — votez à nouveau pour le prolonger.",
+    faq3Question: "Puis-je annuler mon abonnement mensuel ?",
+    faq3Answer:
+      "Absolument. Vous pouvez annuler à tout moment et vous conserverez l'accès jusqu'à la fin de votre période de facturation.",
+    faq4Question: "Puis-je obtenir un remboursement ?",
+    faq4Answer:
+      "Oui. Si vous n'êtes pas satisfait, vous pouvez demander un remboursement complet dans les 15 jours suivant votre achat en contactant le support.",
+    faq4SupportLink: "support@oraxbot.com",
+    faq5Question: "Orax Plus est-il par serveur ou par compte ?",
+    faq5Answer:
+      "Orax Plus est activé par serveur Discord. Chaque serveur que vous souhaitez améliorer nécessite son propre plan Orax Plus. Besoin de le déplacer ? Vous pouvez transférer votre Orax Plus vers un autre serveur à tout moment — il suffit de contacter le support.",
+    faq5SupportLink: "contacter le support",
+    faqMore: "Plus",
+    ariaLabelPricing: "Tarifs",
+    ariaLabelFreeTier: "Offre gratuite",
+    ariaLabelPlusTier: "Offre Orax Plus",
+    ariaLabelWays: "Façons d'obtenir Orax Plus",
+    ariaLabelFaq: "Questions fréquentes",
+  },
+
+  login: {
+    metaTitle: "Tableau de bord Orax — Choisissez votre plateforme",
+    metaDescription:
+      "Connectez-vous au tableau de bord Orax avec Discord ou Fluxer pour gérer vos groupes interserveur.",
+    metaKeywords:
+      "connexion Orax, connexion Discord, connexion Fluxer, tableau de bord",
+    ogImageAlt: "Logo Orax",
+    pageTitle: "Bienvenue sur Orax",
+    pageSubtitle:
+      "Choisissez une plateforme pour accéder à votre tableau de bord",
+    newHere: "Nouveau ici ?",
+    learnMore: "En savoir plus sur Orax",
+    loginWith: "Se connecter avec {platform}",
+    loading: "Chargement…",
+    exchanging: "Finalisation de la connexion…",
   },
 };
 

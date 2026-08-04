@@ -1,8 +1,12 @@
-import { Html, Head, Main, NextScript } from "next/document";
+import { Html, Head, Main, NextScript, DocumentContext, DocumentInitialProps } from "next/document";
 
-export default function App() {
+interface AppDocumentProps extends DocumentInitialProps {
+  lang: string;
+}
+
+export default function App({ lang }: AppDocumentProps) {
   return (
-    <Html lang="en">
+    <Html lang={lang}>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#5865F2" />
@@ -24,3 +28,12 @@ export default function App() {
     </Html>
   );
 }
+
+App.getInitialProps = async (ctx: DocumentContext): Promise<AppDocumentProps> => {
+  const initialProps = await ctx.defaultGetInitialProps(ctx);
+  const path = ctx.asPath || ctx.pathname || "/";
+  let lang = "en";
+  if (path.startsWith("/fr")) lang = "fr";
+  else if (path.startsWith("/es")) lang = "es";
+  return { ...initialProps, lang };
+};

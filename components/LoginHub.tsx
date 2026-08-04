@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import Head from "next/head";
 import Link from "next/link";
 import styles from "../styles/PlatformLogin.module.css";
 import { platformList, getPlatform } from "../utils/platforms";
@@ -11,10 +10,15 @@ import {
 import { getCookie, setCookie } from "../utils/cookies";
 import { notify } from "./ui/NotificationSystem";
 import Loading from "./Loading";
+import LocalizedHead from "./LocalizedHead";
+import { createTranslator, type LanguageCode } from "../utils/i18n";
 
-const TITLE = "Orax Dashboard — Choose your platform";
-const DESCRIPTION =
-  "Sign in to the Orax dashboard with Discord or Fluxer to manage your interserver groups.";
+const LOGIN_PATH = "/login";
+
+interface LoginHubProps {
+  autoRedirect?: boolean;
+  lang?: LanguageCode;
+}
 
 /**
  * Platform chooser + OAuth callback handler shared by the `/dashboard`
@@ -38,15 +42,17 @@ const DESCRIPTION =
  */
 export default function LoginHub({
   autoRedirect = false,
-}: {
-  autoRedirect?: boolean;
-}) {
+  lang = "en",
+}: LoginHubProps) {
+  const t = createTranslator(lang);
+
   const [status, setStatus] = useState<
     "loading" | "ready" | "exchanging"
   >("loading");
 
   useEffect(() => {
     void handleEntry();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function handleEntry() {
@@ -60,8 +66,8 @@ export default function LoginHub({
 
       if (!targetPlatform) {
         notify.error(
-          "Login Failed",
-          "We could not determine which platform you tried to log in with.",
+          t("notifications.loginFailedTitle"),
+          t("notifications.loginFailedPlatformDesc"),
         );
         cleanOAuthQuery();
         setStatus("ready");
@@ -73,8 +79,8 @@ export default function LoginHub({
         const response = await exchangeOauthCode(targetPlatform, code);
         if (!response.access_token || response.access_token === "undefined") {
           notify.error(
-            "Login Failed",
-            "Invalid authentication response. Please try again.",
+            t("notifications.loginFailedTitle"),
+            t("notifications.loginFailedDesc"),
           );
           cleanOAuthQuery();
           setStatus("ready");
@@ -103,8 +109,8 @@ export default function LoginHub({
         return;
       } catch (error) {
         notify.error(
-          "Login Failed",
-          "Unable to complete authentication. Please try again.",
+          t("notifications.loginFailedTitle"),
+          t("notifications.loginFailedRetry"),
         );
         cleanOAuthQuery();
         setStatus("ready");
@@ -159,8 +165,8 @@ export default function LoginHub({
           <div className="spinner" aria-hidden="true" />
           <span>
             {status === "exchanging"
-              ? "Completing sign-in..."
-              : "Loading..."}
+              ? t("login.exchanging")
+              : t("login.loading")}
           </span>
         </div>
         <Loading />
@@ -170,24 +176,26 @@ export default function LoginHub({
 
   return (
     <>
-      <Head>
-        <title>{TITLE}</title>
-        <meta name="description" content={DESCRIPTION} />
-        <meta name="robots" content="noindex, nofollow" />
-      </Head>
+      <LocalizedHead
+        lang={lang}
+        path={LOGIN_PATH}
+        title={t("login.metaTitle")}
+        description={t("login.metaDescription")}
+        keywords={t("login.metaKeywords")}
+        imageAlt={t("login.ogImageAlt")}
+        noindex
+      />
       <div className={styles.container}>
         <div className={styles.card}>
           <img
             src="/logo.png"
-            alt="Orax logo"
+            alt={t("login.ogImageAlt")}
             className={styles.logo}
             width={56}
             height={56}
           />
-          <h1 className={styles.title}>Welcome to Orax</h1>
-          <p className={styles.subtitle}>
-            Choose a platform to access your dashboard
-          </p>
+          <h1 className={styles.title}>{t("login.pageTitle")}</h1>
+          <p className={styles.subtitle}>{t("login.pageSubtitle")}</p>
           <div className={styles.buttonList}>
             {platformList.map((platform) => (
               <button
@@ -201,13 +209,15 @@ export default function LoginHub({
                 onClick={() => handleLoginClick(platform)}
               >
                 <PlatformIcon platform={platform} />
-                <span>Login with {platform.label}</span>
+                <span>
+                  {t("login.loginWith", { platform: platform.label })}
+                </span>
               </button>
             ))}
           </div>
           <p className={styles.footer}>
-            New here?{" "}
-            <Link href="/">Learn more about Orax</Link>
+            {t("login.newHere")}{" "}
+            <Link href="/">{t("login.learnMore")}</Link>
           </p>
         </div>
       </div>
