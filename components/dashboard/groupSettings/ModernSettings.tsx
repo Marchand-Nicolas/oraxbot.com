@@ -11,7 +11,7 @@ import TextField from "./settings/textField";
 import CheckboxField from "./settings/checkboxField";
 import TextareaField from "./settings/textareaField";
 import { getPlatform } from "../../../utils/platforms";
-import config from "../../../utils/config.json";
+import type { OraxPlusPricing } from "../../../utils/pricing";
 import { t, getVoteLabel, getGlobalLanguage } from "../../../utils/i18n";
 
 interface ModernSettingsProps {
@@ -19,6 +19,7 @@ interface ModernSettingsProps {
   onRefreshOraxPlus?: () => Promise<OraxPlusStatus | undefined>;
   onStartOraxPlusVote?: () => void;
   onStartOraxPlusCheckout?: (plan?: "monthly" | "lifetime") => void;
+  pricing: OraxPlusPricing;
 }
 
 const ModernSettings = ({
@@ -26,6 +27,7 @@ const ModernSettings = ({
   onRefreshOraxPlus,
   onStartOraxPlusVote,
   onStartOraxPlusCheckout,
+  pricing,
 }: ModernSettingsProps) => {
   const router = useRouter();
   const params = new URLSearchParams(router.asPath.split("?")[1]);
@@ -193,7 +195,7 @@ const ModernSettings = ({
                 ]
               : []),
             {
-              label: t("oraxPlus.subscribe", { price: config.oraxPlusMonthlyPrice }),
+              label: t("oraxPlus.subscribe", { price: pricing.monthly }),
               variant: "primary",
               disabled: !onStartOraxPlusCheckout,
               onClick: () => {
@@ -202,7 +204,7 @@ const ModernSettings = ({
               },
             },
             {
-              label: t("oraxPlus.lifetime"),
+              label: t("oraxPlus.lifetime", { price: pricing.lifetime }),
               variant: "primary",
               disabled: !onStartOraxPlusCheckout,
               onClick: () => {

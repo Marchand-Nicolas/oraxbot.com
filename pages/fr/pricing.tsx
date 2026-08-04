@@ -1,5 +1,22 @@
+import type { GetServerSideProps } from "next";
 import Pricing from "../../components/pages/Pricing";
+import {
+  getPricingRegion,
+  type PricingRegion,
+} from "../../utils/pricing";
 
-export default function PricingFr() {
-  return <Pricing lang="fr" />;
+interface PricingPageProps {
+  pricingRegion: PricingRegion;
+}
+
+export const getServerSideProps: GetServerSideProps<PricingPageProps> = async ({
+  req,
+}) => ({
+  props: {
+    pricingRegion: getPricingRegion(req.headers["x-vercel-ip-country"]),
+  },
+});
+
+export default function PricingFr({ pricingRegion }: PricingPageProps) {
+  return <Pricing lang="fr" pricingRegion={pricingRegion} />;
 }

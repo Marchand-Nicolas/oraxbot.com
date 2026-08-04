@@ -51,8 +51,8 @@ const en = {
       "Expires in {time}, vote again to extend your plan.",
     ownedGroups: "owned groups",
     channelsPerGroup: "channels per group",
-    subscribe: "Subscribe ${price}/mo",
-    lifetime: "Lifetime $19.99",
+    subscribe: "Subscribe {price}/mo",
+    lifetime: "Lifetime {price}",
     footnotePrefix:
       "15-day refund guarantee. Need to move Orax Plus to another server? ",
     footnoteLink: "Contact support",
@@ -429,7 +429,7 @@ const en = {
     waysMonthlyDescription:
       "A recurring monthly subscription billed securely through Stripe. Cancel anytime.",
     waysLifetimeTitle: "Lifetime",
-    waysLifetimePrice: "$19.99 once",
+    waysLifetimePrice: "{price} once",
     waysLifetimeDescription:
       "Pay once and keep Orax Plus forever for this server. No recurring charges.",
     waysNote:

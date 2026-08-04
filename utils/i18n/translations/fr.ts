@@ -46,8 +46,8 @@ const fr: Translation = {
       "Expire dans {time}, votez à nouveau pour prolonger votre plan.",
     ownedGroups: "groupes possédés",
     channelsPerGroup: "canaux par groupe",
-    subscribe: "S'abonner ${price}/mois",
-    lifetime: "À vie 19,99 $",
+    subscribe: "S'abonner {price}/mois",
+    lifetime: "À vie {price}",
     footnotePrefix:
       "Garantie de remboursement de 15 jours. Besoin de déplacer Orax Plus vers un autre serveur ? ",
     footnoteLink: "Contactez l'assistance",
@@ -442,7 +442,7 @@ const fr: Translation = {
     waysMonthlyDescription:
       "Un abonnement mensuel récurrent facturé en toute sécurité via Stripe. Annulable à tout moment.",
     waysLifetimeTitle: "À vie",
-    waysLifetimePrice: "19,99 $ une fois",
+    waysLifetimePrice: "{price} une fois",
     waysLifetimeDescription:
       "Payez une fois et conservez Orax Plus pour toujours sur ce serveur. Aucun frais récurrent.",
     waysNote:

@@ -1,3 +1,4 @@
+import type { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import dashboardStyles from "../../../../styles/Dashboard.module.css";
 import styles from "../../../../styles/dashboard/OwnedGroup.module.css";
@@ -28,8 +29,25 @@ import {
   t,
 } from "../../../../utils/i18n";
 import { LanguageProvider } from "../../../../hooks/useLanguage";
+import {
+  getOraxPlusPricing,
+  getPricingRegion,
+  type PricingRegion,
+} from "../../../../utils/pricing";
 
-export default function OwnedGroup() {
+interface OwnedGroupProps {
+  pricingRegion: PricingRegion;
+}
+
+export const getServerSideProps: GetServerSideProps<OwnedGroupProps> = async ({
+  req,
+}) => ({
+  props: {
+    pricingRegion: getPricingRegion(req.headers["x-vercel-ip-country"]),
+  },
+});
+
+export default function OwnedGroup({ pricingRegion }: OwnedGroupProps) {
   const router = useRouter();
   const { groupId, platform: platformSlug } = router.query;
   const platform =
@@ -47,6 +65,7 @@ export default function OwnedGroup() {
   const guildId = params.get("guild") ?? undefined;
   const guildIcon = params.get("icon");
   const groupName = params.get("groupName");
+  const pricing = getOraxPlusPricing(pricingRegion, lang);
 
   // Configure the API client to use this platform's session cookie so that
   // any fetch calls made from child components resolve to the right token.
@@ -352,6 +371,7 @@ export default function OwnedGroup() {
               onRefreshOraxPlus={refreshOraxPlusStatus}
               onStartOraxPlusVote={startOraxPlusVote}
               onStartOraxPlusCheckout={startOraxPlusCheckout}
+              pricing={pricing}
             />
             <ModernAdvancedSettings />
           </>

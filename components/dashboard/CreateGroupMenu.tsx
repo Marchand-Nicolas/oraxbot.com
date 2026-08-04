@@ -8,6 +8,7 @@ import { notify } from "../ui/NotificationSystem";
 import { platformApi } from "../../utils/platformApi";
 import type { Channel, OraxPlusStatus } from "../../types";
 import type { PlatformConfig } from "../../utils/platforms";
+import type { OraxPlusPricing } from "../../utils/pricing";
 import { t, getVoteLabel, getGlobalLanguage } from "../../utils/i18n";
 
 interface CreateGroupMenuProps {
@@ -18,6 +19,7 @@ interface CreateGroupMenuProps {
   onStartOraxPlusVote?: () => void;
   onStartOraxPlusCheckout?: (plan?: "monthly" | "lifetime") => void;
   platform?: PlatformConfig;
+  pricing: OraxPlusPricing;
 }
 
 export default function CreateGroupMenu(props: CreateGroupMenuProps) {
@@ -202,7 +204,9 @@ export default function CreateGroupMenu(props: CreateGroupMenuProps) {
                 ]
               : []),
             {
-              label: t("oraxPlus.subscribe", { price: config.oraxPlusMonthlyPrice }),
+              label: t("oraxPlus.subscribe", {
+                price: props.pricing.monthly,
+              }),
               variant: "primary",
               disabled: !props.onStartOraxPlusCheckout,
               onClick: () => {
@@ -211,7 +215,9 @@ export default function CreateGroupMenu(props: CreateGroupMenuProps) {
               },
             },
             {
-              label: t("oraxPlus.lifetime"),
+              label: t("oraxPlus.lifetime", {
+                price: props.pricing.lifetime,
+              }),
               variant: "primary",
               disabled: !props.onStartOraxPlusCheckout,
               onClick: () => {

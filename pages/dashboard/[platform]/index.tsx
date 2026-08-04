@@ -1,3 +1,4 @@
+import type { GetServerSideProps } from "next";
 import styles from "../../../styles/Dashboard.module.css";
 import type {
   DiscordUser,
@@ -32,7 +33,6 @@ import {
 } from "../../../utils/apiClient";
 import { getPlatform, type PlatformConfig } from "../../../utils/platforms";
 import { platformApi } from "../../../utils/platformApi";
-import config from "../../../utils/config.json";
 import { usePlatformAuth } from "../../../hooks/usePlatformAuth";
 import {
   getLanguageByIndex,
@@ -41,6 +41,23 @@ import {
   t as tt,
 } from "../../../utils/i18n";
 import { LanguageProvider } from "../../../hooks/useLanguage";
+import {
+  getOraxPlusPricing,
+  getPricingRegion,
+  type PricingRegion,
+} from "../../../utils/pricing";
+
+interface PlatformDashboardPageProps {
+  pricingRegion: PricingRegion;
+}
+
+export const getServerSideProps: GetServerSideProps<
+  PlatformDashboardPageProps
+> = async ({ req }) => ({
+  props: {
+    pricingRegion: getPricingRegion(req.headers["x-vercel-ip-country"]),
+  },
+});
 
 function formatRemainingPlanTime(expiresAt?: string | null) {
   if (!expiresAt) return null;
@@ -79,7 +96,9 @@ function formatRemainingPlanTime(expiresAt?: string | null) {
  * Thin Next.js page wrapper that resolves the platform from the URL and
  * redirects to the login hub when the slug is unknown.
  */
-export default function PlatformDashboardPage() {
+export default function PlatformDashboardPage({
+  pricingRegion,
+}: PlatformDashboardPageProps) {
   const router = useRouter();
   const platformSlug = router.query.platform;
   const platform =
@@ -96,10 +115,22 @@ export default function PlatformDashboardPage() {
     return <Loading />;
   }
 
-  return <Dashboard key={platform.slug} platform={platform} />;
+  return (
+    <Dashboard
+      key={platform.slug}
+      platform={platform}
+      pricingRegion={pricingRegion}
+    />
+  );
 }
 
-function Dashboard({ platform }: { platform: PlatformConfig }) {
+function Dashboard({
+  platform,
+  pricingRegion,
+}: {
+  platform: PlatformConfig;
+  pricingRegion: PricingRegion;
+}) {
   const { user, guilds, loading } = usePlatformAuth(platform);
 
   const [activeUser, setActiveUser] = useState<DiscordUser | undefined>(
@@ -238,6 +269,7 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
   const channelLimit = oraxPlus?.limits?.channelsPerGroup || 5;
   const voteProvider = platform.vote;
   const lang = getLanguageByIndex(settings.lang ?? 0);
+  const pricing = getOraxPlusPricing(pricingRegion, lang);
   setGlobalLanguage(lang);
   const voteLabelText = voteProvider
     ? getVoteLabel(lang, voteProvider.provider)
@@ -587,6 +619,7 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
                       ownedGroupsCount={ownedGroupsCount}
                       oraxPlus={oraxPlus}
                       platform={platform}
+                      pricing={pricing}
                       onStartOraxPlusVote={startOraxPlusVote}
                       onStartOraxPlusCheckout={startOraxPlusCheckout}
                       setRefreshGuildDatas={setRefreshGuildDatas}
@@ -719,13 +752,13 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
                     className={styles.primaryButton}
                     onClick={() => startOraxPlusCheckout("monthly")}
                   >
-                    {tt("oraxPlus.subscribe", { price: config.oraxPlusMonthlyPrice })}
+                    {tt("oraxPlus.subscribe", { price: pricing.monthly })}
                   </button>
                   <button
                     className={styles.primaryButton}
                     onClick={() => startOraxPlusCheckout("lifetime")}
                   >
-                    {tt("oraxPlus.lifetime")}
+                    {tt("oraxPlus.lifetime", { price: pricing.lifetime })}
                   </button>
                 </div>
               )}
@@ -848,7 +881,7 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
                 ]
               : []),
             {
-              label: tt("oraxPlus.subscribe", { price: config.oraxPlusMonthlyPrice }),
+              label: tt("oraxPlus.subscribe", { price: pricing.monthly }),
               variant: "primary" as const,
               onClick: () => {
                 setShowGroupLimitModal(false);
@@ -856,7 +889,7 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
               },
             },
             {
-              label: tt("oraxPlus.lifetime"),
+              label: tt("oraxPlus.lifetime", { price: pricing.lifetime }),
               variant: "primary" as const,
               onClick: () => {
                 setShowGroupLimitModal(false);

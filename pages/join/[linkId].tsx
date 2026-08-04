@@ -1,3 +1,4 @@
+import type { GetServerSideProps } from "next";
 import { useEffect, useState } from "react";
 import styles from "../../styles/Join.module.css";
 import dashboardStyles from "../../styles/Dashboard.module.css";
@@ -13,6 +14,11 @@ import GuildIcon from "../../components/GuildIcon";
 import { openTopggVote, startOraxPlusCheckout } from "../../utils/oraxPlus";
 import type { Channel, DiscordGuild, DiscordUser } from "../../types";
 import { t } from "../../utils/i18n";
+import {
+  getOraxPlusPricing,
+  getPricingRegion,
+  type PricingRegion,
+} from "../../utils/pricing";
 
 interface ChannelLimitData {
   current: number;
@@ -21,8 +27,21 @@ interface ChannelLimitData {
   groupOwnerId: string;
 }
 
-export default function JoinGroup() {
+interface JoinGroupProps {
+  pricingRegion: PricingRegion;
+}
+
+export const getServerSideProps: GetServerSideProps<JoinGroupProps> = async ({
+  req,
+}) => ({
+  props: {
+    pricingRegion: getPricingRegion(req.headers["x-vercel-ip-country"]),
+  },
+});
+
+export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
   const router = useRouter();
+  const pricing = getOraxPlusPricing(pricingRegion, "en");
   const [guilds, setGuilds] = useState<DiscordGuild[]>([]);
   const [user, setUser] = useState<DiscordUser | null>(null);
   const [group, setGroup] = useState<Record<string, unknown>>({});
@@ -352,7 +371,7 @@ export default function JoinGroup() {
                 </p>
                 {isGroupOwner ? (
                   <p style={{ fontSize: "14px", opacity: 0.8 }}>
-                    {`Subscribe to Orax Plus ($${config.oraxPlusMonthlyPrice}/mo) to raise the limit to `}{channelLimitData.maxLimit} channels per group.
+                    {`Subscribe to Orax Plus (${pricing.monthly}/mo) to raise the limit to `}{channelLimitData.maxLimit} channels per group.
                   </p>
                 ) : (
                   <p style={{ fontSize: "14px", opacity: 0.8 }}>
@@ -373,7 +392,7 @@ export default function JoinGroup() {
             },
             {
               label: isGroupOwner
-                ? `Subscribe $${config.oraxPlusMonthlyPrice}/mo`
+                ? `Subscribe ${pricing.monthly}/mo`
                 : "Subscribe (owner only)",
               variant: "secondary",
               disabled: !isGroupOwner,
@@ -383,7 +402,9 @@ export default function JoinGroup() {
               },
             },
             {
-              label: isGroupOwner ? "Lifetime $19.99" : "Lifetime (owner only)",
+              label: isGroupOwner
+                ? `Lifetime ${pricing.lifetime}`
+                : "Lifetime (owner only)",
               variant: "secondary",
               disabled: !isGroupOwner,
               onClick: () => {

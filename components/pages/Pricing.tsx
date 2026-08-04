@@ -5,17 +5,21 @@ import Header from "../Header";
 import LocalizedHead from "../LocalizedHead";
 import config from "../../utils/config.json";
 import { createTranslator, type LanguageCode } from "../../utils/i18n";
+import {
+  getOraxPlusPricing,
+  type PricingRegion,
+} from "../../utils/pricing";
 
 const PRICING_PATH = "/pricing";
 
 interface PricingProps {
   lang: LanguageCode;
+  pricingRegion: PricingRegion;
 }
 
-const monthlyPrice = `$${config.oraxPlusMonthlyPrice}`;
-
-export default function Pricing({ lang }: PricingProps) {
+export default function Pricing({ lang, pricingRegion }: PricingProps) {
   const t = createTranslator(lang);
+  const pricing = getOraxPlusPricing(pricingRegion, lang);
   const title = t("pricing.metaTitle");
   const description = t("pricing.metaDescription");
 
@@ -90,7 +94,7 @@ export default function Pricing({ lang }: PricingProps) {
             <p className={styles.tierName}>{t("pricing.tierPlusName")}</p>
             <div className={styles.price}>
               <span className={styles.priceAmount}>
-                {t("pricing.fromPrice", { price: monthlyPrice })}
+                {t("pricing.fromPrice", { price: pricing.monthly })}
               </span>
               <span className={styles.pricePeriod}>
                 {t("pricing.perMonth")}
@@ -171,14 +175,16 @@ export default function Pricing({ lang }: PricingProps) {
             <div className={styles.way}>
               <h3>{t("pricing.waysMonthlyTitle")}</h3>
               <p className={styles.wayPrice}>
-                {t("pricing.waysMonthlyPrice", { price: monthlyPrice })}
+                {t("pricing.waysMonthlyPrice", { price: pricing.monthly })}
               </p>
               <p>{t("pricing.waysMonthlyDescription")}</p>
             </div>
             <div className={styles.way}>
               <h3>{t("pricing.waysLifetimeTitle")}</h3>
               <p className={styles.wayPrice}>
-                {t("pricing.waysLifetimePrice")}
+                {t("pricing.waysLifetimePrice", {
+                  price: pricing.lifetime,
+                })}
               </p>
               <p>{t("pricing.waysLifetimeDescription")}</p>
             </div>
