@@ -111,6 +111,17 @@ export default function Pricing() {
               </li>
               <li>
                 <span className={styles.check}>&#10003;</span>
+                <a
+                  href="https://docs.oraxbot.com/premium"
+                  target="_blank"
+                  rel="noreferrer"
+                  className={styles.featureLink}
+                >
+                  Priority message delivery
+                </a>
+              </li>
+              <li>
+                <span className={styles.check}>&#10003;</span>
                 Priority email support
               </li>
             </ul>

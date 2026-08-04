@@ -671,10 +671,10 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
                 <h2>Orax Plus</h2>
                 <p>
                   {oraxPlus?.active
-                    ? "This server has the extended Orax Plus limits, auto-translate, and the /resync command."
+                    ? "This server has the extended Orax Plus limits, auto-translate, the /resync command, and priority message delivery."
                     : voteProvider
-                      ? `Vote for free on ${voteProvider.provider === "fluxerlist" ? "Fluxerlist" : "Top.gg"}, subscribe monthly, or buy lifetime to unlock higher limits, auto-translate, and /resync.`
-                      : "Subscribe monthly or buy lifetime to unlock higher limits, auto-translate, and /resync."}
+                      ? `Vote for free on ${voteProvider.provider === "fluxerlist" ? "Fluxerlist" : "Top.gg"}, subscribe monthly, or buy lifetime to unlock higher limits, auto-translate, /resync, and priority message delivery.`
+                      : "Subscribe monthly or buy lifetime to unlock higher limits, auto-translate, /resync, and priority message delivery."}
                 </p>
                 {votePlanExpiresIn && (
                   <p className={styles.planRenewalNote}>
@@ -767,8 +767,8 @@ function Dashboard({ platform }: { platform: PlatformConfig }) {
                 <p className="hint">
                   Free servers can own up to 2 groups and link up to 5 channels
                   per group. Orax Plus raises this server to 100 groups and 50
-                  channels per group, and unlocks auto-translate and the
-                  &apos;/resync&apos; command.
+                  channels per group, and unlocks auto-translate, priority
+                  message delivery, and the &apos;/resync&apos; command.
                 </p>
                 <div className="line wrap">
                   <p>
