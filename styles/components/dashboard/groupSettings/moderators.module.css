@@ -1,0 +1,247 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.header > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.description {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.addButton {
+  background: linear-gradient(135deg, #5865f2 0%, #4752c4 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    filter 0.15s ease;
+  white-space: nowrap;
+}
+
+.addButton:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.addButton:active {
+  transform: translateY(0);
+}
+
+.state {
+  padding: 14px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  font-size: 13px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 48vh;
+  overflow-y: auto;
+  padding-right: 4px;
+  width: 100%;
+}
+
+.userRow {
+  display: grid;
+  grid-template-columns: 40px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.userInfo strong {
+  color: #ffffff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  width: 100%;
+}
+
+.userInfo span {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.removeButton {
+  width: 38px !important;
+  min-width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 12px;
+  background: rgba(252, 81, 81, 0.15);
+  color: #ff8f8f;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease;
+  margin-top: 0 !important;
+  padding: 0;
+  flex: 0 0 38px;
+  justify-self: end;
+  margin-left: auto;
+}
+
+.removeButton:hover:not(:disabled) {
+  background: rgba(252, 81, 81, 0.28);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.removeButton:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.removeButton svg {
+  width: 18px;
+  height: 18px;
+}
+
+.addRowButton {
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #5865f2 0%, #4752c4 100%);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition:
+    filter 0.15s ease,
+    transform 0.15s ease;
+  white-space: nowrap;
+  min-width: 78px;
+  justify-self: end;
+  margin-left: auto;
+}
+
+.addRowButton:hover:not(:disabled) {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.addRowButton:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.alreadyButton {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 14px;
+  cursor: not-allowed;
+  white-space: nowrap;
+  min-width: 78px;
+  justify-self: end;
+  margin-left: auto;
+}
+
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.search {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.25);
+  color: #ffffff;
+  font-size: 14px;
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.search::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.search:focus {
+  border-color: #5865f2;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+@media screen and (max-width: 520px) {
+  .userRow {
+    grid-template-columns: 40px 1fr;
+  }
+
+  .removeButton,
+  .addRowButton,
+  .alreadyButton {
+    justify-self: end;
+    margin-top: 6px;
+    grid-column: 1 / -1;
+    width: 100% !important;
+    max-width: 100%;
+  }
+}

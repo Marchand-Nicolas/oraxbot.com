@@ -187,12 +187,12 @@ a * {
   color: white;
 }
 
-.popup button {
+.popup .button {
   width: 100% !important;
   margin-top: 10px;
 }
 
-.popup button.default {
+.popup .button.default {
   background: var(--secondary);
   border: none;
   color: white;

@@ -6,6 +6,7 @@ import ActionModal from "../../ui/ActionModal";
 import StarIcon from "../../ui/icons/StarIcon";
 import CustomUsernames from "./settings/customUsernames";
 import LogMessages from "./settings/logMessages";
+import ModeratorsField from "./ModeratorsField";
 import OptionsField from "./settings/optionField";
 import TextField from "./settings/textField";
 import CheckboxField from "./settings/checkboxField";
@@ -130,15 +131,7 @@ const ModernSettings = ({
           <h3 className={styles.sectionTitle}>{t("groupSettings.moderationSecurity")}</h3>
 
           <div className={styles.settingItem}>
-            <TextField
-              label={t("groupSettings.moderators")}
-              description={t("groupSettings.moderatorsDesc")}
-              fieldName="moderators"
-              groupId={groupId}
-              guildId={guildId}
-              placeholder={t("groupSettings.moderatorsPlaceholder")}
-              parser={(value) => value.replace(" ", ",")}
-            />
+            <ModeratorsField groupId={groupId} guildId={guildId} />
           </div>
 
           <div className={styles.settingItem}>

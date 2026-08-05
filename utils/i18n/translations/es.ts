@@ -12,6 +12,7 @@ const es: Translation = {
     delete: "Eliminar",
     rename: "Renombrar",
     remove: "Quitar",
+    add: "Añadir",
     confirm: "Confirmar",
     human: "Humano",
     bot: "Bot",
@@ -154,8 +155,32 @@ const es: Translation = {
     moderationSecurity: "Moderación y seguridad",
     moderators: "Moderadores",
     moderatorsDesc:
-      "Por defecto, Orax considera moderadores a todos los miembros con el permiso 'Gestionar mensajes'. Puedes anular este comportamiento escribiendo una lista de nombres de usuario separados por comas.",
-    moderatorsPlaceholder: "Introduce nombres de usuario separados por comas…",
+      "Por defecto, Orax considera moderadores a todos los miembros con el permiso 'Gestionar mensajes'. Puedes anular este comportamiento añadiendo usuarios concretos de cualquier servidor del grupo a continuación.",
+    addModerator: "Añadir un moderador",
+    moderatorSearchPlaceholder: "Buscar un usuario por nombre…",
+    moderatorsEmpty: "Todavía no se ha añadido ningún moderador.",
+    moderatorsLoading: "Cargando moderadores…",
+    moderatorAddedTitle: "Moderador añadido",
+    moderatorAddedDesc: "El usuario ya puede ejecutar los comandos de moderación.",
+    moderatorAddFailedTitle: "Error al añadir moderador",
+    moderatorAddFailedDesc:
+      "No se pudo añadir a este usuario como moderador. Inténtalo de nuevo.",
+    moderatorAddAlreadyTitle: "Ya es moderador",
+    moderatorAddAlreadyDesc: "Este usuario ya es moderador del grupo.",
+    moderatorRemovedTitle: "Moderador eliminado",
+    moderatorRemovedDesc:
+      "El usuario ya no tiene permisos de moderador en este grupo.",
+    moderatorRemoveFailedTitle: "Error al eliminar moderador",
+    moderatorRemoveFailedDesc:
+      "No se pudo eliminar a este moderador. Inténtalo de nuevo.",
+    moderatorsLoadFailedTitle: "Error al cargar moderadores",
+    moderatorsLoadFailedDesc:
+      "No se pudo obtener la lista de moderadores. Inténtalo de nuevo.",
+    usersLoadFailedTitle: "Error al cargar usuarios",
+    usersLoadFailedDesc:
+      "No se pudo obtener la lista de usuarios de este grupo. Inténtalo de nuevo.",
+    usersEmpty: "Ningún usuario coincide con tu búsqueda.",
+    usersLoading: "Buscando usuarios…",
     blacklist: "Lista negra",
     blacklistDesc:
       "Evitar que los mensajes que contengan ciertas palabras se envíen en el interservidor. Separados por comas.",

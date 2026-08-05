@@ -12,6 +12,7 @@ const fr: Translation = {
     delete: "Supprimer",
     rename: "Renommer",
     remove: "Retirer",
+    add: "Ajouter",
     confirm: "Confirmer",
     human: "Humain",
     bot: "Bot",
@@ -158,9 +159,33 @@ const fr: Translation = {
     moderationSecurity: "Modération et sécurité",
     moderators: "Modérateurs",
     moderatorsDesc:
-      "Par défaut, Orax considère tous les membres ayant la permission « Gérer les messages » comme des modérateurs. Vous pouvez remplacer ce comportement en écrivant une liste de noms d'utilisateur séparés par des virgules.",
-    moderatorsPlaceholder:
-      "Entrez les noms d'utilisateur séparés par des virgules…",
+      "Par défaut, Orax considère tous les membres ayant la permission « Gérer les messages » comme des modérateurs. Vous pouvez remplacer ce comportement en ajoutant des utilisateurs précis depuis n'importe quel serveur du groupe ci-dessous.",
+    addModerator: "Ajouter un modérateur",
+    moderatorSearchPlaceholder: "Rechercher un utilisateur par nom…",
+    moderatorsEmpty: "Aucun modérateur n'a encore été ajouté.",
+    moderatorsLoading: "Chargement des modérateurs…",
+    moderatorAddedTitle: "Modérateur ajouté",
+    moderatorAddedDesc: "L'utilisateur peut désormais exécuter les commandes de modération.",
+    moderatorAddFailedTitle: "Échec de l'ajout du modérateur",
+    moderatorAddFailedDesc:
+      "Impossible d'ajouter cet utilisateur comme modérateur. Veuillez réessayer.",
+    moderatorAddAlreadyTitle: "Déjà modérateur",
+    moderatorAddAlreadyDesc:
+      "Cet utilisateur est déjà modérateur du groupe.",
+    moderatorRemovedTitle: "Modérateur retiré",
+    moderatorRemovedDesc:
+      "L'utilisateur n'a plus les permissions de modérateur dans ce groupe.",
+    moderatorRemoveFailedTitle: "Échec du retrait du modérateur",
+    moderatorRemoveFailedDesc:
+      "Impossible de retirer ce modérateur. Veuillez réessayer.",
+    moderatorsLoadFailedTitle: "Échec du chargement des modérateurs",
+    moderatorsLoadFailedDesc:
+      "Impossible de récupérer la liste des modérateurs. Veuillez réessayer.",
+    usersLoadFailedTitle: "Échec du chargement des utilisateurs",
+    usersLoadFailedDesc:
+      "Impossible de récupérer la liste des utilisateurs de ce groupe. Veuillez réessayer.",
+    usersEmpty: "Aucun utilisateur ne correspond à votre recherche.",
+    usersLoading: "Recherche des utilisateurs…",
     blacklist: "Liste noire",
     blacklistDesc:
       "Empêcher les messages contenant certains mots d'être envoyés dans l'interserveur. Séparés par des virgules.",

@@ -116,6 +116,21 @@ export interface MutedUser {
   [key: string]: unknown;
 }
 
+export interface Moderator {
+  id: string;
+  username: string;
+  avatar?: string | null;
+  [key: string]: unknown;
+}
+
+export interface GroupUser {
+  id: string;
+  username: string;
+  globalName?: string | null;
+  avatar?: string;
+  [key: string]: unknown;
+}
+
 export interface Channel {
   id: string;
   name: string;

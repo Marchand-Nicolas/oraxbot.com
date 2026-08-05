@@ -82,7 +82,7 @@ export default function popup(
           </div>
         ) : (
           <button
-            className="default"
+            className="button default"
             onClick={() => {
               if (datas.action) datas.action();
               unmountRoot(popupContainer);
