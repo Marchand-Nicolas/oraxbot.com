@@ -261,6 +261,10 @@ function resolvePlatformFromState(
   if (match) {
     return getPlatform(match[1]);
   }
+  // Deep links from the interserver-group join flow default to Discord.
+  if (decoded.startsWith("/join/")) {
+    return getPlatform("discord");
+  }
   if (getPlatform(decoded)) {
     return getPlatform(decoded);
   }

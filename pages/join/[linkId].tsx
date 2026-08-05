@@ -105,6 +105,9 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
     }
     let token = getCookie("token");
     if (!token || token === "undefined") {
+      token = getCookie("token_discord");
+    }
+    if (!token || token === "undefined") {
       const code = new URLSearchParams(window.location.search).get("code");
       if (code) {
         fetch(`${config.apiV2}exchange_discord_oauth_code`, {
@@ -120,15 +123,18 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
               window.location.href = "/dashboard";
             } else {
               setCookie("token", res.access_token, res.expires_in! - 1000);
+              setCookie("token_discord", res.access_token, res.expires_in! - 1000);
               token = res.access_token;
               loadPage();
             }
           });
       } else {
+        const target =
+          window.location.pathname + window.location.search;
         window.location.href = `https://discord.com/api/oauth2/authorize?client_id=812298057470967858&redirect_uri=${encodeURI(
           process.env.NEXT_PUBLIC_WEBSITE_URL || "",
         )}%2Fdashboard&response_type=code&scope=identify%20guilds&state=${encodeURIComponent(
-          window.location.href,
+          target,
         )}`;
       }
     } else {
