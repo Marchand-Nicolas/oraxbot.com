@@ -280,8 +280,11 @@ function Dashboard({
     oraxPlus?.active && oraxPlus.entitlement?.source === voteSource
       ? formatRemainingPlanTime(oraxPlus.entitlement.expiresAt)
       : null;
-  const showOraxPlusActions =
-    !oraxPlus?.active || oraxPlus.entitlement?.source === voteSource;
+  const source = oraxPlus?.entitlement?.source;
+  const showVoteButton = voteProvider && (!oraxPlus?.active || source === voteSource);
+  const showMonthlyButton = !oraxPlus?.active || source === voteSource;
+  const showLifetimeButton =
+    !oraxPlus?.active || source === voteSource || source === "stripe";
   const isAtGroupLimit = ownedGroupsCount >= groupLimit;
 
   const startOraxPlusCheckout = (plan?: "monthly" | "lifetime") =>
@@ -738,9 +741,9 @@ function Dashboard({
                   <span>{tt("oraxPlus.channelsPerGroup")}</span>
                 </div>
               </div>
-              {showOraxPlusActions && (
+              {(showVoteButton || showMonthlyButton || showLifetimeButton) && (
                 <div className={styles.planActions}>
-                  {voteProvider && (
+                  {showVoteButton && (
                     <button
                       className={styles.secondaryButton}
                       onClick={startOraxPlusVote}
@@ -748,18 +751,22 @@ function Dashboard({
                       {voteLabelText}
                     </button>
                   )}
-                  <button
-                    className={styles.primaryButton}
-                    onClick={() => startOraxPlusCheckout("monthly")}
-                  >
-                    {tt("oraxPlus.subscribe", { price: pricing.monthly })}
-                  </button>
-                  <button
-                    className={styles.primaryButton}
-                    onClick={() => startOraxPlusCheckout("lifetime")}
-                  >
-                    {tt("oraxPlus.lifetime", { price: pricing.lifetime })}
-                  </button>
+                  {showMonthlyButton && (
+                    <button
+                      className={styles.primaryButton}
+                      onClick={() => startOraxPlusCheckout("monthly")}
+                    >
+                      {tt("oraxPlus.subscribe", { price: pricing.monthly })}
+                    </button>
+                  )}
+                  {showLifetimeButton && (
+                    <button
+                      className={styles.primaryButton}
+                      onClick={() => startOraxPlusCheckout("lifetime")}
+                    >
+                      {tt("oraxPlus.lifetime", { price: pricing.lifetime })}
+                    </button>
+                  )}
                 </div>
               )}
               <p className={styles.planFootnote}>
