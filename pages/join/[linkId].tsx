@@ -202,13 +202,15 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
               {channels.result.map((channel, index) => (
                 <button
                   onClick={() => {
+                    const discordToken =
+                      getCookie("token") || getCookie("token_discord");
                     fetch(`${config.apiV2}join_group_with_link`, {
                       method: "POST",
                       body: JSON.stringify({
                         linkId,
                         guildId,
                         channelId: channel.id,
-                        token: getCookie("token"),
+                        token: discordToken,
                       }),
                       headers: {
                         "Content-Type": "application/json",
@@ -217,8 +219,10 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
                       .then((res) => res.json())
                       .then(
                         (res: {
+                          success?: boolean;
                           error?: string;
                           errorCode?: string;
+                          message?: string;
                           current?: number;
                           limit?: number;
                           maxLimit?: number;
@@ -234,8 +238,13 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
                             setShowChannelLimitModal(true);
                             return;
                           }
-                          if (res.error) popup("Error", res.error, "error");
-                          else {
+                          if (res.success === false || res.error) {
+                            popup(
+                              "Error",
+                              res.message || res.error || "An error occurred",
+                              "error",
+                            );
+                          } else {
                             popup(
                               "Success",
                               "You have successfully joined the group !",
