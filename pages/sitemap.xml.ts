@@ -10,7 +10,7 @@ const LOCALES = ["en", "fr", "es"] as const;
 type Locale = (typeof LOCALES)[number];
 
 const LOCALIZED_PATHS = new Set([
-  "/",
+  "",
   "/pricing",
   "/login",
   "/blog/discord-auto-translation-free",
