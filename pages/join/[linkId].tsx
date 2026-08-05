@@ -240,8 +240,11 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
                               "Success",
                               "You have successfully joined the group !",
                               "success",
+                              {
+                                action: () =>
+                                  router.push(`/dashboard?guild=${guildId}`),
+                              },
                             );
-                            router.push(`/dashboard?guild=${guildId}`);
                           }
                         },
                       );
