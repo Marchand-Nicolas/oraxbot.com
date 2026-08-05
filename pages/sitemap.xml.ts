@@ -9,7 +9,12 @@ const SITEMAP_BASE_URL = "https://oraxbot.com";
 const LOCALES = ["en", "fr", "es"] as const;
 type Locale = (typeof LOCALES)[number];
 
-const LOCALIZED_PATHS = new Set(["/", "/pricing", "/login"]);
+const LOCALIZED_PATHS = new Set([
+  "/",
+  "/pricing",
+  "/login",
+  "/blog/discord-auto-translation-free",
+]);
 
 interface PageEntry {
   path: string;
@@ -23,6 +28,19 @@ const STATIC_PAGES: PageEntry[] = [
   { path: "/explore", priority: "0.8", changefreq: "daily" },
   { path: "/privacy", priority: "0.3", changefreq: "yearly" },
   { path: "/tos", priority: "0.3", changefreq: "yearly" },
+];
+
+/**
+ * Blog articles. Each entry is automatically emitted for every locale
+ * and gets hreflang siblings, so any future article is just a new line
+ * in this array.
+ */
+const BLOG_PAGES: PageEntry[] = [
+  {
+    path: "/blog/discord-auto-translation-free",
+    priority: "0.7",
+    changefreq: "monthly",
+  },
 ];
 
 /** Builds the localized URL for a given page + locale. */
@@ -62,15 +80,19 @@ function hreflangLinks(path: string): string {
 export const getServerSideProps: GetServerSideProps = async ({ res }) => {
   const lastModified = new Date().toISOString();
 
-  const urls = STATIC_PAGES.map(
-    ({ path, priority, changefreq }) => `  <url>
+  const allPages = [...STATIC_PAGES, ...BLOG_PAGES];
+
+  const urls = allPages
+    .map(
+      ({ path, priority, changefreq }) => `  <url>
     <loc>${localizedUrl(path, "en")}</loc>
     <lastmod>${lastModified}</lastmod>
     <changefreq>${changefreq}</changefreq>
     <priority>${priority}</priority>
 ${hreflangLinks(path)}
   </url>`,
-  ).join("\n");
+    )
+    .join("\n");
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset
