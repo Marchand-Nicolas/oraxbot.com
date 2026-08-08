@@ -86,7 +86,7 @@ const ChannelButton = ({
         </Link>
         <svg
           onClick={() =>
-            unlinkChannel(groupId, channel.id, guildId, setChannels)
+            unlinkChannel(groupId, channel.id, guildId, setChannels, channel.platform)
           }
           className={styles.removeChannelIcon}
           fill="none"
@@ -119,11 +119,13 @@ const unlinkChannel = (
   setChannels: (
     updater: (channels: LinkedChannel[]) => LinkedChannel[],
   ) => void,
+  channelPlatform?: number,
 ) => {
   platformApi("unlink_channel", {
     groupId,
     channelId,
     guildId,
+    channelPlatform,
   }).then(() => {
     setChannels((channels) =>
       channels.filter((c) => c.id != channelId),
