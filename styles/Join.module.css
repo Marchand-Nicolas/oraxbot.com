@@ -117,3 +117,72 @@
   cursor: pointer;
   margin: 20px;
 }
+
+.platformSelectWrapper {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 1em;
+  padding: 6px 12px;
+}
+
+.platformSelectLogo {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.platformSelect {
+  background: transparent;
+  color: #ffffff;
+  border: none;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  outline: none;
+}
+
+.platformSelect option {
+  color: #000000;
+}
+
+.loginContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 65px);
+  gap: 12px;
+}
+
+.loginButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px 32px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #ffffff;
+  transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+}
+
+.loginButton:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+.loginButtonIcon {
+  width: 24px;
+  height: 24px;
+  display: block;
+}

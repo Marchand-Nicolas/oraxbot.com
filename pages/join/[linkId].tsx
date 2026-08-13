@@ -2,23 +2,35 @@ import type { GetServerSideProps } from "next";
 import { useEffect, useState } from "react";
 import styles from "../../styles/Join.module.css";
 import dashboardStyles from "../../styles/Dashboard.module.css";
-import { getCookie, setCookie } from "../../utils/cookies";
+import { getCookie } from "../../utils/cookies";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import config from "../../utils/config.json";
 import popup from "../../utils/popup";
 import meteor from "../../public/icons/meteor.svg";
-import { checkAdminPerms } from "../../utils/permissions";
 import ActionModal from "../../components/ui/ActionModal";
 import GuildIcon from "../../components/GuildIcon";
-import { openTopggVote, startOraxPlusCheckout } from "../../utils/oraxPlus";
+import {
+  openTopggVote,
+  startOraxPlusCheckout,
+  startOraxPlusVote,
+} from "../../utils/oraxPlus";
 import type { Channel, DiscordGuild, DiscordUser } from "../../types";
-import { t } from "../../utils/i18n";
+import { voteLabel } from "../../utils/i18n";
 import {
   getOraxPlusPricing,
   getPricingRegion,
   type PricingRegion,
 } from "../../utils/pricing";
+import {
+  getPlatform,
+  platformList,
+  type PlatformConfig,
+} from "../../utils/platforms";
+import {
+  fetchPlatformGuilds,
+  fetchPlatformUser,
+} from "../../utils/platforms/oauth";
 
 interface ChannelLimitData {
   current: number;
@@ -39,11 +51,18 @@ export const getServerSideProps: GetServerSideProps<JoinGroupProps> = async ({
   },
 });
 
+function getPlatformToken(platform: PlatformConfig): string | null {
+  const token = getCookie(platform.cookieName);
+  return token && token !== "undefined" ? token : null;
+}
+
 export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
   const router = useRouter();
   const pricing = getOraxPlusPricing(pricingRegion, "en");
+  const [platformSlug, setPlatformSlug] = useState<string | null>(null);
   const [guilds, setGuilds] = useState<DiscordGuild[]>([]);
   const [user, setUser] = useState<DiscordUser | null>(null);
+  const [loggedIn, setLoggedIn] = useState(false);
   const [group, setGroup] = useState<Record<string, unknown>>({});
   const [channels, setChannels] = useState<{ result?: Channel[] }>({});
   const [showChannelLimitModal, setShowChannelLimitModal] = useState(false);
@@ -51,16 +70,17 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
     useState<ChannelLimitData | null>(null);
 
   const { linkId } = router.query;
-
   const guildId =
-    typeof window !== "undefined"
-      ? new URLSearchParams(window.location.search).get("guild") || ""
-      : "";
+    typeof router.query.guild === "string" ? router.query.guild : "";
+
+  const platform = platformSlug ? getPlatform(platformSlug) : undefined;
+  const voteProvider = platform?.vote?.provider || "topgg";
+
   let guild = guilds.find((guild) => guild.id === guildId);
 
   if (!guild) {
-    if (guilds.length > 0) {
-      guild = guilds.find((guild) => checkAdminPerms(guild));
+    if (platform && guilds.length > 0) {
+      guild = guilds.find((guild) => platform.isAdmin(guild));
     }
     if (!guild)
       guild = {
@@ -79,6 +99,7 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
   }
 
   useEffect(() => {
+    if (!router.isReady || !linkId) return;
     fetch(`${config.apiV2}preview_group`, {
       method: "POST",
       body: JSON.stringify({ linkId }),
@@ -90,97 +111,151 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
       .then((res) => {
         setGroup(res);
       });
-    if (guildId) {
-      fetch(`${config.apiV2}get_guild_channels`, {
-        method: "POST",
-        body: JSON.stringify({ guildId }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-        .then((res) => res.json())
-        .then((res: { result?: Channel[] }) => {
-          setChannels(res);
-        });
-    }
-    let token = getCookie("token");
-    if (!token || token === "undefined") {
-      token = getCookie("token_discord");
-    }
-    if (!token || token === "undefined") {
-      const code = new URLSearchParams(window.location.search).get("code");
-      if (code) {
-        fetch(`${config.apiV2}exchange_discord_oauth_code`, {
-          method: "POST",
-          body: JSON.stringify({ token: code }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-          .then((res) => res.json())
-          .then((res: { access_token?: string; expires_in?: number }) => {
-            if (!res.access_token || res.access_token === "undefined") {
-              window.location.href = "/dashboard";
-            } else {
-              setCookie("token", res.access_token, res.expires_in! - 1000);
-              setCookie("token_discord", res.access_token, res.expires_in! - 1000);
-              token = res.access_token;
-              loadPage();
-            }
-          });
-      } else {
-        const target =
-          window.location.pathname + window.location.search;
-        window.location.href = `https://discord.com/api/oauth2/authorize?client_id=812298057470967858&redirect_uri=${encodeURI(
-          process.env.NEXT_PUBLIC_WEBSITE_URL || "",
-        )}%2Fdashboard&response_type=code&scope=identify%20guilds&state=${encodeURIComponent(
-          target,
-        )}`;
-      }
-    } else {
-      loadPage();
-    }
-    async function loadPage() {
-      const userDatas = await (
-        await fetch("https://discordapp.com/api/users/@me", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            Accept: "application/json",
-            Authorization: "Bearer " + token,
-          },
-        })
-      ).json();
-      if (userDatas.message === "401: Unauthorized") {
-        setCookie("token", "", 0);
-        window.location.href = "/dashboard";
-      } else {
-        setUser(userDatas);
-        const guilds: DiscordGuild[] | { retry_after?: number } = await (
-          await fetch("https://discordapp.com/api/v6/users/@me/guilds", {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-              Accept: "application/json",
-              Authorization: "Bearer " + token,
-            },
-          })
-        ).json();
-        if (!Array.isArray(guilds) && guilds.retry_after) {
-          setTimeout(() => {
-            loadPage();
-          }, guilds.retry_after);
-        } else {
-          if (Array.isArray(guilds) && guilds.length > 0) setGuilds(guilds);
-        }
-      }
-    }
+    // Default to the platform the user is already logged into, else Discord.
+    const activePlatform = platformList.find((p) => getPlatformToken(p));
+    setPlatformSlug((current) => current ?? (activePlatform?.slug || "discord"));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [linkId, guildId]);
+  }, [router.isReady, linkId]);
+
+  useEffect(() => {
+    if (!platform) return;
+    const token = getPlatformToken(platform);
+    if (!token) {
+      setLoggedIn(false);
+      setGuilds([]);
+      setUser(null);
+      return;
+    }
+    setLoggedIn(true);
+    loadPage(platform, token);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [platformSlug]);
+
+  useEffect(() => {
+    setChannels({});
+    if (!platform || !loggedIn || !guildId) return;
+    fetch(`${config.apiV2}get_guild_channels`, {
+      method: "POST",
+      body: JSON.stringify({ guildId, platform: platform.slug }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => res.json())
+      .then((res: { result?: Channel[] }) => {
+        setChannels(res);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [platformSlug, guildId, loggedIn]);
+
+  async function loadPage(platform: PlatformConfig, token: string) {
+    const userDatas = await fetchPlatformUser(platform, token);
+    if (!userDatas || !userDatas.id) {
+      // Token is no longer valid — fall back to the login view.
+      setLoggedIn(false);
+      setGuilds([]);
+      setUser(null);
+      return;
+    }
+    setUser(userDatas);
+    const guildsRes = (await fetchPlatformGuilds(platform, token)) as
+      | DiscordGuild[]
+      | { retry_after?: number };
+    if (!Array.isArray(guildsRes) && guildsRes.retry_after) {
+      setTimeout(() => {
+        loadPage(platform, token);
+      }, guildsRes.retry_after);
+      return;
+    }
+    if (Array.isArray(guildsRes) && guildsRes.length > 0)
+      setGuilds(guildsRes);
+  }
+
+  function handlePlatformChange(slug: string) {
+    if (slug === platformSlug) return;
+    setPlatformSlug(slug);
+    setChannels({});
+    setGuilds([]);
+    setUser(null);
+    if (guildId) router.replace(`/join/${linkId}`);
+  }
+
+  function handleLogin() {
+    if (!platform || !linkId) return;
+    const target = `/join/${linkId}?platform=${platform.slug}`;
+    const sep = platform.authorizeUrl.includes("?") ? "&" : "?";
+    window.location.href = `${platform.authorizeUrl}${sep}state=${encodeURIComponent(
+      target,
+    )}`;
+  }
+
+  function joinChannel(channel: Channel) {
+    if (!platform) return;
+    const token = getPlatformToken(platform);
+    fetch(`${config.apiV2}join_group_with_link`, {
+      method: "POST",
+      body: JSON.stringify({
+        linkId,
+        guildId,
+        channelId: channel.id,
+        token,
+        platform: platform.slug,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => res.json())
+      .then(
+        (res: {
+          success?: boolean;
+          error?: string;
+          errorCode?: string;
+          message?: string;
+          current?: number;
+          limit?: number;
+          maxLimit?: number;
+          groupOwnerId?: string;
+        }) => {
+          if (res.errorCode === "channel_limit_reached") {
+            setChannelLimitData({
+              current: res.current || 0,
+              limit: res.limit || 5,
+              maxLimit: res.maxLimit || 50,
+              groupOwnerId: res.groupOwnerId || "",
+            });
+            setShowChannelLimitModal(true);
+            return;
+          }
+          if (res.success === false || res.error) {
+            popup(
+              "Error",
+              res.message || res.error || "An error occurred",
+              "error",
+            );
+          } else {
+            popup(
+              "Success",
+              "You have successfully joined the group !",
+              "success",
+              {
+                action: () =>
+                  router.push(
+                    `/dashboard/${platform.slug}?guild=${guildId}`,
+                  ),
+              },
+            );
+          }
+        },
+      );
+  }
+
   let adminGuildNumber = 0;
-  for (let index = 0; index < guilds.length; index++) {
-    const guild = guilds[index];
-    if (checkAdminPerms(guild)) adminGuildNumber++;
+  if (platform) {
+    for (let index = 0; index < guilds.length; index++) {
+      const guild = guilds[index];
+      if (platform.isAdmin(guild)) adminGuildNumber++;
+    }
   }
 
   const isGroupOwner =
@@ -195,69 +270,60 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
             What is an interserver group ?
           </button>
         </a>
-        {guildId ? (
+        {platform && (
+          <div className={styles.platformSelectWrapper}>
+            <img
+              src={platform.logoPath}
+              alt=""
+              className={styles.platformSelectLogo}
+              width={20}
+              height={20}
+            />
+            <select
+              className={styles.platformSelect}
+              value={platform.slug}
+              onChange={(event) => handlePlatformChange(event.target.value)}
+              aria-label="Platform"
+            >
+              {platformList.map((p) => (
+                <option key={p.slug} value={p.slug}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+        {!platform ? null : !loggedIn ? (
+          <div className={styles.loginContainer}>
+            <h1 className={styles.title}>
+              You have been invited to join the{" "}
+              {group.name ? (group.name as string) : "..."} interserver group.
+            </h1>
+            <button
+              type="button"
+              className={styles.loginButton}
+              style={{
+                background: platform.brandGradient ?? platform.brandColor,
+              }}
+              onClick={handleLogin}
+            >
+              <img
+                src={platform.logoPath}
+                alt=""
+                className={styles.loginButtonIcon}
+                width={24}
+                height={24}
+              />
+              <span>Log in with {platform.label}</span>
+            </button>
+          </div>
+        ) : guildId ? (
           channels.result ? (
             <div className={styles.buttonContainer}>
               <h2 className={styles.subtitle}>And finally, select a channel</h2>
               {channels.result.map((channel, index) => (
                 <button
-                  onClick={() => {
-                    const discordToken =
-                      getCookie("token") || getCookie("token_discord");
-                    fetch(`${config.apiV2}join_group_with_link`, {
-                      method: "POST",
-                      body: JSON.stringify({
-                        linkId,
-                        guildId,
-                        channelId: channel.id,
-                        token: discordToken,
-                      }),
-                      headers: {
-                        "Content-Type": "application/json",
-                      },
-                    })
-                      .then((res) => res.json())
-                      .then(
-                        (res: {
-                          success?: boolean;
-                          error?: string;
-                          errorCode?: string;
-                          message?: string;
-                          current?: number;
-                          limit?: number;
-                          maxLimit?: number;
-                          groupOwnerId?: string;
-                        }) => {
-                          if (res.errorCode === "channel_limit_reached") {
-                            setChannelLimitData({
-                              current: res.current || 0,
-                              limit: res.limit || 5,
-                              maxLimit: res.maxLimit || 50,
-                              groupOwnerId: res.groupOwnerId || "",
-                            });
-                            setShowChannelLimitModal(true);
-                            return;
-                          }
-                          if (res.success === false || res.error) {
-                            popup(
-                              "Error",
-                              res.message || res.error || "An error occurred",
-                              "error",
-                            );
-                          } else {
-                            popup(
-                              "Success",
-                              "You have successfully joined the group !",
-                              "success",
-                              {
-                                action: () =>
-                                  router.push(`/dashboard?guild=${guildId}`),
-                              },
-                            );
-                          }
-                        },
-                      );
-                  }}
+                  onClick={() => joinChannel(channel)}
                   key={"channel_" + index}
                   className={styles.channelButton}
                 >
@@ -288,7 +354,8 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
                       }
                     : undefined,
                   action: function () {
-                    window.open(config.inviteLink + "&guild_id=" + guildId);
+                    const inviteUrl = platform.getInviteUrl(guildId);
+                    if (inviteUrl) window.open(inviteUrl);
                   },
                 })
               }
@@ -314,7 +381,7 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
             >
               {adminGuildNumber > 0
                 ? guilds.map((g) =>
-                    checkAdminPerms(g) ? (
+                    platform.isAdmin(g) ? (
                       <Link
                         key={"nav_guild_" + g.id}
                         href={`./${linkId}?guild=${g.id}`}
@@ -330,11 +397,7 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
                         >
                           <GuildIcon
                             className={styles.guildIcon}
-                            iconUrl={
-                              g.icon
-                                ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.webp?size=96`
-                                : null
-                            }
+                            iconUrl={platform.getGuildIconUrl(g)}
                             name={g.name}
                             onLoad={() => endImgLoading(g.id)}
                           />
@@ -360,7 +423,7 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
           </div>
         )}
       </div>
-      {showChannelLimitModal && channelLimitData && (
+      {showChannelLimitModal && channelLimitData && platform && (
         <ActionModal
           title="Channel limit reached"
           description={
@@ -375,11 +438,11 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
 
               <div style={{ marginTop: "16px" }}>
                 <p style={{ fontWeight: 600, marginBottom: "4px" }}>
-                  {t("vote.topgg")}
+                  {voteLabel(voteProvider)}
                 </p>
                 <p style={{ fontSize: "14px", opacity: 0.8 }}>
-                  Vote for Orax on Top.gg to join this group right away, even
-                  past the limit.
+                  Vote for Orax to join this group right away, even past the
+                  limit.
                 </p>
               </div>
 
@@ -401,11 +464,15 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
           }
           actions={[
             {
-              label: t("vote.topgg"),
+              label: voteLabel(voteProvider),
               variant: "primary",
               onClick: () => {
                 setShowChannelLimitModal(false);
-                openTopggVote();
+                if (voteProvider === "fluxerlist") {
+                  startOraxPlusVote(guildId, platform);
+                } else {
+                  openTopggVote();
+                }
               },
             },
             {
@@ -416,7 +483,12 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
               disabled: !isGroupOwner,
               onClick: () => {
                 setShowChannelLimitModal(false);
-                startOraxPlusCheckout(channelLimitData.groupOwnerId);
+                startOraxPlusCheckout(
+                  channelLimitData.groupOwnerId,
+                  undefined,
+                  "monthly",
+                  platform,
+                );
               },
             },
             {
@@ -431,6 +503,7 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
                   channelLimitData.groupOwnerId,
                   undefined,
                   "lifetime",
+                  platform,
                 );
               },
             },

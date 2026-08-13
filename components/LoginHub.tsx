@@ -261,8 +261,15 @@ function resolvePlatformFromState(
   if (match) {
     return getPlatform(match[1]);
   }
-  // Deep links from the interserver-group join flow default to Discord.
+  // Deep links from the interserver-group join flow carry the platform in
+  // the query string (e.g. "/join/123?platform=fluxer"); legacy links
+  // without it default to Discord.
   if (decoded.startsWith("/join/")) {
+    try {
+      const joinUrl = new URL(decoded, window.location.origin);
+      const platform = getPlatform(joinUrl.searchParams.get("platform"));
+      if (platform) return platform;
+    } catch {}
     return getPlatform("discord");
   }
   if (getPlatform(decoded)) {

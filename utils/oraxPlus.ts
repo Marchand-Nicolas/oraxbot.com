@@ -68,7 +68,7 @@ async function startTopggVote(
       activated?: boolean;
       vote_url?: string;
       message?: string;
-    }>("start_orax_plus_vote", { guildId });
+    }>("start_orax_plus_vote", { guildId }, { platform });
 
     if (!data?.result) {
       throw new Error(
@@ -153,7 +153,7 @@ async function startFluxerlistVote(
       result?: boolean;
       expires_at?: string;
       message?: string;
-    }>("activate_fluxerlist_vote", { guildId });
+    }>("activate_fluxerlist_vote", { guildId }, { platform });
 
     if (!data?.result) {
       throw new Error(
@@ -204,6 +204,7 @@ export async function startOraxPlusCheckout(
   guildId: string,
   redirectBase = "/dashboard",
   plan: "monthly" | "lifetime" = "monthly",
+  platform?: PlatformConfig,
 ) {
   showCheckoutOverlay();
   try {
@@ -211,12 +212,16 @@ export async function startOraxPlusCheckout(
       result?: boolean;
       url?: string;
       message?: string;
-    }>("create_orax_plus_checkout_session", {
-      guildId,
-      plan,
-      successUrl: `${window.location.origin}${redirectBase}?guild=${guildId}&orax_plus=success`,
-      cancelUrl: `${window.location.origin}${redirectBase}?guild=${guildId}&orax_plus=cancelled`,
-    });
+    }>(
+      "create_orax_plus_checkout_session",
+      {
+        guildId,
+        plan,
+        successUrl: `${window.location.origin}${redirectBase}?guild=${guildId}&orax_plus=success`,
+        cancelUrl: `${window.location.origin}${redirectBase}?guild=${guildId}&orax_plus=cancelled`,
+      },
+      { platform },
+    );
     if (!data?.result || !data?.url) {
       throw new Error(data?.message || "Unable to start Stripe Checkout.");
     }

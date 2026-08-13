@@ -2,7 +2,7 @@ import { useRouter } from "next/router";
 import { useCallback } from "react";
 import config from "./config.json";
 import { getCookie } from "./cookies";
-import { getPlatform } from "./platforms";
+import { getPlatform, type PlatformConfig } from "./platforms";
 
 /**
  * Dashboard API helper.
@@ -61,9 +61,12 @@ export function usePlatformApi() {
 export function platformApi<T = unknown>(
   endpoint: string,
   body: Record<string, unknown> = {},
-  options: { method?: "POST" | "GET" | "PUT" | "DELETE" } = {},
+  options: {
+    method?: "POST" | "GET" | "PUT" | "DELETE";
+    platform?: PlatformConfig;
+  } = {},
 ): Promise<T> {
-  const platform = getCurrentPlatform();
+  const platform = options.platform ?? getCurrentPlatform();
   const token = getCookie(platform?.cookieName ?? "token");
   const method = options.method ?? "POST";
 
