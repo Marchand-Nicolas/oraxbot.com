@@ -63,6 +63,8 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
   const [guilds, setGuilds] = useState<DiscordGuild[]>([]);
   const [user, setUser] = useState<DiscordUser | null>(null);
   const [loggedIn, setLoggedIn] = useState(false);
+  const [loadingGuilds, setLoadingGuilds] = useState(false);
+  const [loadingChannels, setLoadingChannels] = useState(false);
   const [group, setGroup] = useState<Record<string, unknown>>({});
   const [channels, setChannels] = useState<{ result?: Channel[] }>({});
   const [showChannelLimitModal, setShowChannelLimitModal] = useState(false);
@@ -122,18 +124,24 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
     const token = getPlatformToken(platform);
     if (!token) {
       setLoggedIn(false);
+      setLoadingGuilds(false);
       setGuilds([]);
       setUser(null);
       return;
     }
     setLoggedIn(true);
+    setLoadingGuilds(true);
     loadPage(platform, token);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [platformSlug]);
 
   useEffect(() => {
     setChannels({});
-    if (!platform || !loggedIn || !guildId) return;
+    if (!platform || !loggedIn || !guildId) {
+      setLoadingChannels(false);
+      return;
+    }
+    setLoadingChannels(true);
     fetch(`${config.apiV2}get_guild_channels`, {
       method: "POST",
       body: JSON.stringify({ guildId, platform: platform.slug }),
@@ -144,7 +152,9 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
       .then((res) => res.json())
       .then((res: { result?: Channel[] }) => {
         setChannels(res);
-      });
+        setLoadingChannels(false);
+      })
+      .catch(() => setLoadingChannels(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [platformSlug, guildId, loggedIn]);
 
@@ -153,6 +163,7 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
     if (!userDatas || !userDatas.id) {
       // Token is no longer valid — fall back to the login view.
       setLoggedIn(false);
+      setLoadingGuilds(false);
       setGuilds([]);
       setUser(null);
       return;
@@ -169,6 +180,7 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
     }
     if (Array.isArray(guildsRes) && guildsRes.length > 0)
       setGuilds(guildsRes);
+    setLoadingGuilds(false);
   }
 
   function handlePlatformChange(slug: string) {
@@ -318,7 +330,14 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
             </button>
           </div>
         ) : guildId ? (
-          channels.result ? (
+          loadingChannels ? (
+            <div className={styles.buttonContainer}>
+              <div className={styles.loadingContainer}>
+                <div className="spinner" aria-hidden="true" />
+                <p className={styles.loadingText}>Loading channels…</p>
+              </div>
+            </div>
+          ) : channels.result ? (
             <div className={styles.buttonContainer}>
               <h2 className={styles.subtitle}>And finally, select a channel</h2>
               {channels.result.map((channel, index) => (
@@ -379,46 +398,53 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
               style={{ maxWidth: adminGuildNumber > 9 ? "1000px" : "500px" }}
               className={styles.guilds}
             >
-              {adminGuildNumber > 0
-                ? guilds.map((g) =>
-                    platform.isAdmin(g) ? (
-                      <Link
-                        key={"nav_guild_" + g.id}
-                        href={`./${linkId}?guild=${g.id}`}
-                      >
-                        <div
-                          id={"guild_" + g.id}
-                          className={[
-                            styles.navGuild,
-                            !document.getElementById("guild_" + g.id) &&
-                              "loading",
-                            guild!.id === g.id ? styles.selected : null,
-                          ].join(" ")}
-                        >
-                          <GuildIcon
-                            className={styles.guildIcon}
-                            iconUrl={platform.getGuildIconUrl(g)}
-                            name={g.name}
-                            onLoad={() => endImgLoading(g.id)}
-                          />
-                          <p>
-                            {g.name.length > 10
-                              ? g.name.substring(0, 10) + "..."
-                              : g.name}
-                          </p>
-                        </div>
-                      </Link>
-                    ) : null,
-                  )
-                : [...Array(3)].map((o, index) => (
-                    <div key={"nav_guild_" + index} className={styles.navGuild}>
+              {loadingGuilds ? (
+                <div className={styles.loadingContainer}>
+                  <div className="spinner" aria-hidden="true" />
+                  <p className={styles.loadingText}>Loading your servers…</p>
+                </div>
+              ) : adminGuildNumber > 0 ? (
+                guilds.map((g) =>
+                  platform.isAdmin(g) ? (
+                    <Link
+                      key={"nav_guild_" + g.id}
+                      href={`./${linkId}?guild=${g.id}`}
+                    >
                       <div
-                        className={[styles.guildIcon, styles.placeHolder].join(
-                          " ",
-                        )}
-                      />
-                    </div>
-                  ))}
+                        id={"guild_" + g.id}
+                        className={[
+                          styles.navGuild,
+                          !document.getElementById("guild_" + g.id) &&
+                            "loading",
+                          guild!.id === g.id ? styles.selected : null,
+                        ].join(" ")}
+                      >
+                        <GuildIcon
+                          className={styles.guildIcon}
+                          iconUrl={platform.getGuildIconUrl(g)}
+                          name={g.name}
+                          onLoad={() => endImgLoading(g.id)}
+                        />
+                        <p>
+                          {g.name.length > 10
+                            ? g.name.substring(0, 10) + "..."
+                            : g.name}
+                        </p>
+                      </div>
+                    </Link>
+                  ) : null,
+                )
+              ) : (
+                [...Array(3)].map((o, index) => (
+                  <div key={"nav_guild_" + index} className={styles.navGuild}>
+                    <div
+                      className={[styles.guildIcon, styles.placeHolder].join(
+                        " ",
+                      )}
+                    />
+                  </div>
+                ))
+              )}
             </div>
           </div>
         )}
