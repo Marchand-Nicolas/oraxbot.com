@@ -2,7 +2,6 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import styles from "../../styles/components/dashboard/CreateGroupMenu.module.css";
 import ActionModal from "../ui/ActionModal";
-import config from "../../utils/config.json";
 import { unmountRoot } from "../../utils/reactRoot";
 import { notify } from "../ui/NotificationSystem";
 import { platformApi } from "../../utils/platformApi";
@@ -34,15 +33,12 @@ export default function CreateGroupMenu(props: CreateGroupMenuProps) {
 
   useEffect(() => {
     if (props.guildId) {
-      fetch(`${config.apiV2}get_guild_channels`, {
-        method: "POST",
-        body: JSON.stringify({ guildId: props.guildId }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-        .then((res) => res.json())
-        .then((res: { result?: Channel[] }) => {
+      platformApi<{ result?: Channel[] }>(
+        "get_guild_channels",
+        { guildId: props.guildId },
+        { platform: props.platform },
+      )
+        .then((res) => {
           setChannels(res.result || []);
         })
         .catch(() => {
@@ -55,7 +51,7 @@ export default function CreateGroupMenu(props: CreateGroupMenuProps) {
     } else {
       console.warn("No guildId provided to CreateGroupMenu");
     }
-  }, [props.guildId]);
+  }, [props.guildId, props.platform]);
 
   return (
     <>
