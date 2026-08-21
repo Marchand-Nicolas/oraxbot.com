@@ -31,7 +31,8 @@ export function usePlatformApi() {
       options: { method?: "POST" | "GET" | "PUT" | "DELETE" } = {},
     ): Promise<T> => {
       const platform = platformSlug ? getPlatform(platformSlug) : undefined;
-      const token = getCookie(platform?.cookieName ?? "token");
+      const token =
+        getCookie(platform?.cookieName ?? "token") || getCookie("token");
       const method = options.method ?? "POST";
 
       const payload = {
@@ -67,7 +68,8 @@ export function platformApi<T = unknown>(
   } = {},
 ): Promise<T> {
   const platform = options.platform ?? getCurrentPlatform();
-  const token = getCookie(platform?.cookieName ?? "token");
+  const token =
+    getCookie(platform?.cookieName ?? "token") || getCookie("token");
   const method = options.method ?? "POST";
 
   const payload = {
