@@ -62,12 +62,13 @@ export default function ChannelSettings() {
     platformApi<Record<string, unknown>>("get_group_settings_field", {
       groupId,
       guildId,
+      channelId,
       fieldName: "translation",
     })
       .then((data) => {
         setTranslationEnabled(!!data.translation);
       });
-  }, [groupId, guildId, platform]);
+  }, [groupId, guildId, channelId, platform]);
 
   useEffect(() => {
     if (!guildId) return;
