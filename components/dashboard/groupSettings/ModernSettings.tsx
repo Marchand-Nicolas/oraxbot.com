@@ -142,7 +142,7 @@ const ModernSettings = ({
               groupId={groupId}
               guildId={guildId}
               placeholder={t("groupSettings.blacklistPlaceholder")}
-              parser={(value) => value.replace(" ", ",")}
+              parser={(value) => value.replace(/\s*,\s*/g, ",")}
             />
           </div>
 
