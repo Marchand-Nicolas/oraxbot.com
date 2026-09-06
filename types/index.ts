@@ -88,7 +88,7 @@ export interface PublicServer {
   displayName?: string;
   icon?: string | null;
   invite?: string | null;
-  platform?: "discord" | "fluxer" | "telegram" | string;
+  platform?: "discord" | "fluxer" | "telegram" | "unknown" | string;
   [key: string]: unknown;
 }
 

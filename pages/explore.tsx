@@ -1277,7 +1277,9 @@ export default function Explore() {
                                 ? server.invite
                                 : server.platform === "fluxer"
                                   ? `https://fluxer.gg/${server.invite}`
-                                  : `https://discord.gg/${server.invite}`
+                                  : server.platform === "telegram"
+                                    ? server.invite
+                                    : `https://discord.gg/${server.invite}`
                               : null;
                             const displayName =
                               server.displayName ||
