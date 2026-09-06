@@ -83,11 +83,12 @@ export interface ExploreGroup {
 }
 
 export interface PublicServer {
-  guildId?: string;
+  guildId?: string | null;
   guildName?: string;
   displayName?: string;
-  icon?: string;
-  invite?: string;
+  icon?: string | null;
+  invite?: string | null;
+  platform?: "discord" | "fluxer" | "telegram" | string;
   [key: string]: unknown;
 }
 

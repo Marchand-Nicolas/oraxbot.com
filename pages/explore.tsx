@@ -1275,27 +1275,32 @@ export default function Explore() {
                             const inviteUrl = server.invite
                               ? server.invite.startsWith("http")
                                 ? server.invite
-                                : `https://discord.gg/${server.invite}`
+                                : server.platform === "fluxer"
+                                  ? `https://fluxer.gg/${server.invite}`
+                                  : `https://discord.gg/${server.invite}`
                               : null;
                             const displayName =
                               server.displayName ||
                               server.guildName ||
                               "Unknown server";
+                            const iconUrl = server.icon
+                              ? server.icon.startsWith("http")
+                                ? server.icon
+                                : server.platform === "fluxer"
+                                  ? `https://fluxerusercontent.com/icons/${server.guildId}/${server.icon}.webp?size=160`
+                                  : `https://cdn.discordapp.com/icons/${server.guildId}/${server.icon}.webp?size=160&quality=lossless`
+                              : null;
 
                             return (
                               <div
                                 key={
-                                  server.guildId ||
+                                  `${server.platform || "discord"}-${server.guildId}` ||
                                   `${displayName}-${inviteUrl}`
                                 }
                                 className={styles.publicServerCard}
                               >
                                 <GuildIcon
-                                  iconUrl={
-                                    server.icon
-                                      ? `https://cdn.discordapp.com/icons/${server.guildId}/${server.icon}.webp?size=160&quality=lossless`
-                                      : null
-                                  }
+                                  iconUrl={iconUrl}
                                   name={displayName}
                                   className={styles.publicServerIcon}
                                 />
