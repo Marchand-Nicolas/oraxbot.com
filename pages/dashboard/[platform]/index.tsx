@@ -159,6 +159,7 @@ function Dashboard({
     string | null
   >(null);
   const [lastLoadedGuildId, setLastLoadedGuildId] = useState("");
+  const [navOpen, setNavOpen] = useState(false);
   const votePollAttemptsRef = useRef(0);
   const activationPollAttemptsRef = useRef(0);
 
@@ -179,6 +180,15 @@ function Dashboard({
     setActiveTokenCookie(platform.cookieName);
     setAuthRedirectTarget(`/dashboard/${platform.slug}`);
   }, [platform]);
+
+  useEffect(() => {
+    if (!navOpen) return;
+    function handleKeydown(event: KeyboardEvent) {
+      if (event.key === "Escape") setNavOpen(false);
+    }
+    document.addEventListener("keydown", handleKeydown);
+    return () => document.removeEventListener("keydown", handleKeydown);
+  }, [navOpen]);
 
   useEffect(() => {
     if (activeGuilds.length === 0) return;
@@ -509,6 +519,10 @@ function Dashboard({
 
   const backgroundImage = platform.getGuildBackgroundUrl(guild);
 
+  useEffect(() => {
+    setNavOpen(false);
+  }, [guildId]);
+
   return (
     <LanguageProvider lang={lang}>
       {activeUser && <UserMenu user={activeUser} platform={platform} />}
@@ -520,7 +534,25 @@ function Dashboard({
         }}
         className={styles.background}
       />
-      <nav className={styles.navbar}>
+      <button
+        type="button"
+        className={styles.burger}
+        onClick={() => setNavOpen((v) => !v)}
+        aria-label="Toggle servers menu"
+        aria-expanded={navOpen}
+      >
+        <span />
+        <span />
+        <span />
+      </button>
+      {navOpen && (
+        <div
+          className={styles.navOverlay}
+          onClick={() => setNavOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+      <nav className={[styles.navbar, navOpen ? styles.navbarOpen : null].filter(Boolean).join(" ")}>
         {activeGuilds.length > 0
           ? activeGuilds
               .sort((a, b) => {
@@ -533,6 +565,7 @@ function Dashboard({
                   <Link
                     key={"nav_guild_" + g.id}
                     href={`/dashboard/${platform.slug}?guild=${g.id}`}
+                    onClick={() => setNavOpen(false)}
                   >
                     <div
                       id={"guild_" + g.id}
