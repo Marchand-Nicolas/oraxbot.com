@@ -99,6 +99,8 @@ const fr: Translation = {
     applying: "Application…",
     applyContinue: "Continuer",
     applyToServer: "Appliquer à ce serveur",
+    thanksTitle: "Merci pour votre achat !",
+    thanksDesc: "Orax Plus est maintenant actif sur le serveur.",
   },
 
   groups: {

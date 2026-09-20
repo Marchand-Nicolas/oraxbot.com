@@ -21,6 +21,7 @@ import HiddenMenu from "../../../components/ui/hiddenMenu";
 import { notify } from "../../../components/ui/NotificationSystem";
 import ActionModal from "../../../components/ui/ActionModal";
 import OraxPlusApplyModal from "../../../components/ui/OraxPlusApplyModal";
+import OraxPlusThanksModal from "../../../components/ui/OraxPlusThanksModal";
 import ErrorBoundary from "../../../components/ui/ErrorBoundary";
 import {
   startOraxPlusCheckout as startCheckout,
@@ -152,6 +153,7 @@ function Dashboard({
   const [isPollingOraxPlusVote, setIsPollingOraxPlusVote] = useState(false);
   const [showGroupLimitModal, setShowGroupLimitModal] = useState(false);
   const [showOraxPlusApply, setShowOraxPlusApply] = useState(false);
+  const [showOraxPlusThanks, setShowOraxPlusThanks] = useState(false);
   const [purchaseGuildId, setPurchaseGuildId] = useState<string>("");
   const [isWaitingForActivation, setIsWaitingForActivation] = useState(false);
   const [applySubmitting, setApplySubmitting] = useState(false);
@@ -221,14 +223,18 @@ function Dashboard({
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
     const oraxPlusResult = params.get("orax_plus");
-    if (oraxPlusResult === "success") {
+    const stripeSessionId = params.get("session_id");
+    if (oraxPlusResult === "success" || stripeSessionId) {
       const guildFromUrl = params.get("guild");
-      if (guildFromUrl) {
+      if (oraxPlusResult === "success" && guildFromUrl) {
         setPurchaseGuildId(guildFromUrl);
         setIsWaitingForActivation(true);
+      } else if (!guildFromUrl) {
+        setShowOraxPlusThanks(true);
       }
       const cleaned = new URLSearchParams(window.location.search);
       cleaned.delete("orax_plus");
+      cleaned.delete("session_id");
       const search = cleaned.toString();
       const newUrl =
         window.location.pathname +
@@ -949,6 +955,9 @@ function Dashboard({
           onConfirm={handleApplyConfirm}
           onClose={handleApplyClose}
         />
+      )}
+      {showOraxPlusThanks && (
+        <OraxPlusThanksModal onClose={() => setShowOraxPlusThanks(false)} />
       )}
       {loading && <Loading />}
     </LanguageProvider>

@@ -126,8 +126,10 @@ export default function LoginHub({
         const forwardParams = new URLSearchParams();
         const guild = params.get("guild");
         const oraxPlus = params.get("orax_plus");
+        const sessionId = params.get("session_id");
         if (guild) forwardParams.set("guild", guild);
         if (oraxPlus) forwardParams.set("orax_plus", oraxPlus);
+        if (sessionId) forwardParams.set("session_id", sessionId);
         const query = forwardParams.toString();
         window.location.href = `/dashboard/${activePlatform.slug}${
           query ? `?${query}` : ""

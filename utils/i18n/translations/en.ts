@@ -102,6 +102,8 @@ const en = {
     applying: "Applying…",
     applyContinue: "Continue",
     applyToServer: "Apply to this server",
+    thanksTitle: "Thank you for your purchase!",
+    thanksDesc: "Orax Plus is now active on the server.",
   },
 
   groups: {
