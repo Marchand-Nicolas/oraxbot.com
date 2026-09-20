@@ -131,9 +131,11 @@ export default function LoginHub({
         if (oraxPlus) forwardParams.set("orax_plus", oraxPlus);
         if (sessionId) forwardParams.set("session_id", sessionId);
         const query = forwardParams.toString();
-        window.location.href = `/dashboard/${activePlatform.slug}${
-          query ? `?${query}` : ""
-        }`;
+        const destination =
+          !guild && (oraxPlus === "success" || sessionId)
+            ? `/dashboard/${activePlatform.slug}/settings`
+            : `/dashboard/${activePlatform.slug}`;
+        window.location.href = `${destination}${query ? `?${query}` : ""}`;
         return;
       }
     }

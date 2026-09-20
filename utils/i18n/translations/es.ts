@@ -31,6 +31,7 @@ const es: Translation = {
     switchPlatform: "Cambiar plataforma",
     logout: "Cerrar sesión",
     user: "Usuario",
+    settings: "Ajustes",
   },
 
   oraxPlus: {
@@ -135,6 +136,35 @@ const es: Translation = {
     saveFailedTitle: "Error al guardar la configuración",
     saveFailedDesc: "No se pudieron guardar tus ajustes. Inténtalo de nuevo.",
     invalidLink: "Enlace no válido",
+  },
+
+  userSettings: {
+    title: "Ajustes de la cuenta",
+    subtitle: "Gestiona tus compras de Orax Plus y obtén ayuda.",
+    back: "Volver al panel",
+    purchaseHistory: "Historial de compras",
+    empty: "Aún no tienes compras de Orax Plus.",
+    loadFailed: "No se pudo cargar tu historial de compras. Inténtalo de nuevo.",
+    unknownServer: "Servidor desconocido",
+    planMonthly: "Mensual",
+    planLifetime: "De por vida",
+    statusActive: "Activo",
+    statusInactive: "Inactivo",
+    purchasedAt: "Fecha de compra",
+    expiresAt: "Caduca",
+    neverExpires: "Nunca",
+    guildId: "ID del servidor",
+    previousGuildId: "ID del servidor anterior",
+    platform: "Plataforma",
+    stripeCustomer: "Cliente de Stripe",
+    checkoutSession: "Sesión de pago",
+    invoice: "Factura",
+    paymentIntent: "Pago",
+    reference: "Referencia",
+    notAvailable: "—",
+    view: "Ver",
+    supportTitle: "Soporte",
+    supportDesc: "¿Necesitas ayuda con una compra? Escríbenos a",
   },
 
   groupSettings: {

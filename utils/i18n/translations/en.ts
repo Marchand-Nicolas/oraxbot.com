@@ -36,6 +36,7 @@ const en = {
     switchPlatform: "Switch platform",
     logout: "Log out",
     user: "User",
+    settings: "Settings",
   },
 
   oraxPlus: {
@@ -141,6 +142,35 @@ const en = {
     saveFailedTitle: "Settings Save Failed",
     saveFailedDesc: "Unable to save your settings. Please try again.",
     invalidLink: "Invalid link",
+  },
+
+  userSettings: {
+    title: "Account settings",
+    subtitle: "Manage your Orax Plus purchases and get help.",
+    back: "Back to dashboard",
+    purchaseHistory: "Purchase history",
+    empty: "You have no Orax Plus purchases yet.",
+    loadFailed: "Unable to load your purchase history. Please try again.",
+    unknownServer: "Unknown server",
+    planMonthly: "Monthly",
+    planLifetime: "Lifetime",
+    statusActive: "Active",
+    statusInactive: "Inactive",
+    purchasedAt: "Purchase date",
+    expiresAt: "Expires",
+    neverExpires: "Never",
+    guildId: "Server ID",
+    previousGuildId: "Previous server ID",
+    platform: "Platform",
+    stripeCustomer: "Stripe customer",
+    checkoutSession: "Checkout session",
+    invoice: "Invoice",
+    paymentIntent: "Payment",
+    reference: "Reference",
+    notAvailable: "—",
+    view: "View",
+    supportTitle: "Support",
+    supportDesc: "Need help with a purchase? Email us at",
   },
 
   groupSettings: {
