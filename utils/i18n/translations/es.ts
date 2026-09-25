@@ -175,6 +175,10 @@ const es: Translation = {
     repliesQuote: "Cita (estilo antiguo de Discord)",
     repliesQuoteNoButton: "Cita sin botón de salto",
     repliesEmbedNoButton: "Embed sin botón de salto",
+    emojiFallback: "Emojis inaccesibles",
+    emojiFallbackSearch:
+      "Reemplazar con un emoji del mismo nombre, si no mostrar la imagen (predeterminado)",
+    emojiFallbackImage: "Mostrar siempre la imagen del emoji",
     allowEveryone: "Permitir @everyone y @here",
     allowEveryoneDesc:
       "Permitir que las personas mencionen a @everyone y @here en el interservidor.",

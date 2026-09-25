@@ -180,6 +180,10 @@ const fr: Translation = {
     repliesQuote: "Citation (ancien style Discord)",
     repliesQuoteNoButton: "Citation sans bouton de saut",
     repliesEmbedNoButton: "Embed sans bouton de saut",
+    emojiFallback: "Emojis inaccessibles",
+    emojiFallbackSearch:
+      "Remplacer par un emoji du même nom, sinon afficher l'image (par défaut)",
+    emojiFallbackImage: "Toujours afficher l'image de l'emoji",
     allowEveryone: "Autoriser @everyone et @here",
     allowEveryoneDesc:
       "Autoriser les utilisateurs à mentionner @everyone et @here dans l'interserveur.",

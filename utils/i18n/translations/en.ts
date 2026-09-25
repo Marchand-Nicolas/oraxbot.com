@@ -181,6 +181,10 @@ const en = {
     repliesQuote: "Quote (Discord's legacy)",
     repliesQuoteNoButton: "Quote without jump button",
     repliesEmbedNoButton: "Embed without jump button",
+    emojiFallback: "Inaccessible emojis",
+    emojiFallbackSearch:
+      "Replace with a same-name emoji, else show the image (default)",
+    emojiFallbackImage: "Always show the emoji image",
     allowEveryone: "Allow @everyone and @here",
     allowEveryoneDesc:
       "Allow people to ping @everyone and @here in the interserver.",

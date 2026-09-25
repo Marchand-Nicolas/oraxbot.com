@@ -9,6 +9,7 @@ import { useRouter } from "next/router";
 import React, { useEffect, useState, type ChangeEvent } from "react";
 import Filters from "./settings/filters";
 import TextField from "./settings/textField";
+import OptionsField from "./settings/optionField";
 import MutedUsersWindow from "./MutedUsersWindow";
 import { t } from "../../../utils/i18n";
 
@@ -221,6 +222,19 @@ const ModernAdvancedSettings = () => {
                 {t("groupSettings.disableDeleteSync")}
               </label>
             </div>
+          </div>
+
+          <div className={styles.settingItem}>
+            <OptionsField
+              label={t("groupSettings.emojiFallback")}
+              fieldName="emojiFallback"
+              groupId={groupId}
+              guildId={guildId}
+              options={[
+                { name: t("groupSettings.emojiFallbackSearch"), value: "search" },
+                { name: t("groupSettings.emojiFallbackImage"), value: "image" },
+              ]}
+            />
           </div>
         </div>
 
