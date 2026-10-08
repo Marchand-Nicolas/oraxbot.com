@@ -3,7 +3,8 @@ export interface DiscordGuild {
   name: string;
   icon: string | null;
   owner?: boolean;
-  permissions?: number;
+  /** Number in API v6 payloads (still in cached sessions), string from v8+. */
+  permissions?: number | string;
   permissions_new?: string;
 }
 

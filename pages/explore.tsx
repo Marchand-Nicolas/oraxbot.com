@@ -568,7 +568,7 @@ export default function Explore() {
       }
 
       try {
-        const userRes = await fetch("https://discordapp.com/api/users/@me", {
+        const userRes = await fetch("https://discord.com/api/v10/users/@me", {
           method: "GET",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -583,7 +583,7 @@ export default function Explore() {
             if (!cancelled) {
               loadVoteCooldown();
             }
-          }, userData.retry_after + 50);
+          }, userData.retry_after * 1000 + 50);
           return;
         }
 
@@ -722,7 +722,7 @@ export default function Explore() {
       setIsAuthLoading(true);
       try {
         const res = await fetch(
-          "https://discordapp.com/api/v6/users/@me/guilds",
+          "https://discord.com/api/v10/users/@me/guilds",
           {
             method: "GET",
             headers: {
@@ -744,7 +744,7 @@ export default function Explore() {
         if (userGuilds?.retry_after) {
           setTimeout(() => {
             openPublishMenu(resolvedToken);
-          }, userGuilds.retry_after + 50);
+          }, userGuilds.retry_after * 1000 + 50);
           return;
         }
 
@@ -778,7 +778,7 @@ export default function Explore() {
       setIsAuthLoading(true);
       try {
         const res = await fetch(
-          "https://discordapp.com/api/v6/users/@me/guilds",
+          "https://discord.com/api/v10/users/@me/guilds",
           {
             method: "GET",
             headers: {
@@ -799,7 +799,7 @@ export default function Explore() {
         if (userGuilds?.retry_after) {
           setTimeout(() => {
             openJoinMenu(groupId, tokenOverride);
-          }, userGuilds.retry_after + 50);
+          }, userGuilds.retry_after * 1000 + 50);
           return;
         }
 

@@ -347,7 +347,7 @@ export async function safeFetch(
 // Helper for Discord API calls specifically
 export const discordApi = {
   async getUser(token: string): Promise<unknown> {
-    return api.get("https://discordapp.com/api/users/@me", {
+    return api.get("https://discord.com/api/v10/users/@me", {
       showErrorNotifications: false, // Handle errors manually for auth flow
       headers: {
         Authorization: `Bearer ${token}`,
@@ -358,7 +358,7 @@ export const discordApi = {
   },
 
   async getUserGuilds(token: string): Promise<unknown> {
-    return api.get("https://discordapp.com/api/v6/users/@me/guilds", {
+    return api.get("https://discord.com/api/v10/users/@me/guilds", {
       showErrorNotifications: false, // Handle errors manually for auth flow
       headers: {
         Authorization: `Bearer ${token}`,

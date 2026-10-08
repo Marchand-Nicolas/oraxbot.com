@@ -11,6 +11,43 @@ interface OraxPlusVoteResult {
 }
 
 /**
+ * Paywall a vote or checkout was started from. The bot records it in its
+ * Orax Plus funnel so conversion can be compared per paywall.
+ */
+export type OraxPlusOrigin =
+  | "channel_limit"
+  | "group_limit"
+  | "translation"
+  | "dashboard";
+
+interface OraxPlusTrackingTarget {
+  origin: OraxPlusOrigin;
+  /** Server the user acts from (must be one of theirs). */
+  guildId: string;
+  groupId?: string | number;
+  /** On /join: attributes the event to the group's owner server. */
+  linkId?: string;
+}
+
+/**
+ * Record an Orax Plus funnel step that only the browser sees: a paywall
+ * shown, or a vote opened without going through the API. Fire-and-forget:
+ * tracking never blocks or breaks the paywall.
+ */
+export function trackOraxPlusEvent(
+  event: "paywall_shown" | "vote_started",
+  { origin, guildId, groupId, linkId }: OraxPlusTrackingTarget,
+  platform?: PlatformConfig,
+) {
+  if (!guildId) return;
+  platformApi(
+    "track_orax_plus_event",
+    { event, origin, guildId, groupId, linkId },
+    { platform },
+  ).catch(() => {});
+}
+
+/**
  * Fluxerlist does not send a vote webhook, so after opening the vote page
  * we wait this long before asking the backend to grant Orax Plus. The delay
  * gives the user time to actually cast their vote on fluxerlist.com.
@@ -42,14 +79,15 @@ export async function getOraxPlusStatus(guildId: string) {
 export async function startOraxPlusVote(
   guildId: string,
   platform?: PlatformConfig,
+  origin: OraxPlusOrigin = "dashboard",
 ): Promise<OraxPlusVoteResult> {
   const provider = platform?.vote?.provider;
 
   if (provider === "fluxerlist") {
-    return startFluxerlistVote(guildId, platform!);
+    return startFluxerlistVote(guildId, platform!, origin);
   }
 
-  return startTopggVote(guildId, platform);
+  return startTopggVote(guildId, platform, origin);
 }
 
 /**
@@ -58,7 +96,8 @@ export async function startOraxPlusVote(
  */
 async function startTopggVote(
   guildId: string,
-  platform?: PlatformConfig,
+  platform: PlatformConfig | undefined,
+  origin: OraxPlusOrigin,
 ): Promise<OraxPlusVoteResult> {
   const voteWindow = window.open("about:blank", "_blank");
 
@@ -68,7 +107,7 @@ async function startTopggVote(
       activated?: boolean;
       vote_url?: string;
       message?: string;
-    }>("start_orax_plus_vote", { guildId }, { platform });
+    }>("start_orax_plus_vote", { guildId, origin }, { platform });
 
     if (!data?.result) {
       throw new Error(
@@ -137,6 +176,7 @@ function hideVoteRetrievalOverlay() {
 async function startFluxerlistVote(
   guildId: string,
   platform: PlatformConfig,
+  origin: OraxPlusOrigin,
 ): Promise<OraxPlusVoteResult> {
   const voteUrl = platform.vote?.url || config.fluxerlistVoteUrl;
   const label = voteLabel(platform.vote?.provider || "fluxerlist");
@@ -153,7 +193,7 @@ async function startFluxerlistVote(
       result?: boolean;
       expires_at?: string;
       message?: string;
-    }>("activate_fluxerlist_vote", { guildId }, { platform });
+    }>("activate_fluxerlist_vote", { guildId, origin }, { platform });
 
     if (!data?.result) {
       throw new Error(
@@ -200,13 +240,26 @@ function hideCheckoutOverlay() {
   checkoutOverlay = null;
 }
 
+interface OraxPlusCheckoutOptions {
+  origin?: OraxPlusOrigin;
+  /**
+   * Group invite link: lets a user who does not administer `guildId` pay
+   * Orax Plus for it, as long as it owns that group (sponsoring on /join).
+   */
+  sponsorLinkId?: string;
+  /** `guild` query param after checkout, when it differs from `guildId`. */
+  returnGuildId?: string;
+}
+
 export async function startOraxPlusCheckout(
   guildId: string,
   redirectBase = "/dashboard",
   plan: "monthly" | "lifetime" = "monthly",
   platform?: PlatformConfig,
+  { origin = "dashboard", sponsorLinkId, returnGuildId }: OraxPlusCheckoutOptions = {},
 ) {
   showCheckoutOverlay();
+  const returnGuild = returnGuildId ?? guildId;
   try {
     const data = await platformApi<{
       result?: boolean;
@@ -217,8 +270,10 @@ export async function startOraxPlusCheckout(
       {
         guildId,
         plan,
-        successUrl: `${window.location.origin}${redirectBase}?guild=${guildId}&orax_plus=success`,
-        cancelUrl: `${window.location.origin}${redirectBase}?guild=${guildId}&orax_plus=cancelled`,
+        origin,
+        sponsorLinkId,
+        successUrl: `${window.location.origin}${redirectBase}?guild=${returnGuild}&orax_plus=success`,
+        cancelUrl: `${window.location.origin}${redirectBase}?guild=${returnGuild}&orax_plus=cancelled`,
       },
       { platform },
     );

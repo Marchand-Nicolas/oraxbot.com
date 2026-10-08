@@ -5,6 +5,7 @@ import ActionModal from "../ui/ActionModal";
 import { unmountRoot } from "../../utils/reactRoot";
 import { notify } from "../ui/NotificationSystem";
 import { platformApi } from "../../utils/platformApi";
+import { trackOraxPlusEvent } from "../../utils/oraxPlus";
 import type { Channel, OraxPlusStatus } from "../../types";
 import type { PlatformConfig } from "../../utils/platforms";
 import type { OraxPlusPricing } from "../../utils/pricing";
@@ -30,6 +31,17 @@ export default function CreateGroupMenu(props: CreateGroupMenuProps) {
   const voteLabelText = props.platform?.vote
     ? getVoteLabel(getGlobalLanguage(), props.platform.vote.provider)
     : "";
+
+  function openGroupLimitModal() {
+    if (typeof props.guildId === "string") {
+      trackOraxPlusEvent(
+        "paywall_shown",
+        { origin: "group_limit", guildId: props.guildId },
+        props.platform,
+      );
+    }
+    setShowGroupLimitModal(true);
+  }
 
   useEffect(() => {
     if (props.guildId) {
@@ -116,7 +128,7 @@ export default function CreateGroupMenu(props: CreateGroupMenuProps) {
               className="button default"
               onClick={() => {
                 if (isAtGroupLimit) {
-                  setShowGroupLimitModal(true);
+                  openGroupLimitModal();
                   return;
                 }
                 const groupNameEl = document.getElementById(
@@ -150,6 +162,12 @@ export default function CreateGroupMenu(props: CreateGroupMenuProps) {
                   },
                 )
                   .then((data) => {
+                    // The server enforces the group limit too (e.g. a stale
+                    // count here): offer Orax Plus rather than an error.
+                    if (data.error === 2 && !props.oraxPlus?.active) {
+                      openGroupLimitModal();
+                      return;
+                    }
                     if (data.error) {
                       let errorMessage: string;
                       switch (data.error) {

@@ -12,6 +12,7 @@ import TextField from "./settings/textField";
 import CheckboxField from "./settings/checkboxField";
 import TextareaField from "./settings/textareaField";
 import { getPlatform } from "../../../utils/platforms";
+import { trackOraxPlusEvent } from "../../../utils/oraxPlus";
 import type { OraxPlusPricing } from "../../../utils/pricing";
 import { t, getVoteLabel, getGlobalLanguage } from "../../../utils/i18n";
 
@@ -50,6 +51,15 @@ const ModernSettings = ({
     const latestOraxPlus = await onRefreshOraxPlus?.();
     if (latestOraxPlus?.active) return true;
 
+    trackOraxPlusEvent(
+      "paywall_shown",
+      {
+        origin: "translation",
+        guildId,
+        groupId: typeof groupId === "string" ? groupId : undefined,
+      },
+      platform,
+    );
     setShowTranslationModal(true);
     return false;
   };

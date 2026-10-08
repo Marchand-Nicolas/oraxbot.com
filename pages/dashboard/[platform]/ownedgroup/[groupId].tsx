@@ -86,17 +86,20 @@ export default function OwnedGroup({ pricingRegion }: OwnedGroupProps) {
   const startOraxPlusCheckout = (plan?: "monthly" | "lifetime") => {
     if (!guildId || !platform) return;
 
+    // Translation is the only Orax Plus paywall on this page.
     startCheckout(
       guildId,
       `/dashboard/${platform.slug}/ownedgroup/${groupId}`,
       plan,
+      undefined,
+      { origin: "translation" },
     );
   };
 
   const startOraxPlusVote = async () => {
     if (!guildId || !platform) return;
 
-    const result = await startVote(guildId, platform);
+    const result = await startVote(guildId, platform, "translation");
     if (result.activated) refreshOraxPlusStatus();
     if (result.voteOpened) setIsPollingOraxPlusVote(true);
   };

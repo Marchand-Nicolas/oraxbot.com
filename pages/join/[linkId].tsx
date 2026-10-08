@@ -14,6 +14,7 @@ import {
   openTopggVote,
   startOraxPlusCheckout,
   startOraxPlusVote,
+  trackOraxPlusEvent,
 } from "../../utils/oraxPlus";
 import type { Channel, DiscordGuild, DiscordUser } from "../../types";
 import { voteLabel } from "../../utils/i18n";
@@ -72,6 +73,7 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
     useState<ChannelLimitData | null>(null);
 
   const { linkId } = router.query;
+  const groupLinkId = typeof linkId === "string" ? linkId : undefined;
   const guildId =
     typeof router.query.guild === "string" ? router.query.guild : "";
 
@@ -118,6 +120,33 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
     setPlatformSlug((current) => current ?? (activePlatform?.slug || "discord"));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.isReady, linkId]);
+
+  // Back from Stripe after unlocking Orax Plus for the group owner.
+  const checkoutResult = router.query.orax_plus;
+  useEffect(() => {
+    if (!router.isReady) return;
+    const result = checkoutResult;
+    if (result !== "success" && result !== "cancelled") return;
+    if (result === "success") {
+      popup(
+        "Thank you!",
+        "Orax Plus is being activated on the server that owns this group. Select your channel again in a few seconds to join.",
+        "success",
+      );
+    } else {
+      popup(
+        "Checkout cancelled",
+        "No payment was made. You can try again whenever you like.",
+        "warning",
+      );
+    }
+    const query = { ...router.query };
+    delete query.orax_plus;
+    router.replace({ pathname: router.pathname, query }, undefined, {
+      shallow: true,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router.isReady, checkoutResult]);
 
   useEffect(() => {
     if (!platform) return;
@@ -236,6 +265,11 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
               maxLimit: res.maxLimit || 50,
               groupOwnerId: res.groupOwnerId || "",
             });
+            trackOraxPlusEvent(
+              "paywall_shown",
+              { origin: "channel_limit", guildId, linkId: groupLinkId },
+              platform,
+            );
             setShowChannelLimitModal(true);
             return;
           }
@@ -272,6 +306,24 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
 
   const isGroupOwner =
     channelLimitData != null && guildId === channelLimitData.groupOwnerId;
+
+  // Plus always goes to the server that owns the group: its admins pay as
+  // usual, anyone else sponsors it through the invite link.
+  function startChannelLimitCheckout(plan: "monthly" | "lifetime") {
+    if (!channelLimitData || !platform || !groupLinkId) return;
+    setShowChannelLimitModal(false);
+    startOraxPlusCheckout(
+      channelLimitData.groupOwnerId,
+      `/join/${groupLinkId}`,
+      plan,
+      platform,
+      {
+        origin: "channel_limit",
+        returnGuildId: guildId,
+        sponsorLinkId: isGroupOwner ? undefined : groupLinkId,
+      },
+    );
+  }
 
   return (
     <>
@@ -474,7 +526,7 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
 
               <div style={{ marginTop: "16px" }}>
                 <p style={{ fontWeight: 600, marginBottom: "4px" }}>
-                  Orax Plus subscription
+                  {isGroupOwner ? "Orax Plus subscription" : "Sponsor this group"}
                 </p>
                 {isGroupOwner ? (
                   <p style={{ fontSize: "14px", opacity: 0.8 }}>
@@ -482,7 +534,7 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
                   </p>
                 ) : (
                   <p style={{ fontSize: "14px", opacity: 0.8 }}>
-                    Only the group owner can subscribe to increase this limit.
+                    {`Get Orax Plus for the server that owns this group (${pricing.monthly}/mo, or ${pricing.lifetime} once). The limit goes up to `}{channelLimitData.maxLimit} channels and you can join right after.
                   </p>
                 )}
               </div>
@@ -495,8 +547,13 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
               onClick: () => {
                 setShowChannelLimitModal(false);
                 if (voteProvider === "fluxerlist") {
-                  startOraxPlusVote(guildId, platform);
+                  startOraxPlusVote(guildId, platform, "channel_limit");
                 } else {
+                  trackOraxPlusEvent(
+                    "vote_started",
+                    { origin: "channel_limit", guildId, linkId: groupLinkId },
+                    platform,
+                  );
                   openTopggVote();
                 }
               },
@@ -504,34 +561,16 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
             {
               label: isGroupOwner
                 ? `Subscribe ${pricing.monthly}/mo`
-                : "Subscribe (owner only)",
+                : `Sponsor ${pricing.monthly}/mo`,
               variant: "secondary",
-              disabled: !isGroupOwner,
-              onClick: () => {
-                setShowChannelLimitModal(false);
-                startOraxPlusCheckout(
-                  channelLimitData.groupOwnerId,
-                  undefined,
-                  "monthly",
-                  platform,
-                );
-              },
+              onClick: () => startChannelLimitCheckout("monthly"),
             },
             {
               label: isGroupOwner
                 ? `Lifetime ${pricing.lifetime}`
-                : "Lifetime (owner only)",
+                : `Sponsor lifetime ${pricing.lifetime}`,
               variant: "secondary",
-              disabled: !isGroupOwner,
-              onClick: () => {
-                setShowChannelLimitModal(false);
-                startOraxPlusCheckout(
-                  channelLimitData.groupOwnerId,
-                  undefined,
-                  "lifetime",
-                  platform,
-                );
-              },
+              onClick: () => startChannelLimitCheckout("lifetime"),
             },
           ]}
           onClose={() => setShowChannelLimitModal(false)}

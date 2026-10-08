@@ -25,6 +25,8 @@ import ErrorBoundary from "../../../components/ui/ErrorBoundary";
 import {
   startOraxPlusCheckout as startCheckout,
   startOraxPlusVote as startVote,
+  trackOraxPlusEvent,
+  type OraxPlusOrigin,
   changeOraxPlusServer,
 } from "../../../utils/oraxPlus";
 import {
@@ -304,11 +306,22 @@ function Dashboard({
     !oraxPlus?.active || source === voteSource || source === "stripe";
   const isAtGroupLimit = ownedGroupsCount >= groupLimit;
 
-  const startOraxPlusCheckout = (plan?: "monthly" | "lifetime") =>
-    startCheckout(guildId as string, undefined, plan);
+  const startOraxPlusCheckout = (
+    plan?: "monthly" | "lifetime",
+    origin: OraxPlusOrigin = "dashboard",
+  ) => startCheckout(guildId as string, undefined, plan, undefined, { origin });
 
-  async function startOraxPlusVote() {
-    const result = await startVote(guildId as string, platform);
+  function openGroupLimitModal() {
+    trackOraxPlusEvent(
+      "paywall_shown",
+      { origin: "group_limit", guildId: guildId as string },
+      platform,
+    );
+    setShowGroupLimitModal(true);
+  }
+
+  async function startOraxPlusVote(origin: OraxPlusOrigin = "dashboard") {
+    const result = await startVote(guildId as string, platform, origin);
 
     if (result.activated) {
       setRefreshGuildDatas(true);
@@ -653,7 +666,7 @@ function Dashboard({
               <button
                 onClick={() => {
                   if (isAtGroupLimit) {
-                    setShowGroupLimitModal(true);
+                    openGroupLimitModal();
                     return;
                   }
                   renderWithRoot(
@@ -663,8 +676,10 @@ function Dashboard({
                       oraxPlus={oraxPlus}
                       platform={platform}
                       pricing={pricing}
-                      onStartOraxPlusVote={startOraxPlusVote}
-                      onStartOraxPlusCheckout={startOraxPlusCheckout}
+                      onStartOraxPlusVote={() => startOraxPlusVote("group_limit")}
+                      onStartOraxPlusCheckout={(plan) =>
+                        startOraxPlusCheckout(plan, "group_limit")
+                      }
                       setRefreshGuildDatas={setRefreshGuildDatas}
                     />,
                     document.getElementById("menu"),
@@ -786,7 +801,7 @@ function Dashboard({
                   {showVoteButton && (
                     <button
                       className={styles.secondaryButton}
-                      onClick={startOraxPlusVote}
+                      onClick={() => startOraxPlusVote()}
                     >
                       {voteLabelText}
                     </button>
@@ -922,7 +937,7 @@ function Dashboard({
                     variant: "secondary" as const,
                     onClick: () => {
                       setShowGroupLimitModal(false);
-                      startOraxPlusVote();
+                      startOraxPlusVote("group_limit");
                     },
                   },
                 ]
@@ -932,7 +947,7 @@ function Dashboard({
               variant: "primary" as const,
               onClick: () => {
                 setShowGroupLimitModal(false);
-                startOraxPlusCheckout("monthly");
+                startOraxPlusCheckout("monthly", "group_limit");
               },
             },
             {
@@ -940,7 +955,7 @@ function Dashboard({
               variant: "primary" as const,
               onClick: () => {
                 setShowGroupLimitModal(false);
-                startOraxPlusCheckout("lifetime");
+                startOraxPlusCheckout("lifetime", "group_limit");
               },
             },
           ]}

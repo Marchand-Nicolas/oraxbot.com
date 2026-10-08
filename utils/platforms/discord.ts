@@ -27,8 +27,8 @@ const discord: PlatformConfig = {
     label: "Vote on Top.gg",
   },
 
-  userEndpoint: "https://discordapp.com/api/users/@me",
-  guildsEndpoint: "https://discordapp.com/api/v6/users/@me/guilds",
+  userEndpoint: "https://discord.com/api/v10/users/@me",
+  guildsEndpoint: "https://discord.com/api/v10/users/@me/guilds",
   proxyThroughBackend: false,
 
   hasPermissionFlags: true,
