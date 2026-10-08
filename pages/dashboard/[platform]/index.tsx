@@ -19,13 +19,12 @@ import Loading from "../../../components/Loading";
 import GuildIcon from "../../../components/GuildIcon";
 import HiddenMenu from "../../../components/ui/hiddenMenu";
 import { notify } from "../../../components/ui/NotificationSystem";
-import ActionModal from "../../../components/ui/ActionModal";
+import OraxPlusPaywallModal from "../../../components/ui/OraxPlusPaywallModal";
 import OraxPlusApplyModal from "../../../components/ui/OraxPlusApplyModal";
 import ErrorBoundary from "../../../components/ui/ErrorBoundary";
 import {
   startOraxPlusCheckout as startCheckout,
   startOraxPlusVote as startVote,
-  trackOraxPlusEvent,
   type OraxPlusOrigin,
   changeOraxPlusServer,
 } from "../../../utils/oraxPlus";
@@ -43,6 +42,7 @@ import {
   t as tt,
 } from "../../../utils/i18n";
 import { LanguageProvider } from "../../../hooks/useLanguage";
+import { useOraxPlusVotePolling } from "../../../hooks/useOraxPlusVotePolling";
 import {
   getOraxPlusPricing,
   getPricingRegion,
@@ -151,18 +151,13 @@ function Dashboard({
   });
   const [paymentProgress, setPaymentProgress] = useState(0);
   const [refreshGuildDatas, setRefreshGuildDatas] = useState(false);
-  const [isPollingOraxPlusVote, setIsPollingOraxPlusVote] = useState(false);
   const [showGroupLimitModal, setShowGroupLimitModal] = useState(false);
   const [showOraxPlusApply, setShowOraxPlusApply] = useState(false);
   const [purchaseGuildId, setPurchaseGuildId] = useState<string>("");
   const [isWaitingForActivation, setIsWaitingForActivation] = useState(false);
   const [applySubmitting, setApplySubmitting] = useState(false);
-  const [voteBaselineExpiresAt, setVoteBaselineExpiresAt] = useState<
-    string | null
-  >(null);
   const [lastLoadedGuildId, setLastLoadedGuildId] = useState("");
   const [navOpen, setNavOpen] = useState(false);
-  const votePollAttemptsRef = useRef(0);
   const activationPollAttemptsRef = useRef(0);
 
   // Mirror the auth hook's loaded data into local state so the rest of the
@@ -311,14 +306,11 @@ function Dashboard({
     origin: OraxPlusOrigin = "dashboard",
   ) => startCheckout(guildId as string, undefined, plan, undefined, { origin });
 
-  function openGroupLimitModal() {
-    trackOraxPlusEvent(
-      "paywall_shown",
-      { origin: "group_limit", guildId: guildId as string },
-      platform,
-    );
-    setShowGroupLimitModal(true);
-  }
+  const { startPolling: startVotePolling } = useOraxPlusVotePolling({
+    guildId,
+    oraxPlus,
+    refresh: () => setRefreshGuildDatas(true),
+  });
 
   async function startOraxPlusVote(origin: OraxPlusOrigin = "dashboard") {
     const result = await startVote(guildId as string, platform, origin);
@@ -329,70 +321,9 @@ function Dashboard({
     }
 
     if (result.voteOpened) {
-      setVoteBaselineExpiresAt(oraxPlus?.entitlement?.expiresAt || null);
-      setIsPollingOraxPlusVote(true);
+      startVotePolling(oraxPlus?.entitlement?.expiresAt || null);
     }
   }
-
-  useEffect(() => {
-    if (!isPollingOraxPlusVote || !guildId) return;
-
-    votePollAttemptsRef.current = 0;
-    setRefreshGuildDatas(true);
-
-    const intervalId = window.setInterval(() => {
-      votePollAttemptsRef.current += 1;
-      setRefreshGuildDatas(true);
-
-      if (votePollAttemptsRef.current >= 24) {
-        window.clearInterval(intervalId);
-        setIsPollingOraxPlusVote(false);
-        setVoteBaselineExpiresAt(null);
-        notify.error(
-          tt("oraxPlus.voteNotDetectedTitle"),
-          tt("oraxPlus.voteNotDetectedDesc", { context: tt("nav.support").toLowerCase() }),
-          { duration: 8000 },
-        );
-      }
-    }, 5000);
-
-    return () => window.clearInterval(intervalId);
-  }, [guildId, isPollingOraxPlusVote]);
-
-  useEffect(() => {
-    if (!isPollingOraxPlusVote) return;
-    if (!oraxPlus?.active || oraxPlus.entitlement?.source !== "topgg_vote") {
-      return;
-    }
-
-    const currentExpiresAt = oraxPlus.entitlement.expiresAt || null;
-    const currentExpiresAtTime = currentExpiresAt
-      ? new Date(currentExpiresAt).getTime()
-      : 0;
-    const baselineExpiresAtTime = voteBaselineExpiresAt
-      ? new Date(voteBaselineExpiresAt).getTime()
-      : 0;
-
-    if (
-      !voteBaselineExpiresAt ||
-      (currentExpiresAtTime && currentExpiresAtTime > baselineExpiresAtTime)
-    ) {
-      setIsPollingOraxPlusVote(false);
-      setVoteBaselineExpiresAt(null);
-      notify.success(
-        tt("oraxPlus.activatedTitle"),
-        voteBaselineExpiresAt
-          ? tt("oraxPlus.activatedExtendedDesc")
-          : tt("oraxPlus.activatedNewDesc"),
-      );
-    }
-  }, [
-    isPollingOraxPlusVote,
-    oraxPlus?.active,
-    oraxPlus?.entitlement?.source,
-    oraxPlus?.entitlement?.expiresAt,
-    voteBaselineExpiresAt,
-  ]);
 
   useEffect(() => {
     if (!isWaitingForActivation || !purchaseGuildId) return;
@@ -666,7 +597,7 @@ function Dashboard({
               <button
                 onClick={() => {
                   if (isAtGroupLimit) {
-                    openGroupLimitModal();
+                    setShowGroupLimitModal(true);
                     return;
                   }
                   renderWithRoot(
@@ -675,11 +606,7 @@ function Dashboard({
                       ownedGroupsCount={ownedGroupsCount}
                       oraxPlus={oraxPlus}
                       platform={platform}
-                      pricing={pricing}
-                      onStartOraxPlusVote={() => startOraxPlusVote("group_limit")}
-                      onStartOraxPlusCheckout={(plan) =>
-                        startOraxPlusCheckout(plan, "group_limit")
-                      }
+                      onGroupLimitReached={() => setShowGroupLimitModal(true)}
                       setRefreshGuildDatas={setRefreshGuildDatas}
                     />,
                     document.getElementById("menu"),
@@ -920,7 +847,7 @@ function Dashboard({
         <br></br>
       </div>
       {showGroupLimitModal && (
-        <ActionModal
+        <OraxPlusPaywallModal
           title={tt("oraxPlus.groupLimitTitle")}
           description={
             <p>
@@ -929,36 +856,13 @@ function Dashboard({
                 : tt("oraxPlus.groupLimitDescNoVote").trim()}
             </p>
           }
-          actions={[
-            ...(voteProvider
-              ? [
-                  {
-                    label: voteLabelText,
-                    variant: "secondary" as const,
-                    onClick: () => {
-                      setShowGroupLimitModal(false);
-                      startOraxPlusVote("group_limit");
-                    },
-                  },
-                ]
-              : []),
-            {
-              label: tt("oraxPlus.subscribe", { price: pricing.monthly }),
-              variant: "primary" as const,
-              onClick: () => {
-                setShowGroupLimitModal(false);
-                startOraxPlusCheckout("monthly", "group_limit");
-              },
-            },
-            {
-              label: tt("oraxPlus.lifetime", { price: pricing.lifetime }),
-              variant: "primary" as const,
-              onClick: () => {
-                setShowGroupLimitModal(false);
-                startOraxPlusCheckout("lifetime", "group_limit");
-              },
-            },
-          ]}
+          origin="group_limit"
+          guildId={guildId}
+          platform={platform}
+          pricing={pricing}
+          voteLabel={voteLabelText}
+          onVote={() => startOraxPlusVote("group_limit")}
+          onCheckout={(plan) => startOraxPlusCheckout(plan, "group_limit")}
           onClose={() => setShowGroupLimitModal(false)}
         />
       )}

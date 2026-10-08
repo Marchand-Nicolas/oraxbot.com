@@ -67,7 +67,7 @@ const en = {
       " Subscribe to Orax Plus to enable automatic translation for this group.",
     voteNotDetectedTitle: "Vote not detected yet",
     voteNotDetectedDesc:
-      "Top.gg may still be processing the vote. Refresh {context} in a moment if Orax Plus does not appear.",
+      "Top.gg may still be processing your vote. If Orax Plus does not appear within a minute, reload the page.",
     activatedTitle: "Orax Plus activated",
     activatedExtendedDesc:
       "Your Top.gg vote extended this server's plan.",

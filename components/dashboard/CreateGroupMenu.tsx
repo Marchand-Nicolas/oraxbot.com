@@ -1,46 +1,32 @@
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import styles from "../../styles/components/dashboard/CreateGroupMenu.module.css";
-import ActionModal from "../ui/ActionModal";
 import { unmountRoot } from "../../utils/reactRoot";
 import { notify } from "../ui/NotificationSystem";
 import { platformApi } from "../../utils/platformApi";
-import { trackOraxPlusEvent } from "../../utils/oraxPlus";
 import type { Channel, OraxPlusStatus } from "../../types";
 import type { PlatformConfig } from "../../utils/platforms";
-import type { OraxPlusPricing } from "../../utils/pricing";
-import { t, getVoteLabel, getGlobalLanguage } from "../../utils/i18n";
+import { t } from "../../utils/i18n";
 
 interface CreateGroupMenuProps {
   guildId: string | string[] | undefined;
   setRefreshGuildDatas: (value: boolean) => void;
   ownedGroupsCount?: number;
   oraxPlus?: OraxPlusStatus;
-  onStartOraxPlusVote?: () => void;
-  onStartOraxPlusCheckout?: (plan?: "monthly" | "lifetime") => void;
+  /** Closes this menu so the dashboard can show its Orax Plus paywall. */
+  onGroupLimitReached?: () => void;
   platform?: PlatformConfig;
-  pricing: OraxPlusPricing;
 }
 
 export default function CreateGroupMenu(props: CreateGroupMenuProps) {
   const [channels, setChannels] = useState<Channel[]>([]);
-  const [showGroupLimitModal, setShowGroupLimitModal] = useState(false);
   const groupLimit = props.oraxPlus?.limits?.groupsPerGuild || 2;
   const ownedGroupsCount = props.ownedGroupsCount || 0;
   const isAtGroupLimit = ownedGroupsCount >= groupLimit;
-  const voteLabelText = props.platform?.vote
-    ? getVoteLabel(getGlobalLanguage(), props.platform.vote.provider)
-    : "";
 
-  function openGroupLimitModal() {
-    if (typeof props.guildId === "string") {
-      trackOraxPlusEvent(
-        "paywall_shown",
-        { origin: "group_limit", guildId: props.guildId },
-        props.platform,
-      );
-    }
-    setShowGroupLimitModal(true);
+  function showGroupLimitPaywall() {
+    unmountRoot(document.getElementById("menu"));
+    props.onGroupLimitReached?.();
   }
 
   useEffect(() => {
@@ -128,7 +114,7 @@ export default function CreateGroupMenu(props: CreateGroupMenuProps) {
               className="button default"
               onClick={() => {
                 if (isAtGroupLimit) {
-                  openGroupLimitModal();
+                  showGroupLimitPaywall();
                   return;
                 }
                 const groupNameEl = document.getElementById(
@@ -165,7 +151,7 @@ export default function CreateGroupMenu(props: CreateGroupMenuProps) {
                     // The server enforces the group limit too (e.g. a stale
                     // count here): offer Orax Plus rather than an error.
                     if (data.error === 2 && !props.oraxPlus?.active) {
-                      openGroupLimitModal();
+                      showGroupLimitPaywall();
                       return;
                     }
                     if (data.error) {
@@ -218,56 +204,6 @@ export default function CreateGroupMenu(props: CreateGroupMenuProps) {
           </div>
         </div>
       </div>
-      {showGroupLimitModal && (
-        <ActionModal
-          title={t("oraxPlus.groupLimitTitle")}
-          description={
-            <p>
-              {props.platform?.vote
-                ? t("oraxPlus.groupLimitDesc", { vote: voteLabelText })
-                : t("oraxPlus.groupLimitDescNoVote").trim()}
-            </p>
-          }
-          actions={[
-            ...(props.platform?.vote
-              ? [
-                  {
-                    label: voteLabelText,
-                    variant: "secondary" as const,
-                    disabled: !props.onStartOraxPlusVote,
-                    onClick: () => {
-                      setShowGroupLimitModal(false);
-                      props.onStartOraxPlusVote?.();
-                    },
-                  },
-                ]
-              : []),
-            {
-              label: t("oraxPlus.subscribe", {
-                price: props.pricing.monthly,
-              }),
-              variant: "primary",
-              disabled: !props.onStartOraxPlusCheckout,
-              onClick: () => {
-                setShowGroupLimitModal(false);
-                props.onStartOraxPlusCheckout?.("monthly");
-              },
-            },
-            {
-              label: t("oraxPlus.lifetime", {
-                price: props.pricing.lifetime,
-              }),
-              variant: "primary",
-              disabled: !props.onStartOraxPlusCheckout,
-              onClick: () => {
-                setShowGroupLimitModal(false);
-                props.onStartOraxPlusCheckout?.("lifetime");
-              },
-            },
-          ]}
-          onClose={() => setShowGroupLimitModal(false)}
-        />
-      )}
     </>
   );
 }

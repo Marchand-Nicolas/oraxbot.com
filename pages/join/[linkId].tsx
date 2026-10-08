@@ -8,7 +8,7 @@ import { useRouter } from "next/router";
 import config from "../../utils/config.json";
 import popup from "../../utils/popup";
 import meteor from "../../public/icons/meteor.svg";
-import ActionModal from "../../components/ui/ActionModal";
+import OraxPlusPaywallModal from "../../components/ui/OraxPlusPaywallModal";
 import GuildIcon from "../../components/GuildIcon";
 import {
   openTopggVote,
@@ -265,11 +265,6 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
               maxLimit: res.maxLimit || 50,
               groupOwnerId: res.groupOwnerId || "",
             });
-            trackOraxPlusEvent(
-              "paywall_shown",
-              { origin: "channel_limit", guildId, linkId: groupLinkId },
-              platform,
-            );
             setShowChannelLimitModal(true);
             return;
           }
@@ -311,7 +306,6 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
   // usual, anyone else sponsors it through the invite link.
   function startChannelLimitCheckout(plan: "monthly" | "lifetime") {
     if (!channelLimitData || !platform || !groupLinkId) return;
-    setShowChannelLimitModal(false);
     startOraxPlusCheckout(
       channelLimitData.groupOwnerId,
       `/join/${groupLinkId}`,
@@ -323,6 +317,22 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
         sponsorLinkId: isGroupOwner ? undefined : groupLinkId,
       },
     );
+  }
+
+  // The vote lets the voter link past the limit for 12 hours (Discord), or
+  // unlocks Plus on their server (Fluxerlist).
+  function startChannelLimitVote() {
+    if (!platform) return;
+    if (voteProvider === "fluxerlist") {
+      startOraxPlusVote(guildId, platform, "channel_limit");
+      return;
+    }
+    trackOraxPlusEvent(
+      "vote_started",
+      { origin: "channel_limit", guildId, linkId: groupLinkId },
+      platform,
+    );
+    openTopggVote();
   }
 
   return (
@@ -502,7 +512,7 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
         )}
       </div>
       {showChannelLimitModal && channelLimitData && platform && (
-        <ActionModal
+        <OraxPlusPaywallModal
           title="Channel limit reached"
           description={
             <div>
@@ -540,39 +550,25 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
               </div>
             </div>
           }
-          actions={[
-            {
-              label: voteLabel(voteProvider),
-              variant: "primary",
-              onClick: () => {
-                setShowChannelLimitModal(false);
-                if (voteProvider === "fluxerlist") {
-                  startOraxPlusVote(guildId, platform, "channel_limit");
-                } else {
-                  trackOraxPlusEvent(
-                    "vote_started",
-                    { origin: "channel_limit", guildId, linkId: groupLinkId },
-                    platform,
-                  );
-                  openTopggVote();
+          origin="channel_limit"
+          guildId={guildId}
+          linkId={groupLinkId}
+          platform={platform}
+          pricing={pricing}
+          voteLabel={voteLabel(voteProvider)}
+          onVote={startChannelLimitVote}
+          onCheckout={startChannelLimitCheckout}
+          checkoutLabels={
+            isGroupOwner
+              ? {
+                  monthly: `Subscribe ${pricing.monthly}/mo`,
+                  lifetime: `Lifetime ${pricing.lifetime}`,
                 }
-              },
-            },
-            {
-              label: isGroupOwner
-                ? `Subscribe ${pricing.monthly}/mo`
-                : `Sponsor ${pricing.monthly}/mo`,
-              variant: "secondary",
-              onClick: () => startChannelLimitCheckout("monthly"),
-            },
-            {
-              label: isGroupOwner
-                ? `Lifetime ${pricing.lifetime}`
-                : `Sponsor lifetime ${pricing.lifetime}`,
-              variant: "secondary",
-              onClick: () => startChannelLimitCheckout("lifetime"),
-            },
-          ]}
+              : {
+                  monthly: `Sponsor ${pricing.monthly}/mo`,
+                  lifetime: `Sponsor lifetime ${pricing.lifetime}`,
+                }
+          }
           onClose={() => setShowChannelLimitModal(false)}
         />
       )}

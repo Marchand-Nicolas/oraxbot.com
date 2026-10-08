@@ -61,7 +61,7 @@ const es: Translation = {
       " Suscríbete a Orax Plus para activar la traducción automática de este grupo.",
     voteNotDetectedTitle: "Voto aún no detectado",
     voteNotDetectedDesc:
-      "Top.gg puede estar procesando el voto. Actualiza {context} en un momento si Orax Plus no aparece.",
+      "Top.gg puede seguir procesando tu voto. Si Orax Plus no aparece en un minuto, recarga la página.",
     activatedTitle: "Orax Plus activado",
     activatedExtendedDesc: "Tu voto en Top.gg ha extendido el plan de este servidor.",
     activatedNewDesc: "Tu voto en Top.gg se ha aplicado a este servidor.",

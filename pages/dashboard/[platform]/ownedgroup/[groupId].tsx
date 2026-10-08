@@ -2,7 +2,7 @@ import type { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import dashboardStyles from "../../../../styles/Dashboard.module.css";
 import styles from "../../../../styles/dashboard/OwnedGroup.module.css";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   getOraxPlusStatus,
   startOraxPlusCheckout as startCheckout,
@@ -15,7 +15,6 @@ import ModernAdvancedSettings from "../../../../components/dashboard/groupSettin
 import ActivityGraph from "../../../../components/dashboard/groupSettings/activityGraph";
 import ChannelButton from "../../../../components/dashboard/groupSettings/channelButton";
 import Skeleton from "../../../../components/ui/skeleton";
-import { notify } from "../../../../components/ui/NotificationSystem";
 import type { LinkedChannel, OraxPlusStatus } from "../../../../types";
 import {
   setActiveTokenCookie,
@@ -29,6 +28,7 @@ import {
   t,
 } from "../../../../utils/i18n";
 import { LanguageProvider } from "../../../../hooks/useLanguage";
+import { useOraxPlusVotePolling } from "../../../../hooks/useOraxPlusVotePolling";
 import {
   getOraxPlusPricing,
   getPricingRegion,
@@ -58,8 +58,6 @@ export default function OwnedGroup({ pricingRegion }: OwnedGroupProps) {
   const [loading, setLoading] = useState(true);
   const [lang, setLang] = useState<"en" | "es" | "fr">("en");
   const [copied, setCopied] = useState(false);
-  const [isPollingOraxPlusVote, setIsPollingOraxPlusVote] = useState(false);
-  const votePollAttemptsRef = useRef(0);
 
   const params = new URLSearchParams(router.asPath.split("?")[1]);
   const guildId = params.get("guild") ?? undefined;
@@ -96,12 +94,20 @@ export default function OwnedGroup({ pricingRegion }: OwnedGroupProps) {
     );
   };
 
+  const { startPolling: startVotePolling } = useOraxPlusVotePolling({
+    guildId,
+    oraxPlus,
+    refresh: refreshOraxPlusStatus,
+  });
+
   const startOraxPlusVote = async () => {
     if (!guildId || !platform) return;
 
     const result = await startVote(guildId, platform, "translation");
     if (result.activated) refreshOraxPlusStatus();
-    if (result.voteOpened) setIsPollingOraxPlusVote(true);
+    if (result.voteOpened) {
+      startVotePolling(oraxPlus?.entitlement?.expiresAt || null);
+    }
   };
 
   useEffect(() => {
@@ -142,40 +148,6 @@ export default function OwnedGroup({ pricingRegion }: OwnedGroupProps) {
       })
       .catch(() => undefined);
   }, [guildId]);
-
-  useEffect(() => {
-    if (!isPollingOraxPlusVote || !guildId) return;
-
-    votePollAttemptsRef.current = 0;
-    refreshOraxPlusStatus();
-
-    const intervalId = window.setInterval(() => {
-      votePollAttemptsRef.current += 1;
-      refreshOraxPlusStatus();
-
-      if (votePollAttemptsRef.current >= 24) {
-        window.clearInterval(intervalId);
-        setIsPollingOraxPlusVote(false);
-        notify.error(
-          t("oraxPlus.voteNotDetectedTitle"),
-          t("oraxPlus.voteNotDetectedDesc", { context: t("common.okay").toLowerCase() }),
-          { duration: 8000 },
-        );
-      }
-    }, 5000);
-
-    return () => window.clearInterval(intervalId);
-  }, [guildId, isPollingOraxPlusVote, refreshOraxPlusStatus]);
-
-  useEffect(() => {
-    if (!isPollingOraxPlusVote || !oraxPlus?.active) return;
-
-    setIsPollingOraxPlusVote(false);
-    notify.success(
-      t("oraxPlus.activatedTitle"),
-      t("oraxPlus.activatedNewDesc"),
-    );
-  }, [isPollingOraxPlusVote, oraxPlus?.active]);
 
   useEffect(() => {
     if (!guildId) return;

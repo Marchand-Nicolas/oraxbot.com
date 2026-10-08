@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useRouter } from "next/router";
 import styles from "../../../styles/dashboard/OwnedGroup.module.css";
 import type { OraxPlusStatus } from "../../../types";
-import ActionModal from "../../ui/ActionModal";
+import OraxPlusPaywallModal from "../../ui/OraxPlusPaywallModal";
 import StarIcon from "../../ui/icons/StarIcon";
 import CustomUsernames from "./settings/customUsernames";
 import LogMessages from "./settings/logMessages";
@@ -12,7 +12,6 @@ import TextField from "./settings/textField";
 import CheckboxField from "./settings/checkboxField";
 import TextareaField from "./settings/textareaField";
 import { getPlatform } from "../../../utils/platforms";
-import { trackOraxPlusEvent } from "../../../utils/oraxPlus";
 import type { OraxPlusPricing } from "../../../utils/pricing";
 import { t, getVoteLabel, getGlobalLanguage } from "../../../utils/i18n";
 
@@ -20,7 +19,7 @@ interface ModernSettingsProps {
   oraxPlus?: OraxPlusStatus;
   onRefreshOraxPlus?: () => Promise<OraxPlusStatus | undefined>;
   onStartOraxPlusVote?: () => void;
-  onStartOraxPlusCheckout?: (plan?: "monthly" | "lifetime") => void;
+  onStartOraxPlusCheckout: (plan: "monthly" | "lifetime") => void;
   pricing: OraxPlusPricing;
 }
 
@@ -51,15 +50,6 @@ const ModernSettings = ({
     const latestOraxPlus = await onRefreshOraxPlus?.();
     if (latestOraxPlus?.active) return true;
 
-    trackOraxPlusEvent(
-      "paywall_shown",
-      {
-        origin: "translation",
-        guildId,
-        groupId: typeof groupId === "string" ? groupId : undefined,
-      },
-      platform,
-    );
     setShowTranslationModal(true);
     return false;
   };
@@ -174,7 +164,7 @@ const ModernSettings = ({
         </div>
       </div>
       {showTranslationModal && (
-        <ActionModal
+        <OraxPlusPaywallModal
           title={t("oraxPlus.requiredTitle")}
           description={
             <p>
@@ -183,39 +173,14 @@ const ModernSettings = ({
                 : t("oraxPlus.requiredDescNoVote").trim()}
             </p>
           }
-          actions={[
-            ...(voteProvider
-              ? [
-                  {
-                    label: voteLabelText,
-                    variant: "secondary" as const,
-                    disabled: !onStartOraxPlusVote,
-                    onClick: () => {
-                      setShowTranslationModal(false);
-                      onStartOraxPlusVote?.();
-                    },
-                  },
-                ]
-              : []),
-            {
-              label: t("oraxPlus.subscribe", { price: pricing.monthly }),
-              variant: "primary",
-              disabled: !onStartOraxPlusCheckout,
-              onClick: () => {
-                setShowTranslationModal(false);
-                onStartOraxPlusCheckout?.("monthly");
-              },
-            },
-            {
-              label: t("oraxPlus.lifetime", { price: pricing.lifetime }),
-              variant: "primary",
-              disabled: !onStartOraxPlusCheckout,
-              onClick: () => {
-                setShowTranslationModal(false);
-                onStartOraxPlusCheckout?.("lifetime");
-              },
-            },
-          ]}
+          origin="translation"
+          guildId={guildId}
+          groupId={typeof groupId === "string" ? groupId : undefined}
+          platform={platform}
+          pricing={pricing}
+          voteLabel={voteLabelText}
+          onVote={onStartOraxPlusVote}
+          onCheckout={onStartOraxPlusCheckout}
           onClose={() => setShowTranslationModal(false)}
         />
       )}
