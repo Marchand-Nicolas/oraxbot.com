@@ -77,7 +77,8 @@ const en = {
     voteOpenedDesc:
       "Orax Plus will activate automatically when Top.gg sends the vote.",
     voteSetupFailedTitle: "Vote setup failed",
-    activatedFluxerDesc: "Your Fluxerlist vote was applied to this server.",
+    retrievingVote: "Retrieving your vote…",
+    activatedFluxerDesc: "Your vote was applied to this server.",
     voteActivationFailedTitle: "Vote activation failed",
     groupLimitTitle: "Group limit reached",
     groupLimitDesc:

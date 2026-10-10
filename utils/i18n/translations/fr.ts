@@ -73,7 +73,8 @@ const fr: Translation = {
     voteOpenedDesc:
       "Orax Plus s'activera automatiquement lorsque Top.gg enverra le vote.",
     voteSetupFailedTitle: "Échec de la préparation du vote",
-    activatedFluxerDesc: "Votre vote Fluxerlist a été appliqué à ce serveur.",
+    retrievingVote: "Récupération de votre vote…",
+    activatedFluxerDesc: "Votre vote a été appliqué à ce serveur.",
     voteActivationFailedTitle: "Échec de l'activation du vote",
     groupLimitTitle: "Limite de groupes atteinte",
     groupLimitDesc:

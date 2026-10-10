@@ -3,7 +3,7 @@ import { notify } from "../components/ui/NotificationSystem";
 import type { OraxPlusStatus } from "../types";
 import { platformApi } from "./platformApi";
 import type { PlatformConfig } from "./platforms";
-import { t, voteLabel } from "./i18n";
+import { t } from "./i18n";
 
 interface OraxPlusVoteResult {
   activated: boolean;
@@ -154,14 +154,14 @@ voteWindow?.close();
 
 let voteRetrievalOverlay: HTMLDivElement | null = null;
 
-function showVoteRetrievalOverlay(label: string) {
+function showVoteRetrievalOverlay() {
   if (voteRetrievalOverlay) return;
   const overlay = document.createElement("div");
   overlay.className = "popup";
   overlay.innerHTML =
     '<div class="container" style="text-align:center">' +
     '<div class="spinner" style="margin:0 auto 16px"></div>' +
-    `<p style="color:#fff;margin:0">Retrieving your ${label} vote…</p>` +
+    `<p style="color:#fff;margin:0">${t("oraxPlus.retrievingVote")}</p>` +
     "</div>";
   document.body.appendChild(overlay);
   voteRetrievalOverlay = overlay;
@@ -183,7 +183,6 @@ async function startFluxerlistVote(
   origin: OraxPlusOrigin,
   hasVotedFluxerlist?: boolean,
 ): Promise<OraxPlusVoteResult> {
-  const label = voteLabel(platform.vote?.provider || "fluxerlist");
   let votedBefore = hasVotedFluxerlist;
 
   if (votedBefore === undefined) {
@@ -209,7 +208,7 @@ async function startFluxerlistVote(
     window.open(voteUrl, "_blank");
   }
 
-  showVoteRetrievalOverlay(label);
+  showVoteRetrievalOverlay();
 
   try {
     await new Promise((resolve) =>
