@@ -41,6 +41,7 @@ export interface OwnedGroup {
 export interface OraxPlusStatus {
   active?: boolean;
   plan?: "free" | "orax_plus" | string;
+  hasVotedFluxerlist?: boolean;
   entitlement?: {
     source?:
       | "topgg_vote"

@@ -103,7 +103,12 @@ export default function OwnedGroup({ pricingRegion }: OwnedGroupProps) {
   const startOraxPlusVote = async () => {
     if (!guildId || !platform) return;
 
-    const result = await startVote(guildId, platform, "translation");
+    const result = await startVote(
+      guildId,
+      platform,
+      "translation",
+      oraxPlus?.hasVotedFluxerlist,
+    );
     if (result.activated) refreshOraxPlusStatus();
     if (result.voteOpened) {
       startVotePolling(oraxPlus?.entitlement?.expiresAt || null);

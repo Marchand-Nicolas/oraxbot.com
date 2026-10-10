@@ -62,12 +62,15 @@ export function openTopggVote() {
   );
 }
 
-export async function getOraxPlusStatus(guildId: string) {
+export async function getOraxPlusStatus(
+  guildId: string,
+  platform?: PlatformConfig,
+) {
   try {
     const data = await platformApi<{
       result?: boolean;
       oraxPlus?: OraxPlusStatus;
-    }>("get_server_data", { guildId });
+    }>("get_server_data", { guildId }, { platform });
 
     return data.result ? data.oraxPlus : undefined;
   } catch (error) {
@@ -80,11 +83,12 @@ export async function startOraxPlusVote(
   guildId: string,
   platform?: PlatformConfig,
   origin: OraxPlusOrigin = "dashboard",
+  hasVotedFluxerlist?: boolean,
 ): Promise<OraxPlusVoteResult> {
   const provider = platform?.vote?.provider;
 
   if (provider === "fluxerlist") {
-    return startFluxerlistVote(guildId, platform!, origin);
+    return startFluxerlistVote(guildId, platform!, origin, hasVotedFluxerlist);
   }
 
   return startTopggVote(guildId, platform, origin);
@@ -177,11 +181,34 @@ async function startFluxerlistVote(
   guildId: string,
   platform: PlatformConfig,
   origin: OraxPlusOrigin,
+  hasVotedFluxerlist?: boolean,
 ): Promise<OraxPlusVoteResult> {
-  const voteUrl = platform.vote?.url || config.fluxerlistVoteUrl;
   const label = voteLabel(platform.vote?.provider || "fluxerlist");
+  let votedBefore = hasVotedFluxerlist;
 
-  window.open(voteUrl, "_blank");
+  if (votedBefore === undefined) {
+    const voteWindow = window.open("about:blank", "_blank");
+    try {
+      const status = await getOraxPlusStatus(guildId, platform);
+      votedBefore = status?.hasVotedFluxerlist;
+    } catch {
+      votedBefore = false;
+    }
+    const voteUrl = votedBefore
+      ? config.fblVoteUrl
+      : platform.vote?.url || config.fluxerlistVoteUrl;
+    if (voteWindow) {
+      voteWindow.location.href = voteUrl;
+    } else {
+      window.open(voteUrl, "_blank");
+    }
+  } else {
+    const voteUrl = votedBefore
+      ? config.fblVoteUrl
+      : platform.vote?.url || config.fluxerlistVoteUrl;
+    window.open(voteUrl, "_blank");
+  }
+
   showVoteRetrievalOverlay(label);
 
   try {

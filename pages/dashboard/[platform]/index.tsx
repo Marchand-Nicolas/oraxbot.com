@@ -313,7 +313,12 @@ function Dashboard({
   });
 
   async function startOraxPlusVote(origin: OraxPlusOrigin = "dashboard") {
-    const result = await startVote(guildId as string, platform, origin);
+    const result = await startVote(
+      guildId as string,
+      platform,
+      origin,
+      oraxPlus?.hasVotedFluxerlist,
+    );
 
     if (result.activated) {
       setRefreshGuildDatas(true);
