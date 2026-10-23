@@ -1290,6 +1290,7 @@ export default function Explore() {
 
     return () => {
       cancelled = true;
+      unlockScroll();
     };
   }, [viewGroup?.id, lockScroll, unlockScroll]);
 
