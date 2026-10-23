@@ -1297,6 +1297,7 @@ export default function Explore() {
   const handleEditGroup = (groupId: string) => {
     const editable = editableGroups[String(groupId)];
     if (!editable) return;
+    unlockScroll();
     const params = new URLSearchParams();
     params.set("guild", editable.guildId);
     params.set("platform", editable.platform);
