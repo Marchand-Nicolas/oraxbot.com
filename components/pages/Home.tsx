@@ -45,6 +45,17 @@ export default function Home({ lang }: HomeProps) {
       />
       <Header lang={lang} />
       <section className={styles.gradient} aria-label="Hero">
+        <div className={styles.platforms} aria-hidden="true">
+          <span className={`${styles.platformBubble} ${styles.platformDiscord}`}>
+            <img src="/assets/platforms/discord-color.svg" alt="" />
+          </span>
+          <span className={`${styles.platformBubble} ${styles.platformFluxer}`}>
+            <img src="/assets/platforms/fluxer-color.svg" alt="" />
+          </span>
+          <span className={`${styles.platformBubble} ${styles.platformTelegram}`}>
+            <img src="/assets/platforms/telegram.svg" alt="" />
+          </span>
+        </div>
         <div className={styles.heroContent}>
           <span className={styles.brand}>{t("home.brand")}</span>
           <h1 className={styles.title}>{t("home.heroTitle")}</h1>
