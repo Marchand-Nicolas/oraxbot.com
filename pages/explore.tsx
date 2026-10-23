@@ -66,6 +66,78 @@ interface ApiErrorResponse {
   message?: string;
 }
 
+function getGroupInitials(name: string): string {
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return "?";
+  return words
+    .map((word) => word[0]!.toUpperCase())
+    .slice(0, 2)
+    .join("");
+}
+
+function hashString(value: string): number {
+  let hash = 0;
+  for (let i = 0; i < value.length; i++) {
+    hash = (hash * 31 + value.charCodeAt(i)) >>> 0;
+  }
+  return hash;
+}
+
+function coverUnit(seed: number): number {
+  const value = Math.sin(seed) * 10000;
+  return value - Math.floor(value);
+}
+
+function coverColor(hue: number, saturation: number, lightness: number): string {
+  return `hsl(${Math.round(hue)} ${Math.round(saturation)}% ${Math.round(lightness)}%)`;
+}
+
+function getCoverGradient(id: string): string {
+  const seed = hashString(id);
+  const angle = Math.round(120 + coverUnit(seed) * 120);
+  const hue = 225 + coverUnit(seed + 1) * 70;
+  const spread = 12 + coverUnit(seed + 2) * 28;
+  const saturation = 55 + coverUnit(seed + 3) * 20;
+  const base = 26 + coverUnit(seed + 4) * 8;
+  const stops = [0, 1, 2, 3].map((index) => {
+    const stopHue = (hue + spread * (index / 3)) % 360;
+    const lightness = base + index * 3 + coverUnit(seed + 5 + index) * 4;
+    return `${coverColor(stopHue, saturation, lightness)} ${index * 33}%`;
+  });
+  const glowX = Math.round(coverUnit(seed + 9) * 100);
+  const glowY = Math.round(coverUnit(seed + 10) * 100);
+  const glow = coverColor(250 + coverUnit(seed + 11) * 25, 70, 58);
+  return `radial-gradient(circle at ${glowX}% ${glowY}%, color-mix(in srgb, ${glow} 35%, transparent) 0%, transparent 75%), linear-gradient(${angle}deg, ${stops.join(", ")})`;
+}
+
+interface CoverIcon {
+  key: string;
+  url: string;
+  name: string;
+  left: number;
+  top: number;
+  rotate: number;
+  size: number;
+}
+
+function buildCoverIcons(groupId: string, urls: string[]): CoverIcon[] {
+  const icons: CoverIcon[] = [];
+  urls.forEach((url, index) => {
+    if (!url) return;
+    const seed = hashString(`${groupId}-${url}`);
+    icons.push({
+      key: `${groupId}-${index}`,
+      url,
+      name: "Server",
+      left: 6 + (seed % 72),
+      top: 10 + ((seed >>> 8) % 48),
+      rotate: (seed % 28) - 14,
+      size: 52 + (seed % 22),
+    });
+  });
+  return icons;
+}
+
 // Expected API response shape from `${config.apiV2}explore/published_groups?page=`:
 // {
 //   groups: Array<{
@@ -1424,7 +1496,7 @@ export default function Explore() {
                   <span>{Number(group.vote) || 0}</span>
                 </div>
               )}
-              {group.image_url && (
+              {group.image_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={group.image_url}
@@ -1434,6 +1506,34 @@ export default function Explore() {
                   decoding="async"
                   onError={() => handleGroupImageError(group.id)}
                 />
+              ) : (
+                <div
+                  className={styles.cardCover}
+                  style={{ background: getCoverGradient(group.id) }}
+                  aria-hidden="true"
+                >
+                  {buildCoverIcons(group.id, group.server_icons ?? []).map(
+                    (icon) => (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        key={icon.key}
+                        src={icon.url}
+                        alt=""
+                        className={styles.coverIcon}
+                        style={{
+                          left: `${icon.left}%`,
+                          top: `${icon.top}%`,
+                          width: icon.size,
+                          height: icon.size,
+                          transform: `rotate(${icon.rotate}deg)`,
+                        }}
+                      />
+                    ),
+                  )}
+                  {(group.server_icons ?? []).length === 0 && (
+                    <span>{getGroupInitials(group.name)}</span>
+                  )}
+                </div>
               )}
               <div className={styles.cardContent}>
                 <h2 className={styles.cardTitle}>{group.name}</h2>
@@ -1477,7 +1577,7 @@ export default function Explore() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className={styles.groupDetails}>
-                {viewGroup.image_url && (
+                {viewGroup.image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={viewGroup.image_url}
@@ -1485,6 +1585,14 @@ export default function Explore() {
                     className={styles.groupImage}
                     onError={() => handleGroupImageError(viewGroup.id)}
                   />
+                ) : (
+                  <div
+                    className={styles.groupCover}
+                    style={{ background: getCoverGradient(viewGroup.id) }}
+                    aria-hidden="true"
+                  >
+                    {getGroupInitials(viewGroup.name)}
+                  </div>
                 )}
                 <div className={styles.groupContent}>
                   <h2 className={styles.groupTitle}>{viewGroup.name}</h2>

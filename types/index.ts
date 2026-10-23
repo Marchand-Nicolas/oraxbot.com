@@ -78,6 +78,7 @@ export interface ExploreGroup {
   description?: string;
   image_url?: string;
   server_count?: number;
+  server_icons?: string[];
   member_count?: number;
   message_count?: number;
   vote?: number;
