@@ -546,6 +546,13 @@ const fr: Translation = {
     pageTitle: "Bienvenue sur Orax",
     pageSubtitle:
       "Choisissez une plateforme pour accéder à votre tableau de bord",
+    subtitleContinue: "Choisissez une plateforme pour continuer",
+    subtitleExplore: "Choisissez une plateforme pour continuer sur Explore",
+    subtitlePublish:
+      "Choisissez la plateforme du serveur qui possède le groupe à publier",
+    subtitleJoin:
+      "Choisissez la plateforme du serveur que vous souhaitez connecter à ce groupe",
+    subtitleVote: "Choisissez une plateforme pour voter pour ce groupe",
     newHere: "Nouveau ici ?",
     learnMore: "En savoir plus sur Orax",
     loginWith: "Se connecter avec {platform}",

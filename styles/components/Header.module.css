@@ -42,14 +42,14 @@ body:has(.navDark) {
   color: #e5e7eb;
 }
 
-.nav a {
+.nav > a {
   display: flex;
   justify-content: left;
   align-items: center;
   width: fit-content;
 }
 
-.nav span {
+.nav > a span {
   height: 1em;
 }
 

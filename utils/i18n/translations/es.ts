@@ -535,6 +535,13 @@ const es: Translation = {
     ogImageAlt: "Logo de Orax",
     pageTitle: "Bienvenido a Orax",
     pageSubtitle: "Elige una plataforma para acceder a tu panel",
+    subtitleContinue: "Elige una plataforma para continuar",
+    subtitleExplore: "Elige una plataforma para continuar en Explorar",
+    subtitlePublish:
+      "Elige la plataforma del servidor que posee el grupo que quieres publicar",
+    subtitleJoin:
+      "Elige la plataforma del servidor que quieres conectar a este grupo",
+    subtitleVote: "Elige una plataforma para votar por este grupo",
     newHere: "¿Nuevo aquí?",
     learnMore: "Más información sobre Orax",
     loginWith: "Iniciar sesión con {platform}",

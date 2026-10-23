@@ -3,7 +3,11 @@ import Link from "next/link";
 import styles from "../../styles/components/dashboard/UserMenu.module.css";
 import GuildIcon from "../GuildIcon";
 import { platformList, type PlatformConfig } from "../../utils/platforms";
-import { clearPlatformToken } from "../../utils/platforms/oauth";
+import {
+  clearPlatformToken,
+  getPlatformToken,
+  setActivePlatformSession,
+} from "../../utils/platforms/oauth";
 import { removeStorage } from "../../utils/storage";
 import type { DiscordUser } from "../../types";
 import { t } from "../../utils/i18n";
@@ -11,9 +15,20 @@ import { t } from "../../utils/i18n";
 interface UserMenuProps {
   user: DiscordUser;
   platform: PlatformConfig;
+  onSwitchPlatform?: (platform: PlatformConfig) => void;
+  onLogout?: () => void;
+  settingsHref?: string;
+  embedded?: boolean;
 }
 
-export default function UserMenu({ user, platform }: UserMenuProps) {
+export default function UserMenu({
+  user,
+  platform,
+  onSwitchPlatform,
+  onLogout,
+  settingsHref,
+  embedded = false,
+}: UserMenuProps) {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
@@ -47,17 +62,39 @@ export default function UserMenu({ user, platform }: UserMenuProps) {
     avatar: user.avatar,
   });
   const otherPlatforms = platformList.filter((p) => p.slug !== platform.slug);
+  const resolvedSettingsHref =
+    settingsHref ?? `/dashboard/${platform.slug}/settings`;
 
   function handleLogout() {
     setOpen(false);
     clearPlatformToken(platform);
     removeStorage(platform.cachedUserStorageKey);
     removeStorage(platform.cachedGuildsStorageKey);
+    if (onLogout) {
+      onLogout();
+      return;
+    }
     window.location.href = "/dashboard";
   }
 
+  function handleSwitchPlatform(other: PlatformConfig) {
+    setOpen(false);
+    if (onSwitchPlatform) {
+      onSwitchPlatform(other);
+      return;
+    }
+    const token = getPlatformToken(other);
+    if (token) {
+      setActivePlatformSession(other, token);
+    }
+    window.location.href = `/dashboard/${other.slug}`;
+  }
+
   return (
-    <div className={styles.wrapper} ref={wrapperRef}>
+    <div
+      className={`${styles.wrapper} ${embedded ? styles.embedded : ""}`}
+      ref={wrapperRef}
+    >
       <button
         type="button"
         className={[
@@ -128,7 +165,7 @@ export default function UserMenu({ user, platform }: UserMenuProps) {
 
           <div className={styles.divider} />
           <Link
-            href={`/dashboard/${platform.slug}/settings`}
+            href={resolvedSettingsHref}
             className={styles.menuItem}
             role="menuitem"
             onClick={() => setOpen(false)}
@@ -164,12 +201,12 @@ export default function UserMenu({ user, platform }: UserMenuProps) {
               <div className={styles.divider} />
               <p className={styles.sectionLabel}>{t("nav.switchPlatform")}</p>
               {otherPlatforms.map((other) => (
-                <Link
+                <button
                   key={other.slug}
-                  href={`/dashboard/${other.slug}`}
+                  type="button"
                   className={styles.menuItem}
                   role="menuitem"
-                  onClick={() => setOpen(false)}
+                  onClick={() => handleSwitchPlatform(other)}
                 >
                   <span
                     className={styles.menuIcon}
@@ -182,7 +219,7 @@ export default function UserMenu({ user, platform }: UserMenuProps) {
                     />
                   </span>
                   <span>{other.label}</span>
-                </Link>
+                </button>
               ))}
             </>
           )}

@@ -11,6 +11,7 @@ import {
   fetchPlatformUser,
   filterAdminGuilds,
   persistPlatformToken,
+  setActivePlatformSession,
 } from "../utils/platforms/oauth";
 import { t } from "../utils/i18n";
 
@@ -130,6 +131,7 @@ export function usePlatformAuth(platform: PlatformConfig): UsePlatformAuthResult
       return;
     }
 
+    setActivePlatformSession(platform, existingToken);
     loadUserData(existingToken);
 
     async function loadUserData(token: string) {

@@ -3,6 +3,7 @@ import { useCallback } from "react";
 import config from "./config.json";
 import { getCookie } from "./cookies";
 import { getPlatform, type PlatformConfig } from "./platforms";
+import { detectActivePlatform } from "./platforms/oauth";
 
 /**
  * Dashboard API helper.
@@ -93,6 +94,6 @@ export function platformApi<T = unknown>(
 export function getCurrentPlatform() {
   if (typeof window === "undefined") return undefined;
   const match = window.location.pathname.match(/^\/dashboard\/([^/]+)/);
-  if (!match) return undefined;
-  return getPlatform(match[1]);
+  if (match) return getPlatform(match[1]);
+  return detectActivePlatform();
 }

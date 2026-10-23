@@ -5,6 +5,8 @@ import Footer from "../../../components/Footer";
 import styles from "../../../styles/ExplorePublish.module.css";
 import config from "../../../utils/config.json";
 import type { Channel } from "../../../types";
+import { getPlatform } from "../../../utils/platforms";
+import { detectActivePlatform, getPlatformToken } from "../../../utils/platforms/oauth";
 
 interface PublishForm {
   description: string;
@@ -15,10 +17,20 @@ interface PublishForm {
 
 export default function PublishGroup() {
   const router = useRouter();
-  const { groupId, guild: guildFromQuery } = router.query;
+  const {
+    groupId,
+    guild: guildFromQuery,
+    platform: platformFromQuery,
+  } = router.query;
   const guildId = Array.isArray(guildFromQuery)
     ? guildFromQuery[0]
     : guildFromQuery;
+  const platformSlugParam = Array.isArray(platformFromQuery)
+    ? platformFromQuery[0]
+    : platformFromQuery;
+  const platform =
+    (platformSlugParam ? getPlatform(platformSlugParam) : undefined) ||
+    (typeof window !== "undefined" ? detectActivePlatform() : undefined);
 
   const [form, setForm] = useState<PublishForm>({
     description: "",
@@ -71,7 +83,10 @@ export default function PublishGroup() {
       try {
         const res = await fetch(`${config.apiV2}get_guild_channels`, {
           method: "POST",
-          body: JSON.stringify({ guildId }),
+          body: JSON.stringify({
+            guildId,
+            platform: platform?.slug,
+          }),
           headers: {
             "Content-Type": "application/json",
           },
@@ -89,7 +104,7 @@ export default function PublishGroup() {
     }
 
     loadChannels();
-  }, [guildId]);
+  }, [guildId, platform?.slug]);
 
   useEffect(() => {
     const nextImageUrl = form.image_url.trim();
@@ -161,6 +176,8 @@ export default function PublishGroup() {
         image_url: form.image_url || null,
         alerts_channel_id: form.alerts_channel_id || null,
         published: form.published ? 1 : 0,
+        platform: platform?.slug,
+        token: platform ? getPlatformToken(platform) : undefined,
       };
 
       const res = await fetch(`${config.apiV2}explore_save_group`, {
@@ -260,8 +277,8 @@ export default function PublishGroup() {
               ))}
             </select>
             <small className={styles.hint}>
-              This is the Discord channel where servers willing to join your
-              group will send their proposals.
+              This is the {platform?.label || ""} channel where servers willing
+              to join your group will send their proposals.
             </small>
           </label>
 

@@ -4,16 +4,21 @@ import styles from "../styles/PlatformLogin.module.css";
 import { platformList, getPlatform } from "../utils/platforms";
 import type { PlatformConfig } from "../utils/platforms/types";
 import {
+  detectActivePlatform,
   exchangeOauthCode,
+  getPlatformToken,
   persistPlatformToken,
+  setActivePlatformSession,
 } from "../utils/platforms/oauth";
-import { getCookie, setCookie } from "../utils/cookies";
+import { setCookie } from "../utils/cookies";
 import { notify } from "./ui/NotificationSystem";
 import Loading from "./Loading";
 import LocalizedHead from "./LocalizedHead";
 import { createTranslator, type LanguageCode } from "../utils/i18n";
 
 const LOGIN_PATH = "/login";
+
+type LoginAction = "publish" | "join" | "vote" | "explore";
 
 interface LoginHubProps {
   autoRedirect?: boolean;
@@ -49,6 +54,8 @@ export default function LoginHub({
   const [status, setStatus] = useState<
     "loading" | "ready" | "exchanging"
   >("loading");
+  const [redirectTarget, setRedirectTarget] = useState<string | null>(null);
+  const [loginAction, setLoginAction] = useState<LoginAction | null>(null);
 
   useEffect(() => {
     void handleEntry();
@@ -59,6 +66,14 @@ export default function LoginHub({
     const params = new URLSearchParams(window.location.search);
     const code = params.get("code");
     const stateParam = params.get("state");
+    const redirectParam = sanitizeRedirectPath(params.get("redirect"));
+    const actionParam = resolveLoginAction(
+      params.get("action"),
+      redirectParam,
+    );
+
+    if (redirectParam) setRedirectTarget(redirectParam);
+    if (actionParam) setLoginAction(actionParam);
 
     // OAuth callback: provider returned here with a code.
     if (code) {
@@ -98,11 +113,12 @@ export default function LoginHub({
         // If state points somewhere other than the platform root (e.g. a
         // deep link the user wanted to land on post-login), honour it as
         // long as it is a relative path.
+        const decodedState = decodeStateParam(stateParam);
         const deepLink =
-          stateParam &&
-          stateParam.startsWith("/") &&
-          stateParam !== `/dashboard/${targetPlatform.slug}`
-            ? stateParam
+          decodedState &&
+          decodedState.startsWith("/") &&
+          decodedState !== `/dashboard/${targetPlatform.slug}`
+            ? decodedState
             : `/dashboard/${targetPlatform.slug}`;
 
         window.location.href = deepLink;
@@ -123,6 +139,13 @@ export default function LoginHub({
     if (autoRedirect) {
       const activePlatform = detectActivePlatform();
       if (activePlatform) {
+        if (redirectParam) {
+          window.location.href = appendPlatformParam(
+            redirectParam,
+            activePlatform.slug,
+          );
+          return;
+        }
         const forwardParams = new URLSearchParams();
         const guild = params.get("guild");
         const oraxPlus = params.get("orax_plus");
@@ -144,11 +167,16 @@ export default function LoginHub({
   }
 
   function handleLoginClick(platform: PlatformConfig) {
+    const destination = redirectTarget
+      ? appendPlatformParam(redirectTarget, platform.slug)
+      : `/dashboard/${platform.slug}`;
+
     // Already logged in to this platform? Skip the OAuth flow and drop
-    // the user straight into their dashboard.
-    const token = getCookie(platform.cookieName);
-    if (token && token !== "undefined") {
-      window.location.href = `/dashboard/${platform.slug}`;
+    // the user straight into their destination.
+    const token = getPlatformToken(platform);
+    if (token) {
+      setActivePlatformSession(platform, token);
+      window.location.href = destination;
       return;
     }
 
@@ -159,7 +187,7 @@ export default function LoginHub({
       // keep the per-platform cookie; just clear the shared alias.
       setCookie("token", "", 0);
     }
-    window.location.href = buildAuthorizeUrl(platform);
+    window.location.href = buildAuthorizeUrl(platform, destination);
   }
 
   if (status === "loading" || status === "exchanging") {
@@ -177,6 +205,19 @@ export default function LoginHub({
       </div>
     );
   }
+
+  const subtitleText =
+    loginAction === "publish"
+      ? t("login.subtitlePublish")
+      : loginAction === "join"
+        ? t("login.subtitleJoin")
+        : loginAction === "vote"
+          ? t("login.subtitleVote")
+          : loginAction === "explore"
+            ? t("login.subtitleExplore")
+            : redirectTarget
+              ? t("login.subtitleContinue")
+              : t("login.pageSubtitle");
 
   return (
     <>
@@ -199,7 +240,7 @@ export default function LoginHub({
             height={56}
           />
           <h1 className={styles.title}>{t("login.pageTitle")}</h1>
-          <p className={styles.subtitle}>{t("login.pageSubtitle")}</p>
+          <p className={styles.subtitle}>{subtitleText}</p>
           <div className={styles.buttonList}>
             {platformList.map((platform) => (
               <button
@@ -245,11 +286,23 @@ function PlatformIcon({ platform }: { platform: PlatformConfig }) {
  * Builds the OAuth authorize URL for a platform and embeds the post-login
  * destination in the `state` param so the callback page can route it.
  */
-function buildAuthorizeUrl(platform: PlatformConfig): string {
-  const target = `/dashboard/${platform.slug}`;
+function buildAuthorizeUrl(
+  platform: PlatformConfig,
+  destination?: string,
+): string {
+  const target = destination || `/dashboard/${platform.slug}`;
   const stateParam = encodeURIComponent(target);
   const sep = platform.authorizeUrl.includes("?") ? "&" : "?";
   return `${platform.authorizeUrl}${sep}state=${stateParam}`;
+}
+
+function decodeStateParam(state: string | null): string | null {
+  if (!state) return null;
+  try {
+    return decodeURIComponent(state);
+  } catch {
+    return state;
+  }
 }
 
 /** Try to extract a registered platform slug from the OAuth state param. */
@@ -260,21 +313,24 @@ function resolvePlatformFromState(
     // Legacy callback without state — assume Discord (the original flow).
     return getPlatform("discord");
   }
-  const decoded = decodeURIComponent(state);
+  const decoded = decodeStateParam(state) ?? state;
   const match = decoded.match(/^\/dashboard\/([^/?#]+)/);
   if (match) {
     return getPlatform(match[1]);
   }
-  // Deep links from the interserver-group join flow carry the platform in
-  // the query string (e.g. "/join/123?platform=fluxer"); legacy links
-  // without it default to Discord.
-  if (decoded.startsWith("/join/")) {
+  // Deep links from the interserver-group join or explore flow carry the
+  // platform in the query string (e.g. "/join/123?platform=fluxer" or
+  // "/explore?action=publish&platform=fluxer"); legacy links without it
+  // default to Discord.
+  if (decoded.startsWith("/")) {
     try {
-      const joinUrl = new URL(decoded, window.location.origin);
-      const platform = getPlatform(joinUrl.searchParams.get("platform"));
+      const targetUrl = new URL(decoded, window.location.origin);
+      const platform = getPlatform(targetUrl.searchParams.get("platform"));
       if (platform) return platform;
     } catch {}
-    return getPlatform("discord");
+    if (decoded.startsWith("/join/") || decoded.startsWith("/explore")) {
+      return getPlatform("discord");
+    }
   }
   if (getPlatform(decoded)) {
     return getPlatform(decoded);
@@ -282,15 +338,58 @@ function resolvePlatformFromState(
   return undefined;
 }
 
-/**
- * Returns the first registered platform that has a non-empty session
- * cookie, so we can auto-redirect users that are already signed in.
- */
-function detectActivePlatform(): PlatformConfig | undefined {
-  return platformList.find((platform) => {
-    const token = getCookie(platform.cookieName);
-    return Boolean(token && token !== "undefined");
-  });
+function sanitizeRedirectPath(redirect: string | null): string | null {
+  if (!redirect) return null;
+  const trimmed = redirect.trim();
+  if (!trimmed.startsWith("/") || trimmed.startsWith("//")) return null;
+  return trimmed;
+}
+
+function appendPlatformParam(path: string, platformSlug: string): string {
+  try {
+    const url = new URL(path, "https://oraxbot.com");
+    url.searchParams.set("platform", platformSlug);
+    return `${url.pathname}${url.search}${url.hash}`;
+  } catch {
+    const sep = path.includes("?") ? "&" : "?";
+    return `${path}${sep}platform=${encodeURIComponent(platformSlug)}`;
+  }
+}
+
+function resolveLoginAction(
+  actionParam: string | null,
+  redirectPath: string | null,
+): LoginAction | null {
+  if (
+    actionParam === "publish" ||
+    actionParam === "join" ||
+    actionParam === "vote" ||
+    actionParam === "explore"
+  ) {
+    return actionParam;
+  }
+
+  if (redirectPath) {
+    try {
+      const url = new URL(redirectPath, "https://oraxbot.com");
+      const redirectAction = url.searchParams.get("action");
+      if (
+        redirectAction === "publish" ||
+        redirectAction === "join" ||
+        redirectAction === "vote"
+      ) {
+        return redirectAction;
+      }
+      if (url.pathname.startsWith("/explore")) {
+        return "explore";
+      }
+      if (url.pathname.startsWith("/join/")) {
+        return "join";
+      }
+    } catch {}
+  }
+
+  return null;
 }
 
 function cleanOAuthQuery() {

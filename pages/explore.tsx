@@ -5,10 +5,20 @@ import GuildIcon from "../components/GuildIcon";
 import BetaTag from "../components/ui/BetaTag";
 import styles from "../styles/Explore.module.css";
 import config from "../utils/config.json";
-import { getCookie, setCookie } from "../utils/cookies";
 import { useRouter } from "next/router";
-import { checkAdminPerms } from "../utils/permissions";
 import { useScroll } from "../utils/ScrollContext";
+import { getPlatform, type PlatformConfig } from "../utils/platforms";
+import {
+  AUTH_CHANGE_EVENT,
+  clearPlatformToken,
+  detectActivePlatform,
+  exchangeOauthCode,
+  fetchPlatformGuilds,
+  fetchPlatformUser,
+  getPlatformToken,
+  persistPlatformToken,
+  setActivePlatformSession,
+} from "../utils/platforms/oauth";
 
 import type {
   DiscordGuild,
@@ -76,6 +86,9 @@ export default function Explore() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [activePlatform, setActivePlatform] = useState<
+    PlatformConfig | undefined
+  >(undefined);
   const [guilds, setGuilds] = useState<DiscordGuild[]>([]);
   const [selectedGuildId, setSelectedGuildId] = useState("");
   const [ownedGroups, setOwnedGroups] = useState<OwnedGroup[]>([]);
@@ -113,7 +126,37 @@ export default function Explore() {
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const voteAuthHandledRef = useRef(false);
   const menuAuthHandledRef = useRef(false);
+  const actionHandledRef = useRef(false);
   const hasLoadedInitialPageRef = useRef(false);
+
+  const resolveCurrentSession = useCallback(
+    (platformOverride?: PlatformConfig | null) => {
+      const platform = platformOverride || detectActivePlatform();
+      if (!platform) return null;
+      const token = getPlatformToken(platform);
+      if (!token) return null;
+      return { platform, token };
+    },
+    [],
+  );
+
+  const redirectToLogin = useCallback(
+    (
+      action: "publish" | "join" | "vote" | "explore",
+      groupId?: string,
+    ) => {
+      const targetParams = new URLSearchParams();
+      targetParams.set("action", action);
+      if (groupId) {
+        targetParams.set("group", groupId);
+      }
+      const redirectPath = `/explore?${targetParams.toString()}`;
+      window.location.href = `/login?redirect=${encodeURIComponent(
+        redirectPath,
+      )}&action=${encodeURIComponent(action)}`;
+    },
+    [],
+  );
 
   const upsertGroup = useCallback((groupToUpsert: ExploreGroup) => {
     if (!groupToUpsert?.id) return;
@@ -190,15 +233,6 @@ export default function Explore() {
     [groups, fetchExploreGroupById, lockScroll],
   );
 
-  const redirectToDiscordAuth = useCallback((stateValue: string) => {
-    const redirectUri = encodeURI(
-      `${process.env.NEXT_PUBLIC_WEBSITE_URL}/explore`,
-    );
-    window.location.href = `https://discord.com/api/oauth2/authorize?client_id=812298057470967858&redirect_uri=${redirectUri}&response_type=code&scope=identify%20guilds&state=${encodeURIComponent(
-      stateValue,
-    )}`;
-  }, []);
-
   const formatVoteCountdown = useCallback((seconds: number) => {
     const safeSeconds = Math.max(0, Number(seconds) || 0);
     const hours = Math.floor(safeSeconds / 3600)
@@ -264,17 +298,26 @@ export default function Explore() {
       setVoteError("");
       setVoteSuccess("");
 
-      const token = tokenOverride || getCookie("token");
-      if (!token || token === "undefined") {
+      const session = tokenOverride
+        ? resolveCurrentSession(activePlatform)
+        : resolveCurrentSession();
+      const token = tokenOverride || session?.token || null;
+      const platform = session?.platform || activePlatform;
+
+      if (!token || !platform) {
         setIsVoting(false);
-        redirectToDiscordAuth(`vote,${groupId}`);
+        redirectToLogin("vote", groupId);
         return;
       }
 
       try {
         const res = await fetch(`${config.apiV2}explore_vote`, {
           method: "POST",
-          body: JSON.stringify({ token, group_id: groupId }),
+          body: JSON.stringify({
+            token,
+            group_id: groupId,
+            platform: platform.slug,
+          }),
           headers: {
             "Content-Type": "application/json",
           },
@@ -287,8 +330,8 @@ export default function Explore() {
           data?.message === "Invalid auth token";
 
         if (hasInvalidToken) {
-          setCookie("token", "", 0);
-          redirectToDiscordAuth(`vote,${groupId}`);
+          clearPlatformToken(platform);
+          redirectToLogin("vote", groupId);
           return;
         }
 
@@ -330,7 +373,7 @@ export default function Explore() {
         setIsVoting(false);
       }
     },
-    [redirectToDiscordAuth, voteCooldownSeconds],
+    [activePlatform, redirectToLogin, resolveCurrentSession, voteCooldownSeconds],
   );
 
   useEffect(() => {
@@ -392,6 +435,34 @@ export default function Explore() {
     loadPage(1);
   }, [loadPage]);
 
+  useEffect(() => {
+    if (!router.isReady) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const platformSlug = params.get("platform");
+    const platformFromQuery = platformSlug ? getPlatform(platformSlug) : undefined;
+    if (platformFromQuery && getPlatformToken(platformFromQuery)) {
+      setActivePlatformSession(platformFromQuery);
+      setActivePlatform(platformFromQuery);
+    } else {
+      setActivePlatform(detectActivePlatform());
+    }
+  }, [router.isReady]);
+
+  useEffect(() => {
+    const handleAuthChange = () => {
+      const nextSession = resolveCurrentSession();
+      const nextPlatform = nextSession?.platform;
+      setActivePlatform(nextPlatform);
+      setVoteCooldownRefresh((previous) => previous + 1);
+    };
+
+    window.addEventListener(AUTH_CHANGE_EVENT, handleAuthChange);
+    return () => {
+      window.removeEventListener(AUTH_CHANGE_EVENT, handleAuthChange);
+    };
+  }, [resolveCurrentSession]);
+
   // Handle OAuth callback for vote flow: ?code=...&state=vote,<group_id>
   useEffect(() => {
     if (!router.isReady || voteAuthHandledRef.current) return;
@@ -403,14 +474,37 @@ export default function Explore() {
       return;
     }
 
-    if (!stateParam.startsWith("vote,")) return;
-    const stateParts = stateParam.split(",");
-    const groupId = stateParts[1];
+    let decodedState = stateParam;
+    try {
+      decodedState = decodeURIComponent(stateParam);
+    } catch {}
+
+    const stateUrl = (() => {
+      try {
+        return new URL(decodedState, window.location.origin);
+      } catch {
+        return null;
+      }
+    })();
+
+    const isVoteState =
+      decodedState.startsWith("vote,") ||
+      stateUrl?.searchParams.get("action") === "vote";
+    if (!isVoteState) return;
+
+    const groupId = decodedState.startsWith("vote,")
+      ? decodedState.split(",")[1]
+      : stateUrl?.searchParams.get("group") || "";
     if (!groupId) return;
+
+    const platformSlug = stateUrl?.searchParams.get("platform");
+    const platformFromState = platformSlug ? getPlatform(platformSlug) : undefined;
+    const targetPlatform = platformFromState || detectActivePlatform();
+    if (!targetPlatform) return;
 
     voteAuthHandledRef.current = true;
 
-    async function handleVoteAuthCallback() {
+    async function handleVoteAuthCallback(platform: PlatformConfig) {
       setIsAuthLoading(true);
       setVoteError("");
 
@@ -428,36 +522,36 @@ export default function Explore() {
       );
 
       try {
-        const res = await fetch(`${config.apiV2}exchange_discord_oauth_code`, {
-          method: "POST",
-          body: JSON.stringify({
-            token: codeParam,
-            redirect_uri: exploreRedirectUri,
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        const data = await res.json();
+        const data = await exchangeOauthCode(
+          platform,
+          codeParam!,
+          exploreRedirectUri,
+        );
         if (!data.access_token || data.access_token === "undefined") {
-          console.error("Error during Discord authentication for vote:", data);
-          throw new Error("Failed to authenticate with Discord");
+          console.error("Error during platform authentication for vote:", data);
+          throw new Error("Failed to authenticate");
         }
 
-        setCookie("token", data.access_token, data.expires_in - 1000);
+        const expiresIn =
+          typeof data.expires_in === "number" ? data.expires_in : 0;
+        persistPlatformToken(
+          platform,
+          data.access_token,
+          Math.max(expiresIn - 1000, 60),
+        );
+        setActivePlatform(platform);
         setVoteCooldownRefresh((previous) => previous + 1);
         await handleVoteGroup(groupId, data.access_token);
       } catch (e) {
         console.error(e);
-        setVoteError("Discord authentication failed. Please try voting again.");
+        setVoteError("Authentication failed. Please try voting again.");
         router.replace(`/explore?group=${encodeURIComponent(groupId)}`);
       } finally {
         setIsAuthLoading(false);
       }
     }
 
-    handleVoteAuthCallback();
+    handleVoteAuthCallback(targetPlatform);
   }, [
     router,
     router.isReady,
@@ -561,38 +655,34 @@ export default function Explore() {
     let cancelled = false;
 
     async function loadVoteCooldown() {
-      const token = getCookie("token");
-      if (!token || token === "undefined") {
+      const session = resolveCurrentSession();
+      if (!session) {
         setVoteCooldownSeconds(0);
         return;
       }
 
-      try {
-        const userRes = await fetch("https://discord.com/api/v10/users/@me", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            Accept: "application/json",
-            Authorization: "Bearer " + token,
-          },
-        });
-        const userData = await userRes.json();
+      const { platform, token } = session;
 
-        if (userData?.retry_after) {
+      try {
+        const userData = await fetchPlatformUser(platform, token);
+
+        if ((userData as { retry_after?: number })?.retry_after) {
+          const retryAfter =
+            (userData as { retry_after?: number }).retry_after ?? 1;
           setTimeout(() => {
             if (!cancelled) {
               loadVoteCooldown();
             }
-          }, userData.retry_after * 1000 + 50);
+          }, retryAfter * 1000 + 50);
           return;
         }
 
         if (
-          !userRes.ok ||
-          userData?.message === "401: Unauthorized" ||
-          !userData?.id
+          !userData ||
+          (userData as { message?: string }).message === "401: Unauthorized" ||
+          !userData.id
         ) {
-          setCookie("token", "", 0);
+          clearPlatformToken(platform);
           if (!cancelled) {
             setVoteCooldownSeconds(0);
           }
@@ -602,7 +692,9 @@ export default function Explore() {
         const voteRes = await fetch(
           `${config.apiV2}get_vote?group_id=${encodeURIComponent(
             currentViewGroup.id,
-          )}&user_id=${encodeURIComponent(userData.id)}`,
+          )}&user_id=${encodeURIComponent(userData.id)}&platform=${encodeURIComponent(
+            platform.slug,
+          )}`,
         );
         const voteData = await voteRes.json();
 
@@ -641,110 +733,48 @@ export default function Explore() {
     return () => {
       cancelled = true;
     };
-  }, [viewGroup?.id, voteCooldownRefresh]);
+  }, [viewGroup?.id, voteCooldownRefresh, resolveCurrentSession]);
 
-  // --- Publish flow: Discord auth + guilds / groups selection ---
-
-  const ensureDiscordAuth = useCallback(
-    async (authState?: string) => {
-      let token = getCookie("token");
-      if (token && token !== "undefined") return token;
-
-      setIsAuthLoading(true);
-
-      const params = new URLSearchParams(window.location.search);
-      const code = params.get("code");
-      const state = params.get("state");
-
-      if (code) {
-        try {
-          const res = await fetch(
-            `${config.apiV2}exchange_discord_oauth_code`,
-            {
-              method: "POST",
-              body: JSON.stringify({
-                token: code,
-                redirect_uri: exploreRedirectUri,
-              }),
-              headers: {
-                "Content-Type": "application/json",
-              },
-            },
-          );
-          const data: DiscordAuthResponse = await res.json();
-          if (!data.access_token || data.access_token === "undefined") {
-            window.location.href = "/dashboard";
-            return null;
-          }
-          setCookie("token", data.access_token, data.expires_in - 1000);
-          setVoteCooldownRefresh((previous) => previous + 1);
-          token = data.access_token;
-          if (
-            state &&
-            typeof state === "string" &&
-            (state.startsWith("vote,") ||
-              state === "publish" ||
-              state.startsWith("join,"))
-          ) {
-            return token;
-          }
-          // Clean URL from code/state if needed
-          if (state) {
-            window.location.href = state;
-            return null;
-          }
-          return token;
-        } finally {
-          setIsAuthLoading(false);
-        }
-      } else {
-        const fallbackState =
-          authState ||
-          (typeof window !== "undefined" ? window.location.href : "publish");
-        redirectToDiscordAuth(fallbackState);
-        return null;
-      }
-    },
-    [redirectToDiscordAuth, exploreRedirectUri],
-  );
+  // --- Publish & Join flows: platform auth + guilds / groups selection ---
 
   const openPublishMenu = useCallback(
-    async (tokenOverride = null) => {
-      const resolvedToken =
+    async (
+      tokenOverride: string | null = null,
+      platformOverride: PlatformConfig | null = null,
+    ) => {
+      const session = resolveCurrentSession(platformOverride);
+      const platform = platformOverride || session?.platform || activePlatform;
+      const token =
         typeof tokenOverride === "string" && tokenOverride !== ""
           ? tokenOverride
-          : null;
+          : session?.token || null;
 
-      const token = resolvedToken || (await ensureDiscordAuth("publish"));
-      if (!token) return;
+      if (!platform || !token) {
+        redirectToLogin("publish");
+        return;
+      }
 
+      setActivePlatform(platform);
       lockScroll();
       setIsAuthLoading(true);
       try {
-        const res = await fetch(
-          "https://discord.com/api/v10/users/@me/guilds",
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-              Accept: "application/json",
-              Authorization: "Bearer " + token,
-            },
-          },
-        );
-        const userGuilds = await res.json();
+        const userGuilds = await fetchPlatformGuilds(platform, token);
 
-        if (userGuilds?.message === "401: Unauthorized") {
-          // Reuse dashboard flow: clear token and trigger Discord OAuth
-          setCookie("token", "", 0);
-          redirectToDiscordAuth("publish");
+        if (
+          (userGuilds as unknown as { message?: string })?.message ===
+          "401: Unauthorized"
+        ) {
+          clearPlatformToken(platform);
+          redirectToLogin("publish");
           return;
         }
 
-        if (userGuilds?.retry_after) {
+        if ((userGuilds as unknown as { retry_after?: number })?.retry_after) {
+          const retryAfter =
+            (userGuilds as unknown as { retry_after?: number }).retry_after ?? 1;
           setTimeout(() => {
-            openPublishMenu(resolvedToken);
-          }, userGuilds.retry_after * 1000 + 50);
+            openPublishMenu(token, platform);
+          }, retryAfter * 1000 + 50);
           return;
         }
 
@@ -763,43 +793,50 @@ export default function Explore() {
         setIsAuthLoading(false);
       }
     },
-    [ensureDiscordAuth, lockScroll, redirectToDiscordAuth],
+    [activePlatform, lockScroll, redirectToLogin, resolveCurrentSession],
   );
 
   const openJoinMenu = useCallback(
-    async (groupId: string, tokenOverride: string | null = null) => {
+    async (
+      groupId: string,
+      tokenOverride: string | null = null,
+      platformOverride: PlatformConfig | null = null,
+    ) => {
       if (!groupId) return;
 
+      const session = resolveCurrentSession(platformOverride);
+      const platform = platformOverride || session?.platform || activePlatform;
       const token =
-        tokenOverride || (await ensureDiscordAuth(`join,${groupId}`));
-      if (!token) return;
+        typeof tokenOverride === "string" && tokenOverride !== ""
+          ? tokenOverride
+          : session?.token || null;
 
+      if (!platform || !token) {
+        redirectToLogin("join", groupId);
+        return;
+      }
+
+      setActivePlatform(platform);
       lockScroll();
       setIsAuthLoading(true);
       try {
-        const res = await fetch(
-          "https://discord.com/api/v10/users/@me/guilds",
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-              Accept: "application/json",
-              Authorization: "Bearer " + token,
-            },
-          },
-        );
-        const userGuilds = await res.json();
+        const userGuilds = await fetchPlatformGuilds(platform, token);
 
-        if (userGuilds?.message === "401: Unauthorized") {
-          setCookie("token", "", 0);
-          redirectToDiscordAuth(`join,${groupId}`);
+        if (
+          (userGuilds as unknown as { message?: string })?.message ===
+          "401: Unauthorized"
+        ) {
+          clearPlatformToken(platform);
+          redirectToLogin("join", groupId);
           return;
         }
 
-        if (userGuilds?.retry_after) {
+        if ((userGuilds as unknown as { retry_after?: number })?.retry_after) {
+          const retryAfter =
+            (userGuilds as unknown as { retry_after?: number }).retry_after ?? 1;
           setTimeout(() => {
-            openJoinMenu(groupId, tokenOverride);
-          }, userGuilds.retry_after * 1000 + 50);
+            openJoinMenu(groupId, token, platform);
+          }, retryAfter * 1000 + 50);
           return;
         }
 
@@ -822,7 +859,7 @@ export default function Explore() {
         setIsAuthLoading(false);
       }
     },
-    [ensureDiscordAuth, lockScroll, redirectToDiscordAuth],
+    [activePlatform, lockScroll, redirectToLogin, resolveCurrentSession],
   );
 
   useEffect(() => {
@@ -833,50 +870,78 @@ export default function Explore() {
     const stateParam = params.get("state");
     if (!codeParam || !stateParam) return;
 
-    const isPublishState = stateParam === "publish";
-    const isJoinState = stateParam.startsWith("join,");
+    let decodedState = stateParam;
+    try {
+      decodedState = decodeURIComponent(stateParam);
+    } catch {}
+
+    const stateUrl = (() => {
+      try {
+        return new URL(decodedState, window.location.origin);
+      } catch {
+        return null;
+      }
+    })();
+
+    const isPublishState =
+      decodedState === "publish" ||
+      stateUrl?.searchParams.get("action") === "publish";
+    const isJoinState =
+      decodedState.startsWith("join,") ||
+      stateUrl?.searchParams.get("action") === "join";
     if (!isPublishState && !isJoinState) return;
 
-    const stateParts = stateParam.split(",");
-    const joinGroupIdFromState = stateParts[1] || "";
+    const joinGroupIdFromState = decodedState.startsWith("join,")
+      ? decodedState.split(",")[1] || ""
+      : stateUrl?.searchParams.get("group") || "";
+
+    const platformSlug = stateUrl?.searchParams.get("platform");
+    const platformFromState = platformSlug ? getPlatform(platformSlug) : undefined;
+    const platform =
+      platformFromState || detectActivePlatform() || getPlatform("discord");
+    if (!platform) return;
 
     menuAuthHandledRef.current = true;
 
-    async function handleMenuAuthCallback() {
+    async function handleMenuAuthCallback(targetPlatform: PlatformConfig) {
       setIsAuthLoading(true);
       setJoinError("");
 
       try {
-        const res = await fetch(`${config.apiV2}exchange_discord_oauth_code`, {
-          method: "POST",
-          body: JSON.stringify({
-            token: codeParam,
-            redirect_uri: exploreRedirectUri,
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        const data = await res.json();
+        const data = await exchangeOauthCode(
+          targetPlatform,
+          codeParam!,
+          exploreRedirectUri,
+        );
         if (!data.access_token || data.access_token === "undefined") {
-          throw new Error("Failed to authenticate with Discord");
+          throw new Error("Failed to authenticate");
         }
 
-        setCookie("token", data.access_token, data.expires_in - 1000);
+        const expiresIn =
+          typeof data.expires_in === "number" ? data.expires_in : 0;
+        persistPlatformToken(
+          targetPlatform,
+          data.access_token,
+          Math.max(expiresIn - 1000, 60),
+        );
+        setActivePlatform(targetPlatform);
         setVoteCooldownRefresh((previous) => previous + 1);
 
         await router.replace("/explore", undefined, { shallow: true });
 
         if (isPublishState) {
-          await openPublishMenu(data.access_token);
+          await openPublishMenu(data.access_token, targetPlatform);
         } else if (isJoinState && joinGroupIdFromState) {
-          await openJoinMenu(joinGroupIdFromState, data.access_token);
+          await openJoinMenu(
+            joinGroupIdFromState,
+            data.access_token,
+            targetPlatform,
+          );
         }
       } catch (e) {
         console.error(e);
         if (isJoinState) {
-          setJoinError("Discord authentication failed. Please try again.");
+          setJoinError("Authentication failed. Please try again.");
         }
         router.replace("/explore", undefined, { shallow: true });
       } finally {
@@ -884,7 +949,7 @@ export default function Explore() {
       }
     }
 
-    handleMenuAuthCallback();
+    handleMenuAuthCallback(platform);
   }, [
     router,
     router.isReady,
@@ -892,6 +957,68 @@ export default function Explore() {
     openJoinMenu,
     exploreRedirectUri,
   ]);
+
+  useEffect(() => {
+    if (!router.isReady || actionHandledRef.current) return;
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("code")) return;
+
+    const action = params.get("action");
+    if (action !== "publish" && action !== "join" && action !== "vote") return;
+
+    const groupIdFromQuery = params.get("group") || "";
+    const platformSlug = params.get("platform");
+    const platformFromQuery = platformSlug ? getPlatform(platformSlug) : undefined;
+
+    const session = resolveCurrentSession(platformFromQuery);
+    if (!session) return;
+
+    actionHandledRef.current = true;
+    setActivePlatformSession(session.platform, session.token);
+    setActivePlatform(session.platform);
+
+    async function handlePostLoginAction(
+      resolvedPlatform: PlatformConfig,
+      resolvedToken: string,
+    ) {
+      if (action === "publish") {
+        await router.replace("/explore", undefined, { shallow: true });
+        await openPublishMenu(resolvedToken, resolvedPlatform);
+        return;
+      }
+
+      if (action === "join" && groupIdFromQuery) {
+        await router.replace("/explore", undefined, { shallow: true });
+        await openJoinMenu(groupIdFromQuery, resolvedToken, resolvedPlatform);
+        return;
+      }
+
+      if (action === "vote" && groupIdFromQuery) {
+        const opened = await openGroupMenuById(groupIdFromQuery);
+        if (!opened) {
+          setPendingVoteGroupId(groupIdFromQuery);
+        }
+        await router.replace(
+          `/explore?group=${encodeURIComponent(groupIdFromQuery)}`,
+          undefined,
+          { shallow: true },
+        );
+        await handleVoteGroup(groupIdFromQuery, resolvedToken);
+      }
+    }
+
+    void handlePostLoginAction(session.platform, session.token);
+  }, [
+    router,
+    router.isReady,
+    openPublishMenu,
+    openJoinMenu,
+    openGroupMenuById,
+    handleVoteGroup,
+    resolveCurrentSession,
+  ]);
+
   useEffect(() => {
     async function loadOwnedGroups() {
       if (!selectedGuildId) {
@@ -900,12 +1027,15 @@ export default function Explore() {
         return;
       }
 
+      const session = resolveCurrentSession(activePlatform);
+
       try {
         const res = await fetch(`${config.apiV2}get_server_data`, {
           method: "POST",
           body: JSON.stringify({
             guildId: selectedGuildId,
-            token: getCookie("token"),
+            token: session?.token,
+            platform: session?.platform.slug,
           }),
           headers: {
             "Content-Type": "application/json",
@@ -929,7 +1059,13 @@ export default function Explore() {
     if (isPublishMenuOpen && publishStep === 2) {
       loadOwnedGroups();
     }
-  }, [isPublishMenuOpen, publishStep, selectedGuildId]);
+  }, [
+    activePlatform,
+    isPublishMenuOpen,
+    publishStep,
+    resolveCurrentSession,
+    selectedGuildId,
+  ]);
 
   const closePublishMenu = () => {
     setIsPublishMenuOpen(false);
@@ -944,10 +1080,15 @@ export default function Explore() {
         return;
       }
 
+      const session = resolveCurrentSession(activePlatform);
+
       try {
         const res = await fetch(`${config.apiV2}get_guild_channels`, {
           method: "POST",
-          body: JSON.stringify({ guildId: joinSelectedGuildId }),
+          body: JSON.stringify({
+            guildId: joinSelectedGuildId,
+            platform: session?.platform.slug,
+          }),
           headers: {
             "Content-Type": "application/json",
           },
@@ -971,7 +1112,13 @@ export default function Explore() {
     if (isJoinMenuOpen && joinStep === 2) {
       loadGuildChannels();
     }
-  }, [isJoinMenuOpen, joinStep, joinSelectedGuildId]);
+  }, [
+    activePlatform,
+    isJoinMenuOpen,
+    joinStep,
+    joinSelectedGuildId,
+    resolveCurrentSession,
+  ]);
 
   const closeJoinMenu = () => {
     setIsJoinMenuOpen(false);
@@ -1057,10 +1204,16 @@ export default function Explore() {
   const handleConfirmPublishGroup = (groupId?: string) => {
     const idToUse = groupId || selectedGroupId;
     if (!idToUse) return;
-    const query =
-      selectedGuildId && selectedGuildId !== ""
-        ? `?guild=${encodeURIComponent(selectedGuildId)}`
-        : "";
+    const params = new URLSearchParams();
+    if (selectedGuildId && selectedGuildId !== "") {
+      params.set("guild", selectedGuildId);
+    }
+    const platformSlug =
+      activePlatform?.slug || detectActivePlatform()?.slug || "";
+    if (platformSlug) {
+      params.set("platform", platformSlug);
+    }
+    const query = params.toString() ? `?${params.toString()}` : "";
     router.push(`/explore/publish/${idToUse}${query}`);
   };
 
@@ -1075,11 +1228,14 @@ export default function Explore() {
     setJoinSuccess("");
 
     try {
+      const session = resolveCurrentSession(activePlatform);
       const body = {
         group_id: joinGroupId,
         guild_id: joinSelectedGuildId,
         channel_id: joinSelectedChannelId,
         description: joinDescription,
+        platform: session?.platform.slug,
+        token: session?.token,
       };
 
       const res = await fetch(`${config.apiV2}explore_join_group`, {
@@ -1126,7 +1282,9 @@ export default function Explore() {
             onClick={() => openPublishMenu()}
             disabled={isAuthLoading}
           >
-            {isAuthLoading ? "Connecting to Discord..." : "Publish your group"}
+            {isAuthLoading
+              ? `Connecting${activePlatform ? ` to ${activePlatform.label}` : ""}...`
+              : "Publish your group"}
           </button>
           {globalVoteSuccess && (
             <p className={styles.globalVoteSuccess}>{globalVoteSuccess}</p>
@@ -1450,13 +1608,13 @@ export default function Explore() {
                   <div className={styles.publishHeader}>
                     <h2>Select a server</h2>
                     <p>
-                      Choose the Discord server that owns the group you want to
-                      publish.
+                      Choose the {activePlatform?.label || ""} server that owns
+                      the group you want to publish.
                     </p>
                   </div>
                   <div className={styles.guildGrid}>
                     {guilds.map((g) =>
-                      checkAdminPerms(g) ? (
+                      (activePlatform ? activePlatform.isAdmin(g) : false) ? (
                         <button
                           key={g.id}
                           type="button"
@@ -1468,8 +1626,8 @@ export default function Explore() {
                         >
                           <GuildIcon
                             iconUrl={
-                              g.icon
-                                ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png?size=128`
+                              activePlatform
+                                ? activePlatform.getGuildIconUrl(g)
                                 : null
                             }
                             name={g.name}
@@ -1482,7 +1640,7 @@ export default function Explore() {
                     {guilds.length === 0 && (
                       <p className={styles.empty}>
                         No servers found. Make sure you are logged in with the
-                        correct Discord account.
+                        correct {activePlatform?.label || ""} account.
                       </p>
                     )}
                   </div>
@@ -1548,11 +1706,14 @@ export default function Explore() {
                 <>
                   <div className={styles.publishHeader}>
                     <h2>Select a server</h2>
-                    <p>Choose the Discord server that will join this group.</p>
+                    <p>
+                      Choose the {activePlatform?.label || ""} server that will
+                      join this group.
+                    </p>
                   </div>
                   <div className={styles.guildGrid}>
                     {guilds.map((g) =>
-                      checkAdminPerms(g) ? (
+                      (activePlatform ? activePlatform.isAdmin(g) : false) ? (
                         <button
                           key={g.id}
                           type="button"
@@ -1565,8 +1726,8 @@ export default function Explore() {
                         >
                           <GuildIcon
                             iconUrl={
-                              g.icon
-                                ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png?size=128`
+                              activePlatform
+                                ? activePlatform.getGuildIconUrl(g)
                                 : null
                             }
                             name={g.name}
@@ -1579,7 +1740,7 @@ export default function Explore() {
                     {guilds.length === 0 && (
                       <p className={styles.empty}>
                         No servers found. Make sure you are logged in with the
-                        correct Discord account.
+                        correct {activePlatform?.label || ""} account.
                       </p>
                     )}
                   </div>

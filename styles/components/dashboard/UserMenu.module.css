@@ -5,6 +5,13 @@
   z-index: 1000;
 }
 
+.embedded {
+  position: relative;
+  top: auto;
+  right: auto;
+  z-index: 30;
+}
+
 .trigger {
   display: flex;
   align-items: center;
@@ -223,6 +230,11 @@
   .wrapper {
     top: 8px;
     right: 10px;
+  }
+
+  .embedded {
+    top: auto;
+    right: auto;
   }
 
   .trigger {

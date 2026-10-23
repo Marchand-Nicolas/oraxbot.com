@@ -1,8 +1,56 @@
 import config from "../config.json";
 import type { PlatformConfig } from "./types";
+import { getPlatform, platformList } from "./index";
 import type { DiscordUser, Guild } from "../../types";
-import { setCookie } from "../cookies";
+import { getCookie, setCookie } from "../cookies";
 import { setStorage } from "../storage";
+
+export const ACTIVE_PLATFORM_COOKIE = "active_platform";
+export const AUTH_CHANGE_EVENT = "orax:auth-changed";
+
+const DEFAULT_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60;
+
+function notifyAuthChange(): void {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent(AUTH_CHANGE_EVENT));
+}
+
+export function getPlatformToken(platform: PlatformConfig): string | null {
+  const token = getCookie(platform.cookieName);
+  return token && token !== "undefined" ? token : null;
+}
+
+export function detectActivePlatform(): PlatformConfig | undefined {
+  const activeSlug = getCookie(ACTIVE_PLATFORM_COOKIE);
+  if (activeSlug) {
+    const preferred = getPlatform(activeSlug);
+    if (preferred && getPlatformToken(preferred)) {
+      return preferred;
+    }
+  }
+
+  const sharedToken = getCookie("token");
+  if (sharedToken && sharedToken !== "undefined") {
+    const matched = platformList.find(
+      (platform) => getPlatformToken(platform) === sharedToken,
+    );
+    if (matched) return matched;
+  }
+
+  return platformList.find((platform) => Boolean(getPlatformToken(platform)));
+}
+
+export function setActivePlatformSession(
+  platform: PlatformConfig,
+  tokenOverride?: string,
+  expiresInSeconds = DEFAULT_TOKEN_TTL_SECONDS,
+): void {
+  const token = tokenOverride ?? getPlatformToken(platform);
+  if (!token) return;
+  setCookie(ACTIVE_PLATFORM_COOKIE, platform.slug, expiresInSeconds);
+  setCookie("token", token, expiresInSeconds);
+  notifyAuthChange();
+}
 
 /** Shape returned by the orax bot's `exchange_oauth_code` endpoint. */
 export interface TokenExchangeResponse {
@@ -51,12 +99,35 @@ export function persistPlatformToken(
 ): void {
   setCookie(platform.cookieName, token, expiresInSeconds);
   setCookie("token", token, expiresInSeconds);
+  if (token) {
+    setCookie(ACTIVE_PLATFORM_COOKIE, platform.slug, expiresInSeconds);
+  } else if (getCookie(ACTIVE_PLATFORM_COOKIE) === platform.slug) {
+    setCookie(ACTIVE_PLATFORM_COOKIE, "", 0);
+  }
+  notifyAuthChange();
 }
 
 /** Clear every cookie tied to a platform session. Useful at logout time. */
 export function clearPlatformToken(platform: PlatformConfig): void {
   setCookie(platform.cookieName, "", 0);
-  setCookie("token", "", 0);
+  if (getCookie(ACTIVE_PLATFORM_COOKIE) === platform.slug) {
+    setCookie(ACTIVE_PLATFORM_COOKIE, "", 0);
+  }
+  const nextActive = platformList.find(
+    (other) => other.slug !== platform.slug && Boolean(getPlatformToken(other)),
+  );
+  if (nextActive) {
+    const nextToken = getPlatformToken(nextActive)!;
+    setCookie(
+      ACTIVE_PLATFORM_COOKIE,
+      nextActive.slug,
+      DEFAULT_TOKEN_TTL_SECONDS,
+    );
+    setCookie("token", nextToken, DEFAULT_TOKEN_TTL_SECONDS);
+  } else {
+    setCookie("token", "", 0);
+  }
+  notifyAuthChange();
 }
 
 /** Fetch the logged-in user profile from the platform's REST API. */
