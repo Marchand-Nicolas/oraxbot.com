@@ -7,7 +7,11 @@ import styles from "../styles/Explore.module.css";
 import config from "../utils/config.json";
 import { useRouter } from "next/router";
 import { useScroll } from "../utils/ScrollContext";
-import { getPlatform, type PlatformConfig } from "../utils/platforms";
+import {
+  getPlatform,
+  platformList,
+  type PlatformConfig,
+} from "../utils/platforms";
 import {
   AUTH_CHANGE_EVENT,
   clearPlatformToken,
@@ -121,6 +125,9 @@ export default function Explore() {
   const [pendingVoteGroupId, setPendingVoteGroupId] = useState("");
   const [voteCooldownRefresh, setVoteCooldownRefresh] = useState(0);
   const [shareMessage, setShareMessage] = useState("");
+  const [editableGroups, setEditableGroups] = useState<
+    Record<string, { guildId: string; platform: string }>
+  >({});
 
   const observerRef = useRef<IntersectionObserver | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
@@ -1214,6 +1221,88 @@ export default function Explore() {
     };
   }, [viewGroup?.id, lockScroll, unlockScroll]);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadEditableGroups() {
+      const sessions = platformList
+        .map((platform) => {
+          const token = getPlatformToken(platform);
+          return token ? { platform, token } : null;
+        })
+        .filter(
+          (session): session is { platform: PlatformConfig; token: string } =>
+            session !== null,
+        );
+
+      if (sessions.length === 0) {
+        if (!cancelled) setEditableGroups({});
+        return;
+      }
+
+      const matches: Record<string, { guildId: string; platform: string }> =
+        {};
+
+      await Promise.all(
+        sessions.map(async ({ platform, token }) => {
+          let userGuilds: DiscordGuild[] = [];
+          try {
+            const fetched = await fetchPlatformGuilds(platform, token);
+            if (!Array.isArray(fetched)) return;
+            userGuilds = fetched.filter((guild) => platform.isAdmin(guild));
+          } catch (e) {
+            console.error("Failed to load guilds for explore edit:", e);
+            return;
+          }
+
+          await Promise.all(
+            userGuilds.map(async (guild) => {
+              try {
+                const res = await fetch(`${config.apiV2}get_server_data`, {
+                  method: "POST",
+                  body: JSON.stringify({
+                    guildId: guild.id,
+                    token,
+                    platform: platform.slug,
+                  }),
+                  headers: { "Content-Type": "application/json" },
+                });
+                const data: OwnedGroupsResponse = await res.json();
+                if (!Array.isArray(data.ownedGroups)) return;
+                for (const group of data.ownedGroups) {
+                  if (!group?.id || matches[String(group.id)]) continue;
+                  matches[String(group.id)] = {
+                    guildId: guild.id,
+                    platform: platform.slug,
+                  };
+                }
+              } catch (e) {
+                console.error("Failed to load owned groups for explore edit:", e);
+              }
+            }),
+          );
+        }),
+      );
+
+      if (!cancelled) setEditableGroups(matches);
+    }
+
+    loadEditableGroups();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handleEditGroup = (groupId: string) => {
+    const editable = editableGroups[String(groupId)];
+    if (!editable) return;
+    const params = new URLSearchParams();
+    params.set("guild", editable.guildId);
+    params.set("platform", editable.platform);
+    router.push(`/explore/publish/${groupId}?${params.toString()}`);
+  };
+
   const handleConfirmPublishGroup = (groupId?: string) => {
     const idToUse = groupId || selectedGroupId;
     if (!idToUse) return;
@@ -1590,6 +1679,15 @@ export default function Explore() {
                 >
                   Close
                 </button>
+                {editableGroups[String(viewGroup.id)] && (
+                  <button
+                    type="button"
+                    className={styles.groupEditButton}
+                    onClick={() => handleEditGroup(viewGroup.id)}
+                  >
+                    Edit
+                  </button>
+                )}
                 <button
                   type="button"
                   className={styles.groupJoinButton}
