@@ -1,4 +1,11 @@
-import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type DragEvent,
+  type FormEvent,
+} from "react";
 import { useRouter } from "next/router";
 import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
@@ -6,7 +13,18 @@ import styles from "../../../styles/ExplorePublish.module.css";
 import config from "../../../utils/config.json";
 import type { Channel } from "../../../types";
 import { getPlatform } from "../../../utils/platforms";
-import { detectActivePlatform, getPlatformToken } from "../../../utils/platforms/oauth";
+import {
+  detectActivePlatform,
+  getPlatformToken,
+} from "../../../utils/platforms/oauth";
+
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const ALLOWED_MIME_TYPES = new Set([
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+  "image/gif",
+]);
 
 interface PublishForm {
   description: string;
@@ -42,10 +60,13 @@ export default function PublishGroup() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-  const [imagePreviewStatus, setImagePreviewStatus] = useState<
-    "idle" | "loading" | "loaded" | "error"
-  >("idle");
-  const [resolvedImageUrl, setResolvedImageUrl] = useState("");
+
+  const [imageData, setImageData] = useState<string | null>(null);
+  const [selectedFileName, setSelectedFileName] = useState("");
+  const [removeImage, setRemoveImage] = useState(false);
+  const [imageError, setImageError] = useState("");
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (!groupId) return;
@@ -106,43 +127,6 @@ export default function PublishGroup() {
     loadChannels();
   }, [guildId, platform?.slug]);
 
-  useEffect(() => {
-    const nextImageUrl = form.image_url.trim();
-
-    if (!nextImageUrl) {
-      setImagePreviewStatus("idle");
-      setResolvedImageUrl("");
-      return;
-    }
-
-    setImagePreviewStatus("loading");
-    setResolvedImageUrl("");
-
-    let cancelled = false;
-    const image = new Image();
-
-    image.onload = () => {
-      if (cancelled) return;
-      setResolvedImageUrl(nextImageUrl);
-      setImagePreviewStatus("loaded");
-    };
-
-    image.onerror = () => {
-      if (cancelled) return;
-      setResolvedImageUrl("");
-      setImagePreviewStatus("error");
-    };
-
-    image.src = nextImageUrl;
-
-    return () => {
-      cancelled = true;
-      image.onload = null;
-      image.onerror = null;
-      image.src = "";
-    };
-  }, [form.image_url]);
-
   const handleChange = (
     e: ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -161,6 +145,72 @@ export default function PublishGroup() {
     }));
   };
 
+  const processSelectedFile = (file: File | undefined | null) => {
+    if (!file) return;
+
+    setImageError("");
+    setSuccess(false);
+
+    if (!ALLOWED_MIME_TYPES.has(file.type)) {
+      setImageError("Unsupported format. Please upload a PNG, JPG, WEBP, or GIF.");
+      return;
+    }
+
+    if (file.size > MAX_IMAGE_BYTES) {
+      setImageError("Image is too large. Maximum size is 5 MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        setImageData(reader.result);
+        setSelectedFileName(file.name);
+        setRemoveImage(false);
+      }
+    };
+    reader.onerror = () => {
+      setImageError("Failed to read image file. Please try again.");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleFileInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    processSelectedFile(file);
+  };
+
+  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isDragging) setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    processSelectedFile(file);
+  };
+
+  const handleRemoveImage = () => {
+    setImageData(null);
+    setSelectedFileName("");
+    setRemoveImage(true);
+    setImageError("");
+    setForm((prev) => ({ ...prev, image_url: "" }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!groupId) return;
@@ -173,7 +223,9 @@ export default function PublishGroup() {
       const payload = {
         group_id: groupId,
         description: form.description || null,
-        image_url: form.image_url || null,
+        image_url: removeImage ? null : form.image_url || null,
+        image_data: imageData || undefined,
+        remove_image: removeImage || undefined,
         alerts_channel_id: form.alerts_channel_id || null,
         published: form.published ? 1 : 0,
         platform: platform?.slug,
@@ -189,18 +241,30 @@ export default function PublishGroup() {
       });
 
       const data = await res.json();
-      if (!res.ok || data.error) {
-        throw new Error(data.error || "Failed to save group");
+      if (!res.ok || data.result === false || data.error) {
+        throw new Error(data.message || data.error || "Failed to save group");
       }
 
+      if (typeof data.image_url === "string" || data.image_url === null) {
+        setForm((prev) => ({ ...prev, image_url: data.image_url || "" }));
+      }
+      setImageData(null);
+      setSelectedFileName("");
+      setRemoveImage(false);
       setSuccess(true);
     } catch (e) {
       console.error(e);
-      setError("Failed to save group. Please try again.");
+      setError(
+        e instanceof Error && e.message
+          ? e.message
+          : "Failed to save group. Please try again.",
+      );
     } finally {
       setIsLoading(false);
     }
   };
+
+  const previewSrc = imageData || (!removeImage ? form.image_url : "");
 
   return (
     <>
@@ -225,41 +289,65 @@ export default function PublishGroup() {
             />
           </label>
 
-          <label className={styles.field}>
-            <span>Image URL (GIFs supported)</span>
+          <div className={styles.field}>
+            <span>Banner image (PNG, JPG, WEBP, GIF — max 5 MB)</span>
             <input
-              className="textInput normal"
-              type="url"
-              name="image_url"
-              value={form.image_url}
-              onChange={handleChange}
-              placeholder="https://example.com/your-banner.png"
+              ref={fileInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/gif"
+              onChange={handleFileInputChange}
+              className={styles.hiddenFileInput}
             />
-            {form.image_url.trim() !== "" && (
+            <div
+              className={`${styles.uploadDropzone} ${
+                isDragging ? styles.uploadDropzoneDragging : ""
+              }`}
+              onClick={() => fileInputRef.current?.click()}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  fileInputRef.current?.click();
+                }
+              }}
+            >
+              <p className={styles.uploadDropzoneTitle}>
+                {selectedFileName
+                  ? `Selected: ${selectedFileName}`
+                  : "Click or drag & drop an image to upload"}
+              </p>
+              <small className={styles.hint}>
+                Recommended ratio 16:9 — PNG, JPG, WEBP or GIF up to 5 MB
+              </small>
+            </div>
+
+            {imageError && <p className={styles.error}>{imageError}</p>}
+
+            {previewSrc && (
               <div className={styles.imagePreviewWrap}>
-                {imagePreviewStatus === "loading" && (
-                  <p className={styles.imagePreviewLoading}>
-                    Loading image preview...
-                  </p>
-                )}
-                {imagePreviewStatus === "error" && (
-                  <p className={styles.error}>
-                    Failed to load image from this URL. Make sure it&apos;s a
-                    direct link to an image and the URL is correct.
-                  </p>
-                )}
-                {imagePreviewStatus === "loaded" && resolvedImageUrl && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    key={resolvedImageUrl}
-                    src={resolvedImageUrl}
-                    alt="Group image preview"
-                    className={styles.imagePreview}
-                  />
-                )}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  key={previewSrc}
+                  src={previewSrc}
+                  alt="Group image preview"
+                  className={styles.imagePreview}
+                />
+                <div className={styles.imagePreviewActions}>
+                  <button
+                    type="button"
+                    className={styles.removeImageButton}
+                    onClick={handleRemoveImage}
+                  >
+                    Remove image
+                  </button>
+                </div>
               </div>
             )}
-          </label>
+          </div>
 
           <label className={styles.field}>
             <span>Proposals channel</span>

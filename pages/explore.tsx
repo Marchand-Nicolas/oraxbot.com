@@ -1340,6 +1340,8 @@ export default function Explore() {
                   src={group.image_url}
                   alt={group.name}
                   className={styles.cardImage}
+                  loading="lazy"
+                  decoding="async"
                   onError={() => handleGroupImageError(group.id)}
                 />
               )}

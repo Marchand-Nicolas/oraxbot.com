@@ -118,6 +118,9 @@
 
 .imagePreviewWrap {
   margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .imagePreview {
@@ -133,6 +136,63 @@
   margin: 0;
   color: #a7b2c4;
   font-size: 0.85rem;
+}
+
+.hiddenFileInput {
+  display: none;
+}
+
+.uploadDropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 1.4rem 1rem;
+  border-radius: var(--border-radius);
+  border: 1px dashed rgba(148, 163, 184, 0.45);
+  background: rgba(15, 23, 42, 0.62);
+  cursor: pointer;
+  text-align: center;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.uploadDropzone:hover,
+.uploadDropzoneDragging {
+  border-color: #8151fc;
+  background: rgba(129, 81, 252, 0.12);
+}
+
+.uploadDropzoneTitle {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #e5e7eb;
+  font-weight: 500;
+}
+
+.imagePreviewActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.removeImageButton {
+  background: transparent;
+  border: 1px solid rgba(252, 81, 81, 0.45);
+  color: #fc5151;
+  border-radius: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.removeImageButton:hover {
+  background: rgba(252, 81, 81, 0.12);
+  border-color: #fc5151;
 }
 
 .actions {

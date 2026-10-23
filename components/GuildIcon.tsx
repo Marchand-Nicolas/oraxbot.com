@@ -35,6 +35,10 @@ export default function GuildIcon({
   const showFallback = !iconUrl || failed;
 
   useEffect(() => {
+    setFailed(false);
+  }, [iconUrl]);
+
+  useEffect(() => {
     if (showFallback && onLoad) onLoad();
   }, [showFallback, onLoad]);
 
