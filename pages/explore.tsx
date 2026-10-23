@@ -1155,7 +1155,7 @@ export default function Explore() {
       return;
     }
 
-    const currentViewGroup = viewGroup;
+    const groupId = String(viewGroup.id);
 
     lockScroll();
     let cancelled = false;
@@ -1167,7 +1167,7 @@ export default function Explore() {
       try {
         const res = await fetch(
           `${config.apiV2}get_group_public_servers?group_id=${encodeURIComponent(
-            currentViewGroup.id,
+            groupId,
           )}`,
         );
         const data = await res.json();
@@ -1177,7 +1177,20 @@ export default function Explore() {
         }
 
         if (!cancelled) {
-          setViewGroupServers(Array.isArray(data.servers) ? data.servers : []);
+          const serversList = Array.isArray(data.servers) ? data.servers : [];
+          setViewGroupServers(serversList);
+          setViewGroup((prev) =>
+            prev && String(prev.id) === groupId
+              ? { ...prev, server_count: serversList.length }
+              : prev,
+          );
+          setGroups((prev) =>
+            prev.map((g) =>
+              String(g.id) === groupId
+                ? { ...g, server_count: serversList.length }
+                : g,
+            ),
+          );
         }
       } catch (e) {
         console.error(e);
@@ -1199,7 +1212,7 @@ export default function Explore() {
     return () => {
       cancelled = true;
     };
-  }, [viewGroup, lockScroll, unlockScroll]);
+  }, [viewGroup?.id, lockScroll, unlockScroll]);
 
   const handleConfirmPublishGroup = (groupId?: string) => {
     const idToUse = groupId || selectedGroupId;
