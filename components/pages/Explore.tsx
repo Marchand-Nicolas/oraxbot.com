@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Header from "../Header";
 import Footer from "../Footer";
 import GuildIcon from "../GuildIcon";
@@ -162,7 +162,7 @@ interface ExploreProps {
 }
 
 export default function Explore({ lang }: ExploreProps) {
-  const t = createTranslator(lang);
+  const t = useMemo(() => createTranslator(lang), [lang]);
   const exploreRedirectUri = "https://oraxbot.com/explore";
   const router = useRouter();
   const { lockScroll, unlockScroll } = useScroll();
@@ -735,7 +735,7 @@ export default function Explore({ lang }: ExploreProps) {
     };
   }, [
     router.isReady,
-    router.query,
+    router.query.group,
     groups,
     lockScroll,
     openedMenuFromLink,
@@ -857,7 +857,7 @@ export default function Explore({ lang }: ExploreProps) {
     return () => {
       cancelled = true;
     };
-  }, [viewGroup, voteCooldownRefresh, resolveCurrentSession, t]);
+  }, [viewGroup?.id, voteCooldownRefresh, resolveCurrentSession]);
 
   // --- Publish & Join flows: platform auth + guilds / groups selection ---
 
@@ -1260,6 +1260,7 @@ export default function Explore({ lang }: ExploreProps) {
 
   const closeViewGroup = () => {
     setViewGroup(null);
+    setOpenedMenuFromLink(false);
     setVoteError("");
     setVoteSuccess("");
     setShareMessage("");
@@ -1338,7 +1339,7 @@ export default function Explore({ lang }: ExploreProps) {
       cancelled = true;
       unlockScroll();
     };
-  }, [viewGroup?.id, lockScroll, t, unlockScroll]);
+  }, [viewGroup?.id, lockScroll, unlockScroll]);
 
   useEffect(() => {
     let cancelled = false;
