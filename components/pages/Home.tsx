@@ -21,7 +21,6 @@ export default function Home({ lang }: HomeProps) {
   const platforms = [
     t("home.platformDiscord"),
     t("home.platformFluxer"),
-    t("home.platformTelegram"),
   ];
   const [platformIndex, setPlatformIndex] = useState(0);
 
