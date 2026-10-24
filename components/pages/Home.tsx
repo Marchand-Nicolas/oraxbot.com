@@ -6,7 +6,11 @@ import Footer from "../Footer";
 import Header from "../Header";
 import LocalizedHead from "../LocalizedHead";
 import config from "../../utils/config.json";
-import { createTranslator, type LanguageCode } from "../../utils/i18n";
+import {
+  createTranslator,
+  localizedPath,
+  type LanguageCode,
+} from "../../utils/i18n";
 
 const HOME_PATH = "/";
 
@@ -191,7 +195,10 @@ export default function Home({ lang }: HomeProps) {
             <h2>{t("home.cardSupportTitle")}</h2>
             <p>{t("home.cardSupportDescription")}</p>
           </a>
-          <Link href="/explore" className={`${styles.card} ${styles.soft}`}>
+          <Link
+            href={localizedPath(lang, "/explore")}
+            className={`${styles.card} ${styles.soft}`}
+          >
             <h2>{t("home.cardExploreTitle")}</h2>
             <p>{t("home.cardExploreDescription")}</p>
           </Link>
