@@ -1,8 +1,39 @@
 .wrapper {
+  --trigger-border: rgba(255, 255, 255, 0.18);
+  --trigger-background: rgba(0, 0, 0, 0.45);
+  --trigger-hover-border: rgba(255, 255, 255, 0.3);
+  --trigger-hover-background: rgba(0, 0, 0, 0.6);
+  --trigger-open-border: rgba(255, 255, 255, 0.32);
+  --trigger-open-background: rgba(0, 0, 0, 0.65);
+  --surface-background: rgba(0, 0, 0, 0.6);
+  --surface-border: rgba(255, 255, 255, 0.18);
+  --text-primary: #fff;
+  --text-muted: rgba(255, 255, 255, 0.65);
+  --divider: rgba(255, 255, 255, 0.12);
+  --section-label: rgba(255, 255, 255, 0.55);
+  --item-hover: rgba(255, 255, 255, 0.1);
+  --settings-icon-background: rgba(255, 255, 255, 0.12);
   position: fixed;
   top: 24px;
   right: 22px;
   z-index: 1000;
+}
+
+.light {
+  --trigger-border: rgba(0, 0, 0, 0.12);
+  --trigger-background: rgba(255, 255, 255, 0.92);
+  --trigger-hover-border: rgba(0, 0, 0, 0.2);
+  --trigger-hover-background: #f3f4f6;
+  --trigger-open-border: rgba(0, 0, 0, 0.24);
+  --trigger-open-background: #fff;
+  --surface-background: rgba(255, 255, 255, 0.98);
+  --surface-border: rgba(0, 0, 0, 0.12);
+  --text-primary: #292a2b;
+  --text-muted: #6b7280;
+  --divider: rgba(0, 0, 0, 0.1);
+  --section-label: #6b7280;
+  --item-hover: rgba(0, 0, 0, 0.06);
+  --settings-icon-background: rgba(0, 0, 0, 0.08);
 }
 
 .embedded {
@@ -18,12 +49,12 @@
   gap: 10px;
   padding: 5px 12px 5px 5px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid var(--trigger-border);
+  background: var(--trigger-background);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   box-shadow: 0 8px 32px 0 rgba(17, 21, 77, 0.37);
-  color: #fff;
+  color: var(--text-primary);
   cursor: pointer;
   font-family: inherit;
   font-size: 14px;
@@ -36,8 +67,8 @@
 }
 
 .trigger:hover {
-  background: rgba(0, 0, 0, 0.6);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: var(--trigger-hover-background);
+  border-color: var(--trigger-hover-border);
 }
 
 .trigger:active {
@@ -45,8 +76,8 @@
 }
 
 .triggerOpen {
-  background: rgba(0, 0, 0, 0.65);
-  border-color: rgba(255, 255, 255, 0.32);
+  background: var(--trigger-open-background);
+  border-color: var(--trigger-open-border);
 }
 
 .avatar {
@@ -83,12 +114,12 @@
   min-width: 240px;
   padding: 8px;
   border-radius: 12px;
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--surface-background);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid var(--surface-border);
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.5);
-  color: #fff;
+  color: var(--text-primary);
   animation: dropIn 0.15s ease-out;
 }
 
@@ -126,7 +157,7 @@
 }
 
 .headerName {
-  color: #fff;
+  color: var(--text-primary);
   font-size: 15px;
   line-height: 1.2;
   white-space: nowrap;
@@ -135,7 +166,7 @@
 }
 
 .headerHandle {
-  color: rgba(255, 255, 255, 0.65);
+  color: var(--text-muted);
   font-size: 12px;
   white-space: nowrap;
   overflow: hidden;
@@ -164,12 +195,12 @@
 .divider {
   height: 1px;
   margin: 4px 6px;
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--divider);
 }
 
 .sectionLabel {
   margin: 6px 12px 4px;
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--section-label);
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
@@ -183,7 +214,7 @@
   width: 100%;
   padding: 9px 10px;
   border-radius: 8px;
-  color: #fff;
+  color: var(--text-primary);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -195,7 +226,7 @@
 }
 
 .menuItem:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--item-hover);
 }
 
 .menuIcon {
@@ -206,7 +237,7 @@
   height: 28px;
   border-radius: 6px;
   flex-shrink: 0;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .menuIcon svg {

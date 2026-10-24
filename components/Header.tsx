@@ -196,6 +196,7 @@ export default function NavBar({
         <UserMenu
           user={activeUser}
           platform={activePlatform}
+          theme={theme === "dark" ? "dark" : "light"}
           embedded
           onSwitchPlatform={handleSwitchPlatform}
           onLogout={handleLogout}

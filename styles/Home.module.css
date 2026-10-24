@@ -130,6 +130,24 @@
   transform: scale(1.1);
 }
 
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.platformName {
+  display: inline-block;
+  min-width: 8ch;
+  text-align: left;
+}
+
 .title {
   margin: 0;
   line-height: 1.15;

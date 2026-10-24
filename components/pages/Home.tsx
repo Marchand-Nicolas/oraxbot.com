@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import styles from "../../styles/Home.module.css";
@@ -17,6 +18,20 @@ export default function Home({ lang }: HomeProps) {
   const t = createTranslator(lang);
   const title = t("home.metaTitle");
   const description = t("home.metaDescription");
+  const platforms = [
+    t("home.platformDiscord"),
+    t("home.platformFluxer"),
+    t("home.platformTelegram"),
+  ];
+  const [platformIndex, setPlatformIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setPlatformIndex((index) => (index + 1) % platforms.length);
+    }, 3000);
+
+    return () => window.clearInterval(interval);
+  }, [platforms.length]);
 
   return (
     <>
@@ -58,7 +73,17 @@ export default function Home({ lang }: HomeProps) {
         </div>
         <div className={styles.heroContent}>
           <span className={styles.brand}>{t("home.brand")}</span>
-          <h1 className={styles.title}>{t("home.heroTitle")}</h1>
+          <h1 className={styles.title}>
+            <span className={styles.srOnly}>{t("home.heroTitle")}</span>
+            <span aria-hidden="true">
+              {t("home.heroTitlePrefix")} {" "}
+              {t("home.heroTitlePlatformPrefix")} {" "}
+              <span className={styles.platformName}>
+                {platforms[platformIndex]}
+              </span>{" "}
+              {t("home.heroTitleSuffix")}
+            </span>
+          </h1>
           <p className={styles.description}>{t("home.heroDescription")}</p>
           <a
             href={config.inviteLink}

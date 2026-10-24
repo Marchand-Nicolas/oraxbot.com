@@ -19,6 +19,7 @@ interface UserMenuProps {
   onLogout?: () => void;
   settingsHref?: string;
   embedded?: boolean;
+  theme?: "dark" | "light";
 }
 
 export default function UserMenu({
@@ -28,6 +29,7 @@ export default function UserMenu({
   onLogout,
   settingsHref,
   embedded = false,
+  theme = "dark",
 }: UserMenuProps) {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -92,7 +94,13 @@ export default function UserMenu({
 
   return (
     <div
-      className={`${styles.wrapper} ${embedded ? styles.embedded : ""}`}
+      className={[
+        styles.wrapper,
+        embedded ? styles.embedded : null,
+        theme === "light" ? styles.light : null,
+      ]
+        .filter(Boolean)
+        .join(" ")}
       ref={wrapperRef}
     >
       <button
@@ -172,7 +180,7 @@ export default function UserMenu({
           >
             <span
               className={styles.menuIcon}
-              style={{ backgroundColor: "rgba(255, 255, 255, 0.12)" }}
+              style={{ backgroundColor: "var(--settings-icon-background)" }}
             >
               <svg
                 fill="none"
