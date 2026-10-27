@@ -58,6 +58,13 @@ body:has(.navDark) {
   color: rgb(30, 55, 48);
 }
 
+.logo {
+  display: block;
+  flex-shrink: 0;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
 .navLink {
   position: relative;
   margin-left: auto;

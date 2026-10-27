@@ -60,6 +60,13 @@
   font-weight: 700;
 }
 
+.brandLogo {
+  display: block;
+  flex-shrink: 0;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
 .tagline {
   margin: 0;
   max-width: 260px;

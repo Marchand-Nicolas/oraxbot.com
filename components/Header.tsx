@@ -178,7 +178,13 @@ export default function NavBar({
       className={`${styles.nav} ${theme === "dark" ? styles.navDark : styles.navLight}`}
     >
       <Link href="/" className="line">
-        <Image src="/logo.png" alt={t("home.ogImageAlt")} width={50} height={50} />
+        <Image
+          src="/logobg.png"
+          alt={t("home.ogImageAlt")}
+          width={40}
+          height={40}
+          className={styles.logo}
+        />
         <strong className={styles.title}>{t("siteHeader.brand")}</strong>
       </Link>
       <Link href="/pricing" className={styles.navLink}>

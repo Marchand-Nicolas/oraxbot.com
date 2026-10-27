@@ -275,10 +275,11 @@ export default function Footer({
           <div className={styles.brand}>
             <Link href={localizedPath(lang, "/")} className={styles.brandLink}>
               <Image
-                src="/logo.png"
+                src="/logoshadow.png"
                 alt={t("home.ogImageAlt")}
-                width={32}
-                height={32}
+                width={36}
+                height={36}
+                className={styles.brandLogo}
               />
               <span>{t("home.brand")}</span>
             </Link>
