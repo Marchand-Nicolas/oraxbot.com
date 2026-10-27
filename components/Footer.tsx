@@ -275,7 +275,7 @@ export default function Footer({
           <div className={styles.brand}>
             <Link href={localizedPath(lang, "/")} className={styles.brandLink}>
               <Image
-                src="/logoshadow.png"
+                src="/logoshadow.webp"
                 alt={t("home.ogImageAlt")}
                 width={36}
                 height={36}

@@ -233,7 +233,7 @@ export default function LoginHub({
       <div className={styles.container}>
         <div className={styles.card}>
           <img
-            src="/logo.png"
+            src="/logo.webp"
             alt={t("login.ogImageAlt")}
             className={styles.logo}
             width={56}

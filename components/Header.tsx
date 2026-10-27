@@ -179,7 +179,7 @@ export default function NavBar({
     >
       <Link href="/" className="line">
         <Image
-          src="/logobg.png"
+          src="/logobg.webp"
           alt={t("home.ogImageAlt")}
           width={40}
           height={40}
