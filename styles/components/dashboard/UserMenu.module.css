@@ -211,6 +211,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  box-sizing: border-box;
   width: 100%;
   padding: 9px 10px;
   border-radius: 8px;

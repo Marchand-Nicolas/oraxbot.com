@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import styles from "../../styles/components/dashboard/UserMenu.module.css";
 import GuildIcon from "../GuildIcon";
 import { platformList, type PlatformConfig } from "../../utils/platforms";
@@ -31,6 +32,7 @@ export default function UserMenu({
   embedded = false,
   theme = "dark",
 }: UserMenuProps) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
@@ -64,8 +66,11 @@ export default function UserMenu({
     avatar: user.avatar,
   });
   const otherPlatforms = platformList.filter((p) => p.slug !== platform.slug);
-  const resolvedSettingsHref =
-    settingsHref ?? `/dashboard/${platform.slug}/settings`;
+  const dashboardHref = `/dashboard/${platform.slug}`;
+  const resolvedSettingsHref = settingsHref ?? `${dashboardHref}/settings`;
+  const currentPath = router.asPath.split(/[?#]/)[0].replace(/\/+$/, "");
+  const isDashboard = currentPath === dashboardHref;
+  const isSettings = currentPath === resolvedSettingsHref.replace(/\/+$/, "");
 
   function handleLogout() {
     setOpen(false);
@@ -172,6 +177,35 @@ export default function UserMenu({
           </div>
 
           <div className={styles.divider} />
+          {!isDashboard && (
+            <Link
+              href={dashboardHref}
+              className={styles.menuItem}
+              role="menuitem"
+              onClick={() => setOpen(false)}
+            >
+              <span
+                className={styles.menuIcon}
+                style={{ backgroundColor: "var(--settings-icon-background)" }}
+              >
+                <svg
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.8}
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3 3h7v7H3V3Zm11 0h7v7h-7V3ZM3 14h7v7H3v-7Zm11 0h7v7h-7v-7Z"
+                  />
+                </svg>
+              </span>
+              <span>{t("nav.dashboard")}</span>
+            </Link>
+          )}
+          {!isSettings && (
           <Link
             href={resolvedSettingsHref}
             className={styles.menuItem}
@@ -203,6 +237,7 @@ export default function UserMenu({
             </span>
             <span>{t("nav.settings")}</span>
           </Link>
+          )}
 
           {otherPlatforms.length > 0 && (
             <>

@@ -36,6 +36,7 @@ const en = {
     switchPlatform: "Switch platform",
     logout: "Log out",
     user: "User",
+    dashboard: "Dashboard",
     settings: "Settings",
   },
 

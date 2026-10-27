@@ -31,6 +31,7 @@ const fr: Translation = {
     switchPlatform: "Changer de plateforme",
     logout: "Se déconnecter",
     user: "Utilisateur",
+    dashboard: "Tableau de bord",
     settings: "Paramètres",
   },
 
