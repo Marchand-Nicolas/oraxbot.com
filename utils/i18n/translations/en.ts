@@ -401,9 +401,23 @@ const en = {
   },
 
   siteFooter: {
+    tagline: "Sync your channels across Discord and Fluxer servers.",
+    language: "Language",
+    product: "Product",
+    resources: "Resources",
+    community: "Community",
+    pricing: "Pricing",
+    dashboard: "Dashboard",
+    addToDiscord: "Add to Discord",
+    addToFluxer: "Add to Fluxer",
     docs: "Docs",
-    tos: "TOS",
+    explore: "Explore groups",
+    autoTranslateGuide: "Auto-translation guide",
+    supportServer: "Support server",
     github: "GitHub",
+    tip: "Support on Ko-fi",
+    tos: "Terms of Service",
+    privacy: "Privacy Policy",
   },
 
   home: {

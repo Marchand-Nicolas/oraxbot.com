@@ -417,9 +417,23 @@ const fr: Translation = {
   },
 
   siteFooter: {
+    tagline: "Synchronisez vos salons entre serveurs Discord et Fluxer.",
+    language: "Langue",
+    product: "Produit",
+    resources: "Ressources",
+    community: "Communauté",
+    pricing: "Tarifs",
+    dashboard: "Tableau de bord",
+    addToDiscord: "Ajouter à Discord",
+    addToFluxer: "Ajouter à Fluxer",
     docs: "Documentation",
-    tos: "CGU",
+    explore: "Explorer les groupes",
+    autoTranslateGuide: "Guide de traduction automatique",
+    supportServer: "Serveur de support",
     github: "GitHub",
+    tip: "Soutenir sur Ko-fi",
+    tos: "Conditions d'utilisation",
+    privacy: "Politique de confidentialité",
   },
 
   home: {

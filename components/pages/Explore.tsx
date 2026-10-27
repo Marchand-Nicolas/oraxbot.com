@@ -2149,7 +2149,7 @@ export default function Explore({ lang }: ExploreProps) {
           </div>
         )}
       </main>
-      <Footer theme="dark" />
+      <Footer theme="dark" lang={lang} />
     </>
   );
 }

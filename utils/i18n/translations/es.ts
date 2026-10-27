@@ -409,9 +409,23 @@ const es: Translation = {
   },
 
   siteFooter: {
+    tagline: "Sincroniza tus canales entre servidores de Discord y Fluxer.",
+    language: "Idioma",
+    product: "Producto",
+    resources: "Recursos",
+    community: "Comunidad",
+    pricing: "Precios",
+    dashboard: "Panel",
+    addToDiscord: "Añadir a Discord",
+    addToFluxer: "Añadir a Fluxer",
     docs: "Documentación",
-    tos: "TOS",
+    explore: "Explorar grupos",
+    autoTranslateGuide: "Guía de traducción automática",
+    supportServer: "Servidor de soporte",
     github: "GitHub",
+    tip: "Apoyar en Ko-fi",
+    tos: "Términos de servicio",
+    privacy: "Política de privacidad",
   },
 
   home: {

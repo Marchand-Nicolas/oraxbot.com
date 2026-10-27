@@ -204,7 +204,7 @@ export default function Home({ lang }: HomeProps) {
           </Link>
         </div>
       </section>
-      <Footer lang={lang} />
+      <Footer lang={lang} showCopyright />
     </>
   );
 }
