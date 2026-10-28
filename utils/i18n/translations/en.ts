@@ -193,6 +193,10 @@ const en = {
     syncMentions: "Sync role mentions across servers",
     syncMentionsDesc:
       "Allow @Role pings to notify matching roles across linked servers (names must exactly match).",
+    acceptCalls: "Accept incoming /call requests",
+    acceptCallsDesc:
+      "Allow random /call requests from other servers to temporarily join this group.",
+    learnMore: "Learn more",
     translation: "Translation",
     translationDesc:
       "Automatically translate synced messages. Target language can be selected in every channel's settings.",

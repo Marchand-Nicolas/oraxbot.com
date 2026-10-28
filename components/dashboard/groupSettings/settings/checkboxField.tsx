@@ -7,7 +7,7 @@ import { platformApi } from "../../../../utils/platformApi";
 interface CheckboxFieldProps {
   label: string;
   fieldName: string;
-  description?: string;
+  description?: ReactNode;
   groupId?: string | string[];
   guildId?: string | string[];
   apiEndpoint?: string;

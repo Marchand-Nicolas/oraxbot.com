@@ -192,6 +192,10 @@ const fr: Translation = {
     syncMentions: "Synchroniser les mentions de rôle entre serveurs",
     syncMentionsDesc:
       "Autoriser les mentions @Rôle à notifier les rôles correspondants dans les serveurs liés (les noms doivent correspondre exactement).",
+    acceptCalls: "Accepter les appels entrants (/call)",
+    acceptCallsDesc:
+      "Autoriser les demandes d'appel aléatoires (/call) d'autres serveurs à rejoindre temporairement ce groupe.",
+    learnMore: "En savoir plus",
     translation: "Traduction",
     translationDesc:
       "Traduire automatiquement les messages synchronisés. La langue cible peut être sélectionnée dans les paramètres de chaque canal.",

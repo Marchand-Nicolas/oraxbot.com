@@ -187,6 +187,10 @@ const es: Translation = {
     syncMentions: "Sincronizar menciones de rol entre servidores",
     syncMentionsDesc:
       "Permitir que las menciones @Rol notifiquen a los roles coincidentes en los servidores vinculados (los nombres deben coincidir exactamente).",
+    acceptCalls: "Aceptar llamadas entrantes (/call)",
+    acceptCallsDesc:
+      "Permitir que las solicitudes de llamada aleatoria (/call) de otros servidores se unan temporalmente a este grupo.",
+    learnMore: "Más información",
     translation: "Traducción",
     translationDesc:
       "Traducir automáticamente los mensajes sincronizados. El idioma de destino se puede seleccionar en los ajustes de cada canal.",

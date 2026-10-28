@@ -103,6 +103,28 @@ const ModernSettings = ({
 
           <div className={styles.settingItem}>
             <CheckboxField
+              label={t("groupSettings.acceptCalls")}
+              description={
+                <>
+                  {t("groupSettings.acceptCallsDesc")}{" "}
+                  <a
+                    href="https://docs.oraxbot.com/commands/call"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ textDecoration: "underline" }}
+                  >
+                    {t("groupSettings.learnMore")}
+                  </a>
+                </>
+              }
+              fieldName="acceptCalls"
+              groupId={groupId}
+              guildId={guildId}
+            />
+          </div>
+
+          <div className={styles.settingItem}>
+            <CheckboxField
               label={t("groupSettings.translation")}
               description={t("groupSettings.translationDesc")}
               fieldName="translation"
