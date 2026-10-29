@@ -314,7 +314,6 @@
 }
 
 .emptyGroupContainer {
-  width: calc(100% - 1em);
   border: dotted 4px rgba(255, 255, 255, 0.216);
   padding: 1em 0.5em;
 }
