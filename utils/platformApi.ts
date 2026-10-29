@@ -66,6 +66,7 @@ export function platformApi<T = unknown>(
   options: {
     method?: "POST" | "GET" | "PUT" | "DELETE";
     platform?: PlatformConfig;
+    signal?: AbortSignal;
   } = {},
 ): Promise<T> {
   const platform = options.platform ?? getCurrentPlatform();
@@ -87,6 +88,7 @@ export function platformApi<T = unknown>(
     method,
     body: method === "GET" ? undefined : JSON.stringify(payload),
     headers: { "Content-Type": "application/json" },
+    signal: options.signal,
   }).then((res) => res.json() as Promise<T>);
 }
 

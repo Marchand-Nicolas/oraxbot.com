@@ -47,12 +47,8 @@ export function trackOraxPlusEvent(
   ).catch(() => {});
 }
 
-/**
- * Fluxerlist does not send a vote webhook, so after opening the vote page
- * we wait this long before asking the backend to grant Orax Plus. The delay
- * gives the user time to actually cast their vote on fluxerlist.com.
- */
-const FLUXERLIST_RETRIEVAL_DELAY_MS = 18000;
+const FLUXERLIST_POLL_INTERVAL_MS = 5000;
+let fluxerlistVoteAttempt: Promise<OraxPlusVoteResult> | null = null;
 
 export function openTopggVote() {
   window.open(config.topggVoteUrl, "_blank");
@@ -88,7 +84,16 @@ export async function startOraxPlusVote(
   const provider = platform?.vote?.provider;
 
   if (provider === "fluxerlist") {
-    return startFluxerlistVote(guildId, platform!, origin, hasVotedFluxerlist);
+    if (fluxerlistVoteAttempt) return fluxerlistVoteAttempt;
+    fluxerlistVoteAttempt = startFluxerlistVote(
+      guildId,
+      platform!,
+      origin,
+      hasVotedFluxerlist,
+    ).finally(() => {
+      fluxerlistVoteAttempt = null;
+    });
+    return fluxerlistVoteAttempt;
   }
 
   return startTopggVote(guildId, platform, origin);
@@ -154,7 +159,7 @@ voteWindow?.close();
 
 let voteRetrievalOverlay: HTMLDivElement | null = null;
 
-function showVoteRetrievalOverlay() {
+function showVoteRetrievalOverlay(onCancel: () => void) {
   if (voteRetrievalOverlay) return;
   const overlay = document.createElement("div");
   overlay.className = "popup";
@@ -163,6 +168,12 @@ function showVoteRetrievalOverlay() {
     '<div class="spinner" style="margin:0 auto 16px"></div>' +
     `<p style="color:#fff;margin:0">${t("oraxPlus.retrievingVote")}</p>` +
     "</div>";
+  const cancelButton = document.createElement("button");
+  cancelButton.type = "button";
+  cancelButton.textContent = t("common.cancel");
+  cancelButton.style.marginTop = "16px";
+  cancelButton.addEventListener("click", onCancel);
+  overlay.firstElementChild?.appendChild(cancelButton);
   document.body.appendChild(overlay);
   voteRetrievalOverlay = overlay;
 }
@@ -172,11 +183,6 @@ function hideVoteRetrievalOverlay() {
   voteRetrievalOverlay = null;
 }
 
-/**
- * Fluxerlist flow: there is no webhook, so we open the vote page, show a
- * "Retrieving vote…" overlay for ~20s, then ask the backend to grant
- * Orax Plus on a trust basis.
- */
 async function startFluxerlistVote(
   guildId: string,
   platform: PlatformConfig,
@@ -208,40 +214,71 @@ async function startFluxerlistVote(
     window.open(voteUrl, "_blank");
   }
 
-  showVoteRetrievalOverlay();
+  const controller = new AbortController();
+  const { signal } = controller;
+  const cancel = () => controller.abort();
+  const initialPath = window.location.pathname + window.location.search;
+  const cancelOnNavigation = () => {
+    if (window.location.pathname + window.location.search !== initialPath) {
+      cancel();
+    }
+  };
+  window.addEventListener("pagehide", cancel);
+  const navigationTimer = window.setInterval(cancelOnNavigation, 500);
+  showVoteRetrievalOverlay(cancel);
 
   try {
-    await new Promise((resolve) =>
-      setTimeout(resolve, FLUXERLIST_RETRIEVAL_DELAY_MS),
-    );
+    while (!signal.aborted) {
+      const data = await platformApi<{
+        result?: boolean;
+        error?: number;
+        expires_at?: string;
+        message?: string;
+      }>("activate_fluxerlist_vote", { guildId, origin }, { platform, signal });
 
-    const data = await platformApi<{
-      result?: boolean;
-      expires_at?: string;
-      message?: string;
-    }>("activate_fluxerlist_vote", { guildId, origin }, { platform });
+      cancelOnNavigation();
+      if (signal.aborted) break;
 
-    if (!data?.result) {
-      throw new Error(
-        data?.message ||
-          "Unable to activate Orax Plus from your Fluxerlist vote.",
+      if (data?.result) {
+        notify.success(
+          t("oraxPlus.activatedTitle"),
+          t("oraxPlus.activatedFluxerDesc"),
+        );
+        return { activated: true, voteOpened: false };
+      }
+
+      if (data?.error !== 4) {
+        throw new Error(
+          data?.message ||
+            "Unable to activate Orax Plus from your Fluxerlist vote.",
+        );
+      }
+
+      await new Promise<void>((resolve) => {
+        const finish = () => {
+          window.clearTimeout(timer);
+          signal.removeEventListener("abort", finish);
+          resolve();
+        };
+        const timer = window.setTimeout(finish, FLUXERLIST_POLL_INTERVAL_MS);
+        signal.addEventListener("abort", finish, { once: true });
+        if (signal.aborted) finish();
+      });
+    }
+    return { activated: false, voteOpened: false };
+  } catch (error) {
+    if (!signal.aborted) {
+      notify.error(
+        t("oraxPlus.voteActivationFailedTitle"),
+        error instanceof Error
+          ? error.message
+          : "Unable to activate Orax Plus from your Fluxerlist vote.",
       );
     }
-
-    notify.success(
-      t("oraxPlus.activatedTitle"),
-      t("oraxPlus.activatedFluxerDesc"),
-    );
-    return { activated: true, voteOpened: false };
-  } catch (error) {
-    notify.error(
-      t("oraxPlus.voteActivationFailedTitle"),
-      error instanceof Error
-        ? error.message
-        : "Unable to activate Orax Plus from your Fluxerlist vote.",
-    );
     return { activated: false, voteOpened: false };
   } finally {
+    window.clearInterval(navigationTimer);
+    window.removeEventListener("pagehide", cancel);
     hideVoteRetrievalOverlay();
   }
 }
