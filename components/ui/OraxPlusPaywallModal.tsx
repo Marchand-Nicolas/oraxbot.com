@@ -1,11 +1,80 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import ActionModal, { type ActionModalAction } from "./ActionModal";
+import actionStyles from "../../styles/components/ui/ActionModal.module.css";
 import { trackOraxPlusEvent, type OraxPlusOrigin } from "../../utils/oraxPlus";
 import type { PlatformConfig } from "../../utils/platforms";
 import type { OraxPlusPricing } from "../../utils/pricing";
 import { t } from "../../utils/i18n";
 
-type OraxPlusPlan = "monthly" | "lifetime";
+export type OraxPlusPlan = "monthly" | "lifetime";
+
+export interface OraxPlusActionButtonsProps {
+  pricing: OraxPlusPricing;
+  voteLabel?: string;
+  onVote?: () => void;
+  onCheckout: (plan: OraxPlusPlan) => void;
+  checkoutLabels?: Partial<Record<OraxPlusPlan, string>>;
+  className?: string;
+}
+
+export function buildOraxPlusActions({
+  pricing,
+  voteLabel,
+  onVote,
+  onCheckout,
+  checkoutLabels,
+  wrapAction = (fn) => fn,
+}: OraxPlusActionButtonsProps & {
+  wrapAction?: (action: () => void) => () => void;
+}): ActionModalAction[] {
+  return [
+    ...(voteLabel && onVote
+      ? [
+          {
+            label: voteLabel,
+            variant: "secondary" as const,
+            onClick: wrapAction(onVote),
+          },
+        ]
+      : []),
+    {
+      label:
+        checkoutLabels?.monthly ??
+        t("oraxPlus.subscribe", { price: pricing.monthly }),
+      variant: "primary",
+      onClick: wrapAction(() => onCheckout("monthly")),
+    },
+    {
+      label:
+        checkoutLabels?.lifetime ??
+        t("oraxPlus.lifetime", { price: pricing.lifetime }),
+      variant: "primary",
+      onClick: wrapAction(() => onCheckout("lifetime")),
+    },
+  ];
+}
+
+export function OraxPlusActionButtons(props: OraxPlusActionButtonsProps) {
+  const actions = buildOraxPlusActions(props);
+  return (
+    <div className={props.className || actionStyles.actions}>
+      {actions.map((action) => (
+        <button
+          key={action.label}
+          type="button"
+          className={[
+            actionStyles.actionButton,
+            actionStyles[action.variant || "secondary"],
+          ].join(" ")}
+          disabled={action.disabled}
+          onClick={action.onClick}
+        >
+          {action.label}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 interface OraxPlusPaywallModalProps {
   title: string;
@@ -67,25 +136,14 @@ export default function OraxPlusPaywallModal({
     action();
   };
 
-  const actions: ActionModalAction[] = [
-    ...(voteLabel && onVote
-      ? [{ label: voteLabel, variant: "secondary" as const, onClick: closeThen(onVote) }]
-      : []),
-    {
-      label:
-        checkoutLabels?.monthly ??
-        t("oraxPlus.subscribe", { price: pricing.monthly }),
-      variant: "primary",
-      onClick: closeThen(() => onCheckout("monthly")),
-    },
-    {
-      label:
-        checkoutLabels?.lifetime ??
-        t("oraxPlus.lifetime", { price: pricing.lifetime }),
-      variant: "primary",
-      onClick: closeThen(() => onCheckout("lifetime")),
-    },
-  ];
+  const actions = buildOraxPlusActions({
+    pricing,
+    voteLabel,
+    onVote,
+    onCheckout,
+    checkoutLabels,
+    wrapAction: closeThen,
+  });
 
   return (
     <ActionModal

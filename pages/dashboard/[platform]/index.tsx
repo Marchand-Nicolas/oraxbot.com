@@ -15,6 +15,7 @@ import meteor from "../../../public/icons/meteor.svg";
 import CreateGroupMenu from "../../../components/dashboard/CreateGroupMenu";
 import Settings from "../../../components/dashboard/Settings";
 import UserMenu from "../../../components/dashboard/UserMenu";
+import OraxPlusPlanActions from "../../../components/dashboard/OraxPlusPlanActions";
 import Loading from "../../../components/Loading";
 import GuildIcon from "../../../components/GuildIcon";
 import HiddenMenu from "../../../components/ui/hiddenMenu";
@@ -728,34 +729,15 @@ function Dashboard({
                   <span>{tt("oraxPlus.channelsPerGroup")}</span>
                 </div>
               </div>
-              {(showVoteButton || showMonthlyButton || showLifetimeButton) && (
-                <div className={styles.planActions}>
-                  {showVoteButton && (
-                    <button
-                      className={styles.secondaryButton}
-                      onClick={() => startOraxPlusVote()}
-                    >
-                      {voteLabelText}
-                    </button>
-                  )}
-                  {showMonthlyButton && (
-                    <button
-                      className={styles.primaryButton}
-                      onClick={() => startOraxPlusCheckout("monthly")}
-                    >
-                      {tt("oraxPlus.subscribe", { price: pricing.monthly })}
-                    </button>
-                  )}
-                  {showLifetimeButton && (
-                    <button
-                      className={styles.primaryButton}
-                      onClick={() => startOraxPlusCheckout("lifetime")}
-                    >
-                      {tt("oraxPlus.lifetime", { price: pricing.lifetime })}
-                    </button>
-                  )}
-                </div>
-              )}
+              <OraxPlusPlanActions
+                pricing={pricing}
+                voteLabel={voteLabelText}
+                showVoteButton={showVoteButton}
+                showMonthlyButton={showMonthlyButton}
+                showLifetimeButton={showLifetimeButton}
+                onVote={() => startOraxPlusVote()}
+                onCheckout={(plan) => startOraxPlusCheckout(plan)}
+              />
               <p className={styles.planFootnote}>
                 {tt("oraxPlus.footnotePrefix")}
                 <a href="mailto:support@oraxbot.com">{tt("oraxPlus.footnoteLink")}</a>{" "}

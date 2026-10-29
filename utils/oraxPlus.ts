@@ -286,6 +286,8 @@ export async function startOraxPlusCheckout(
 ) {
   showCheckoutOverlay();
   const returnGuild = returnGuildId ?? guildId;
+  const queryPrefix =
+    returnGuild && returnGuild !== "0" ? `guild=${returnGuild}&` : "";
   try {
     const data = await platformApi<{
       result?: boolean;
@@ -298,8 +300,8 @@ export async function startOraxPlusCheckout(
         plan,
         origin,
         sponsorLinkId,
-        successUrl: `${window.location.origin}${redirectBase}?guild=${returnGuild}&orax_plus=success`,
-        cancelUrl: `${window.location.origin}${redirectBase}?guild=${returnGuild}&orax_plus=cancelled`,
+        successUrl: `${window.location.origin}${redirectBase}?${queryPrefix}orax_plus=success`,
+        cancelUrl: `${window.location.origin}${redirectBase}?${queryPrefix}orax_plus=cancelled`,
       },
       { platform },
     );
