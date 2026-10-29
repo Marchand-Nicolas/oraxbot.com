@@ -53,7 +53,7 @@ const Filters = ({ groupId, guildId }: FiltersProps) => {
     const newRule: FilterRule = {
       id: Date.now().toString(),
       type: "keyword",
-      condition: "include",
+      condition: "exclude",
       value: "",
     };
     const updatedRules = [...filterRules, newRule];
