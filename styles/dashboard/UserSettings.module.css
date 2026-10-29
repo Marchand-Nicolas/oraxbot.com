@@ -208,6 +208,135 @@
   word-break: break-all;
 }
 
+.instanceCard {
+  padding: 18px;
+  border: 1px solid #2a2e38;
+  border-radius: 12px;
+  background: #171a21;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fieldLabel {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #c5c9d1;
+}
+
+.input,
+.select {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid #303542;
+  border-radius: 8px;
+  background: #12141a;
+  color: #f2f4f7;
+  font: inherit;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+}
+
+.input:focus,
+.select:focus {
+  outline: none;
+  border-color: #5b8def;
+}
+
+.statusRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.statusRunning {
+  background: rgba(46, 204, 113, 0.14);
+  color: #58d68d;
+}
+
+.statusPaused {
+  background: rgba(241, 196, 15, 0.14);
+  color: #f4d03f;
+}
+
+.statusError {
+  background: rgba(231, 76, 60, 0.14);
+  color: #ec7063;
+}
+
+.buttonRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.primaryButton {
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 8px;
+  background: #5b8def;
+  color: #fff;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: #4a7de0;
+}
+
+.primaryButton:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.dangerButton {
+  padding: 8px 14px;
+  border: 1px solid rgba(231, 76, 60, 0.45);
+  border-radius: 8px;
+  background: transparent;
+  color: #ec7063;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dangerButton:hover:not(:disabled) {
+  background: rgba(231, 76, 60, 0.12);
+}
+
+.dangerButton:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.warningNote {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #f4d03f;
+}
+
 @media screen and (max-width: 550px) {
   .page {
     padding: 16px 16px 40px;

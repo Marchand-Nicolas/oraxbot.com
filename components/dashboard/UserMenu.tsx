@@ -94,7 +94,9 @@ export default function UserMenu({
     if (token) {
       setActivePlatformSession(other, token);
     }
-    window.location.href = `/dashboard/${other.slug}`;
+    window.location.href = isSettings
+      ? `/dashboard/${other.slug}/settings`
+      : `/dashboard/${other.slug}`;
   }
 
   return (

@@ -124,7 +124,13 @@ export function usePlatformAuth(platform: PlatformConfig): UsePlatformAuthResult
       // the destination in `state` so /dashboard (the redirect_uri) knows
       // which platform to exchange the code with and where to send the
       // user afterwards.
-      const target = `/dashboard/${platform.slug}`;
+      const currentUrl = new URL(window.location.href);
+      currentUrl.searchParams.delete("code");
+      currentUrl.searchParams.delete("state");
+      const currentTarget = `${currentUrl.pathname}${currentUrl.search}${currentUrl.hash}`;
+      const target = currentTarget.startsWith(`/dashboard/${platform.slug}`)
+        ? currentTarget
+        : `/dashboard/${platform.slug}`;
       const stateParam = encodeURIComponent(target);
       const sep = platform.authorizeUrl.includes("?") ? "&" : "?";
       window.location.href = `${platform.authorizeUrl}${sep}state=${stateParam}`;
@@ -146,7 +152,7 @@ export function usePlatformAuth(platform: PlatformConfig): UsePlatformAuthResult
 
         if ((user as { message?: string }).message === "401: Unauthorized") {
           persistPlatformToken(platform, "", 0);
-          window.location.href = `/dashboard/${platform.slug}`;
+          window.location.reload();
           return;
         }
 
