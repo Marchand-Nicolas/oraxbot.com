@@ -159,7 +159,7 @@ voteWindow?.close();
 
 let voteRetrievalOverlay: HTMLDivElement | null = null;
 
-function showVoteRetrievalOverlay(onCancel: () => void) {
+function showVoteRetrievalOverlay() {
   if (voteRetrievalOverlay) return;
   const overlay = document.createElement("div");
   overlay.className = "popup";
@@ -168,12 +168,6 @@ function showVoteRetrievalOverlay(onCancel: () => void) {
     '<div class="spinner" style="margin:0 auto 16px"></div>' +
     `<p style="color:#fff;margin:0">${t("oraxPlus.retrievingVote")}</p>` +
     "</div>";
-  const cancelButton = document.createElement("button");
-  cancelButton.type = "button";
-  cancelButton.textContent = t("common.cancel");
-  cancelButton.style.marginTop = "16px";
-  cancelButton.addEventListener("click", onCancel);
-  overlay.firstElementChild?.appendChild(cancelButton);
   document.body.appendChild(overlay);
   voteRetrievalOverlay = overlay;
 }
@@ -225,7 +219,7 @@ async function startFluxerlistVote(
   };
   window.addEventListener("pagehide", cancel);
   const navigationTimer = window.setInterval(cancelOnNavigation, 500);
-  showVoteRetrievalOverlay(cancel);
+  showVoteRetrievalOverlay();
 
   try {
     while (!signal.aborted) {
