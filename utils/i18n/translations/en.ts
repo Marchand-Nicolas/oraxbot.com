@@ -207,6 +207,7 @@ const en = {
     settingsTitle: "Settings",
     basicConfig: "Basic Configuration",
     repliesStyle: "Replies style",
+    repliesModern: "Modern (default)",
     repliesEmbed: "Embed",
     repliesQuote: "Quote (Discord's legacy)",
     repliesQuoteNoButton: "Quote without jump button",

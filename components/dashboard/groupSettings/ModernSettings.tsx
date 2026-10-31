@@ -73,6 +73,7 @@ const ModernSettings = ({
               groupId={groupId}
               guildId={guildId}
               options={[
+                { name: t("groupSettings.repliesModern"), value: "modern" },
                 { name: t("groupSettings.repliesEmbed"), value: "embed" },
                 { name: t("groupSettings.repliesQuote"), value: "quote" },
                 { name: t("groupSettings.repliesQuoteNoButton"), value: "quoteNoButton" },

@@ -201,6 +201,7 @@ const es: Translation = {
     settingsTitle: "Ajustes",
     basicConfig: "Configuración básica",
     repliesStyle: "Estilo de respuestas",
+    repliesModern: "Moderno (predeterminado)",
     repliesEmbed: "Embed",
     repliesQuote: "Cita (estilo antiguo de Discord)",
     repliesQuoteNoButton: "Cita sin botón de salto",

@@ -206,6 +206,7 @@ const fr: Translation = {
     settingsTitle: "Paramètres",
     basicConfig: "Configuration de base",
     repliesStyle: "Style des réponses",
+    repliesModern: "Moderne (par défaut)",
     repliesEmbed: "Embed",
     repliesQuote: "Citation (ancien style Discord)",
     repliesQuoteNoButton: "Citation sans bouton de saut",
