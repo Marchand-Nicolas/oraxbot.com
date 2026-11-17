@@ -11,6 +11,7 @@ import meteor from "../../public/icons/meteor.svg";
 import OraxPlusPaywallModal from "../../components/ui/OraxPlusPaywallModal";
 import SearchableList from "../../components/ui/SearchableList";
 import BackLink from "../../components/ui/BackLink";
+import UserMenu from "../../components/dashboard/UserMenu";
 import ChannelIcon from "../../components/ui/icons/ChannelIcon";
 import GuildIcon from "../../components/GuildIcon";
 import {
@@ -122,8 +123,13 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
       .then((res) => {
         setGroup(res);
       });
-    // Default to the platform the user is already logged into, else Discord.
-    const activePlatform = platformList.find((p) => getPlatformToken(p));
+    // Default to the platform the user just logged in with (?platform=), else
+    // the first one they are already logged into, else Discord.
+    const requestedPlatform = getPlatform(router.query.platform);
+    const activePlatform =
+      requestedPlatform && getPlatformToken(requestedPlatform)
+        ? requestedPlatform
+        : platformList.find((p) => getPlatformToken(p));
     setPlatformSlug((current) => current ?? (activePlatform?.slug || "discord"));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.isReady, linkId]);
@@ -228,13 +234,29 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
     if (guildId) router.replace(`/join/${linkId}`);
   }
 
-  function handleLogin() {
-    if (!platform || !linkId) return;
-    const target = `/join/${linkId}?platform=${platform.slug}`;
-    const sep = platform.authorizeUrl.includes("?") ? "&" : "?";
-    window.location.href = `${platform.authorizeUrl}${sep}state=${encodeURIComponent(
+  function handleLogin(loginPlatform: PlatformConfig) {
+    if (!linkId) return;
+    const target = `/join/${linkId}?platform=${loginPlatform.slug}`;
+    const sep = loginPlatform.authorizeUrl.includes("?") ? "&" : "?";
+    window.location.href = `${loginPlatform.authorizeUrl}${sep}state=${encodeURIComponent(
       target,
     )}`;
+  }
+
+  // Same as the site header: switch right away when already logged into the
+  // other platform, otherwise go through its login.
+  function handleSwitchPlatform(other: PlatformConfig) {
+    if (getPlatformToken(other)) handlePlatformChange(other.slug);
+    else handleLogin(other);
+  }
+
+  // UserMenu has already cleared the token, so fall back to the login view.
+  function handleLogout() {
+    setLoggedIn(false);
+    setUser(null);
+    setGuilds([]);
+    setChannels({});
+    if (guildId) router.replace(`/join/${linkId}`);
   }
 
   function joinChannel(channel: Channel) {
@@ -354,28 +376,13 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
             What is an interserver group ?
           </button>
         </a>
-        {platform && (
-          <div className={styles.platformSelectWrapper}>
-            <img
-              src={platform.logoPath}
-              alt=""
-              className={styles.platformSelectLogo}
-              width={20}
-              height={20}
-            />
-            <select
-              className={styles.platformSelect}
-              value={platform.slug}
-              onChange={(event) => handlePlatformChange(event.target.value)}
-              aria-label="Platform"
-            >
-              {platformList.map((p) => (
-                <option key={p.slug} value={p.slug}>
-                  {p.label}
-                </option>
-              ))}
-            </select>
-          </div>
+        {platform && loggedIn && user && (
+          <UserMenu
+            user={user}
+            platform={platform}
+            onSwitchPlatform={handleSwitchPlatform}
+            onLogout={handleLogout}
+          />
         )}
         {!platform ? null : !loggedIn ? (
           <div className={styles.loginContainer}>
@@ -383,23 +390,26 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
               You have been invited to join the{" "}
               {group.name ? (group.name as string) : "..."} interserver group.
             </h1>
-            <button
-              type="button"
-              className={styles.loginButton}
-              style={{
-                background: platform.brandGradient ?? platform.brandColor,
-              }}
-              onClick={handleLogin}
-            >
-              <img
-                src={platform.logoPath}
-                alt=""
-                className={styles.loginButtonIcon}
-                width={24}
-                height={24}
-              />
-              <span>Log in with {platform.label}</span>
-            </button>
+            <div className={styles.loginButtons}>
+              {platformList.map((p) => (
+                <button
+                  key={p.slug}
+                  type="button"
+                  className={styles.loginButton}
+                  style={{ background: p.brandGradient ?? p.brandColor }}
+                  onClick={() => handleLogin(p)}
+                >
+                  <img
+                    src={p.logoPath}
+                    alt=""
+                    className={styles.loginButtonIcon}
+                    width={24}
+                    height={24}
+                  />
+                  <span>Log in with {p.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
         ) : guildId ? (
           loadingChannels || channels.result ? (
