@@ -627,6 +627,12 @@ const en = {
     selectChannel: "Select a channel",
     selectChannelDescription: "Choose the channel where your proposal should be sent.",
     noChannelsFound: "No available channels found for this server.",
+    searchGroups: "Search groups…",
+    searchChannels: "Search channels…",
+    loadingGroups: "Loading groups…",
+    loadingChannels: "Loading channels…",
+    noSearchResults: "Nothing matches your search.",
+    clearSearch: "Clear search",
     writeProposal: "Write your proposal",
     proposalDescription:
       "Explain why this server wants to join this interserver group.",

@@ -96,26 +96,54 @@
   transform: translateX(-50%) translateY(-50%);
 }
 
-.buttonContainer {
+.channelStep {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: calc(100vh - 65px);
+  padding: 64px 0 24px;
+  box-sizing: border-box;
 }
 
-.channelButton {
+.channelContent {
+  width: 100%;
+  max-width: 560px;
+  max-height: calc(100vh - 160px);
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.channelHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.channelHeaderIcon {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  border-radius: 16px;
+  object-fit: cover;
+  font-size: 1.1rem;
+}
+
+.channelHeader h2 {
+  margin: 0 0 0.3rem;
+  font-size: 1.35rem;
+}
+
+.channelHeader p {
+  margin: 0;
+  color: #cdd0d6;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.channelHeader strong {
   color: #ffffff;
-  font-weight: bold;
-  border: none;
-  background-color: rgb(0, 161, 232);
-  border-radius: 1em;
-  font-weight: bold;
-  display: block;
-  font-size: 16px;
-  padding: 5px 20px;
-  cursor: pointer;
-  margin: 20px;
 }
 
 .platformSelectWrapper {

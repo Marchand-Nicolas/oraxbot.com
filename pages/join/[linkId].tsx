@@ -9,6 +9,9 @@ import config from "../../utils/config.json";
 import popup from "../../utils/popup";
 import meteor from "../../public/icons/meteor.svg";
 import OraxPlusPaywallModal from "../../components/ui/OraxPlusPaywallModal";
+import SearchableList from "../../components/ui/SearchableList";
+import BackLink from "../../components/ui/BackLink";
+import ChannelIcon from "../../components/ui/icons/ChannelIcon";
 import GuildIcon from "../../components/GuildIcon";
 import {
   openTopggVote,
@@ -68,6 +71,9 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
   const [loadingChannels, setLoadingChannels] = useState(false);
   const [group, setGroup] = useState<Record<string, unknown>>({});
   const [channels, setChannels] = useState<{ result?: Channel[] }>({});
+  const [joiningChannelId, setJoiningChannelId] = useState<string | null>(
+    null,
+  );
   const [showChannelLimitModal, setShowChannelLimitModal] = useState(false);
   const [channelLimitData, setChannelLimitData] =
     useState<ChannelLimitData | null>(null);
@@ -80,7 +86,8 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
   const platform = platformSlug ? getPlatform(platformSlug) : undefined;
   const voteProvider = platform?.vote?.provider || "topgg";
 
-  let guild = guilds.find((guild) => guild.id === guildId);
+  const selectedGuild = guilds.find((guild) => guild.id === guildId);
+  let guild = selectedGuild;
 
   if (!guild) {
     if (platform && guilds.length > 0) {
@@ -231,8 +238,9 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
   }
 
   function joinChannel(channel: Channel) {
-    if (!platform) return;
+    if (!platform || joiningChannelId) return;
     const token = getPlatformToken(platform);
+    setJoiningChannelId(channel.id);
     fetch(`${config.apiV2}join_group_with_link`, {
       method: "POST",
       body: JSON.stringify({
@@ -288,7 +296,9 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
             );
           }
         },
-      );
+      )
+      .catch(() => popup("Error", "An error occurred", "error"))
+      .finally(() => setJoiningChannelId(null));
   }
 
   let adminGuildNumber = 0;
@@ -392,25 +402,58 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
             </button>
           </div>
         ) : guildId ? (
-          loadingChannels ? (
-            <div className={styles.buttonContainer}>
-              <div className={styles.loadingContainer}>
-                <div className="spinner" aria-hidden="true" />
-                <p className={styles.loadingText}>Loading channels…</p>
+          loadingChannels || channels.result ? (
+            <div className={styles.channelStep}>
+              <div className={styles.channelContent}>
+                <BackLink
+                  label="Change server"
+                  onClick={() => router.push(`/join/${linkId}`)}
+                />
+                <div className={styles.channelHeader}>
+                  {selectedGuild && (
+                    <GuildIcon
+                      className={styles.channelHeaderIcon}
+                      iconUrl={platform.getGuildIconUrl(selectedGuild)}
+                      name={selectedGuild.name}
+                    />
+                  )}
+                  <div>
+                    <h2>Select a channel</h2>
+                    <p>
+                      Pick the channel
+                      {selectedGuild && (
+                        <>
+                          {" "}
+                          on <strong>{selectedGuild.name}</strong>
+                        </>
+                      )}{" "}
+                      that will join{" "}
+                      {group.name ? (
+                        <>
+                          the <strong>{group.name as string}</strong> group
+                        </>
+                      ) : (
+                        "this group"
+                      )}
+                      .
+                    </p>
+                  </div>
+                </div>
+                <SearchableList
+                  items={channels.result ?? []}
+                  getKey={(channel) => channel.id}
+                  getLabel={(channel) => channel.name}
+                  renderIcon={(channel) => <ChannelIcon type={channel.type} />}
+                  onSelect={joinChannel}
+                  loading={loadingChannels}
+                  loadingText="Loading channels…"
+                  pendingKey={joiningChannelId}
+                  searchPlaceholder="Search channels…"
+                  emptyText="No channel available on this server."
+                  noResultsText="No channel matches your search."
+                  autoFocus
+                />
               </div>
-            </div>
-          ) : channels.result ? (
-            <div className={styles.buttonContainer}>
-              <h2 className={styles.subtitle}>And finally, select a channel</h2>
-              {channels.result.map((channel, index) => (
-                <button
-                  onClick={() => joinChannel(channel)}
-                  key={"channel_" + index}
-                  className={styles.channelButton}
-                >
-                  {channel.name}
-                </button>
-              ))}
             </div>
           ) : (
             <button

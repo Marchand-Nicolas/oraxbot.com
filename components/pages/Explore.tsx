@@ -3,6 +3,9 @@ import Header from "../Header";
 import Footer from "../Footer";
 import GuildIcon from "../GuildIcon";
 import BetaTag from "../ui/BetaTag";
+import SearchableList from "../ui/SearchableList";
+import BackLink from "../ui/BackLink";
+import ChannelIcon from "../ui/icons/ChannelIcon";
 import LocalizedHead from "../LocalizedHead";
 import styles from "../../styles/Explore.module.css";
 import config from "../../utils/config.json";
@@ -178,6 +181,7 @@ export default function Explore({ lang }: ExploreProps) {
   const [guilds, setGuilds] = useState<DiscordGuild[]>([]);
   const [selectedGuildId, setSelectedGuildId] = useState("");
   const [ownedGroups, setOwnedGroups] = useState<OwnedGroup[]>([]);
+  const [isOwnedGroupsLoading, setIsOwnedGroupsLoading] = useState(false);
   const [selectedGroupId, setSelectedGroupId] = useState("");
   const [isPublishMenuOpen, setIsPublishMenuOpen] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
@@ -193,6 +197,7 @@ export default function Explore({ lang }: ExploreProps) {
   const [joinGroupId, setJoinGroupId] = useState("");
   const [joinSelectedGuildId, setJoinSelectedGuildId] = useState("");
   const [joinChannels, setJoinChannels] = useState<LinkedChannel[]>([]);
+  const [isJoinChannelsLoading, setIsJoinChannelsLoading] = useState(false);
   const [joinSelectedChannelId, setJoinSelectedChannelId] = useState("");
   const [joinDescription, setJoinDescription] = useState("");
   const [isJoinSubmitting, setIsJoinSubmitting] = useState(false);
@@ -1154,6 +1159,7 @@ export default function Explore({ lang }: ExploreProps) {
 
       const session = resolveCurrentSession(activePlatform);
 
+      setIsOwnedGroupsLoading(true);
       try {
         const res = await fetch(`${config.apiV2}get_server_data`, {
           method: "POST",
@@ -1178,6 +1184,8 @@ export default function Explore({ lang }: ExploreProps) {
         console.error("Failed to load owned groups for publish:", e);
         setOwnedGroups([]);
         setSelectedGroupId("");
+      } finally {
+        setIsOwnedGroupsLoading(false);
       }
     }
 
@@ -1207,6 +1215,7 @@ export default function Explore({ lang }: ExploreProps) {
 
       const session = resolveCurrentSession(activePlatform);
 
+      setIsJoinChannelsLoading(true);
       try {
         const res = await fetch(`${config.apiV2}get_guild_channels`, {
           method: "POST",
@@ -1231,6 +1240,8 @@ export default function Explore({ lang }: ExploreProps) {
         console.error("Failed to load guild channels for join:", e);
         setJoinChannels([]);
         setJoinSelectedChannelId("");
+      } finally {
+        setIsJoinChannelsLoading(false);
       }
     }
 
@@ -1919,6 +1930,7 @@ export default function Explore({ lang }: ExploreProps) {
                           className={styles.guildCard}
                           onClick={() => {
                             setSelectedGuildId(g.id);
+                            setIsOwnedGroupsLoading(true);
                             setPublishStep(2);
                           }}
                         >
@@ -1949,39 +1961,40 @@ export default function Explore({ lang }: ExploreProps) {
               {publishStep === 2 && (
                 <>
                   <div className={styles.publishHeader}>
-                    <button
-                      type="button"
-                      className={styles.backButton}
+                    <BackLink
+                      label={t("explore.back")}
+                      className={styles.headerBackLink}
                       onClick={() => {
                         setPublishStep(1);
                         setSelectedGroupId("");
                         setOwnedGroups([]);
                       }}
-                    >
-                       ← {t("explore.back")}
-                    </button>
+                    />
                     <h2>{t("explore.selectGroup")}</h2>
                     <p>
                       {t("explore.selectGroupDescription")}
                     </p>
                   </div>
-                  <div className={styles.groupList}>
-                    {ownedGroups.map((g) => (
-                      <button
-                        key={g.id}
-                        type="button"
-                        className={styles.groupItem}
-                        onClick={() => handleConfirmPublishGroup(g.id)}
-                      >
-                        <span className={styles.groupName}>{g.name}</span>
-                      </button>
-                    ))}
-                    {ownedGroups.length === 0 && (
-                      <p className={styles.empty}>
-                         {t("explore.noOwnedGroups")}
-                      </p>
+                  <SearchableList
+                    items={ownedGroups}
+                    getKey={(g) => g.id}
+                    getLabel={(g) => g.name}
+                    renderIcon={(g) => (
+                      <GuildIcon
+                        iconUrl={null}
+                        name={g.name}
+                        className={styles.listInitials}
+                      />
                     )}
-                  </div>
+                    onSelect={(g) => handleConfirmPublishGroup(g.id)}
+                    loading={isOwnedGroupsLoading}
+                    loadingText={t("explore.loadingGroups")}
+                    searchPlaceholder={t("explore.searchGroups")}
+                    emptyText={t("explore.noOwnedGroups")}
+                    noResultsText={t("explore.noSearchResults")}
+                    clearSearchLabel={t("explore.clearSearch")}
+                    autoFocus
+                  />
                 </>
               )}
             </div>
@@ -2019,6 +2032,7 @@ export default function Explore({ lang }: ExploreProps) {
                           className={styles.guildCard}
                           onClick={() => {
                             setJoinSelectedGuildId(g.id);
+                            setIsJoinChannelsLoading(true);
                             setJoinStep(2);
                             setJoinError("");
                           }}
@@ -2050,9 +2064,9 @@ export default function Explore({ lang }: ExploreProps) {
               {joinStep === 2 && (
                 <>
                   <div className={styles.publishHeader}>
-                    <button
-                      type="button"
-                      className={styles.backButton}
+                    <BackLink
+                      label={t("explore.back")}
+                      className={styles.headerBackLink}
                       onClick={() => {
                         setJoinStep(1);
                         setJoinSelectedGuildId("");
@@ -2060,54 +2074,45 @@ export default function Explore({ lang }: ExploreProps) {
                         setJoinSelectedChannelId("");
                         setJoinError("");
                       }}
-                    >
-                       ← {t("explore.back")}
-                    </button>
+                    />
                     <h2>{t("explore.selectChannel")}</h2>
                     <p>
                        {t("explore.selectChannelDescription")}
                     </p>
                   </div>
 
-                  <div className={styles.groupList}>
-                    {joinChannels.map((channel) => (
-                      <button
-                        key={channel.id}
-                        type="button"
-                        className={styles.groupItem}
-                        onClick={() => {
-                          setJoinSelectedChannelId(channel.id);
-                          setJoinStep(3);
-                          setJoinError("");
-                        }}
-                      >
-                        <span className={styles.groupName}>
-                          #{channel.name}
-                        </span>
-                      </button>
-                    ))}
-                    {joinChannels.length === 0 && (
-                      <p className={styles.empty}>
-                         {t("explore.noChannelsFound")}
-                      </p>
-                    )}
-                  </div>
+                  <SearchableList
+                    items={joinChannels}
+                    getKey={(channel) => channel.id}
+                    getLabel={(channel) => channel.name}
+                    renderIcon={(channel) => <ChannelIcon type={channel.type} />}
+                    onSelect={(channel) => {
+                      setJoinSelectedChannelId(channel.id);
+                      setJoinStep(3);
+                      setJoinError("");
+                    }}
+                    loading={isJoinChannelsLoading}
+                    loadingText={t("explore.loadingChannels")}
+                    searchPlaceholder={t("explore.searchChannels")}
+                    emptyText={t("explore.noChannelsFound")}
+                    noResultsText={t("explore.noSearchResults")}
+                    clearSearchLabel={t("explore.clearSearch")}
+                    autoFocus
+                  />
                 </>
               )}
 
               {joinStep === 3 && (
                 <>
                   <div className={styles.publishHeader}>
-                    <button
-                      type="button"
-                      className={styles.backButton}
+                    <BackLink
+                      label={t("explore.back")}
+                      className={styles.headerBackLink}
                       onClick={() => {
                         setJoinStep(2);
                         setJoinError("");
                       }}
-                    >
-                       ← {t("explore.back")}
-                    </button>
+                    />
                     <h2>{t("explore.writeProposal")}</h2>
                     <p>
                        {t("explore.proposalDescription")}

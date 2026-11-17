@@ -646,6 +646,12 @@ const fr: Translation = {
     selectChannel: "Sélectionner un salon",
     selectChannelDescription: "Choisissez le salon où votre proposition sera envoyée.",
     noChannelsFound: "Aucun salon disponible trouvé pour ce serveur.",
+    searchGroups: "Rechercher un groupe…",
+    searchChannels: "Rechercher un salon…",
+    loadingGroups: "Chargement des groupes…",
+    loadingChannels: "Chargement des salons…",
+    noSearchResults: "Aucun résultat pour cette recherche.",
+    clearSearch: "Effacer la recherche",
     writeProposal: "Rédiger votre proposition",
     proposalDescription:
       "Expliquez pourquoi ce serveur souhaite rejoindre ce groupe interserveur.",

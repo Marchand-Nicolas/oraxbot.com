@@ -1,0 +1,21 @@
+.backLink {
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #cdd0d6;
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.backLink:hover {
+  color: #ffffff;
+}
+
+.backLink:focus-visible {
+  outline: 2px solid #8151fc;
+  outline-offset: 2px;
+  border-radius: 4px;
+}

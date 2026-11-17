@@ -636,6 +636,12 @@ const es: Translation = {
     selectChannel: "Selecciona un canal",
     selectChannelDescription: "Elige el canal donde se enviará tu propuesta.",
     noChannelsFound: "No se encontraron canales disponibles para este servidor.",
+    searchGroups: "Buscar grupos…",
+    searchChannels: "Buscar canales…",
+    loadingGroups: "Cargando grupos…",
+    loadingChannels: "Cargando canales…",
+    noSearchResults: "Ningún resultado para esta búsqueda.",
+    clearSearch: "Borrar búsqueda",
     writeProposal: "Escribe tu propuesta",
     proposalDescription:
       "Explica por qué este servidor quiere unirse a este grupo interservidor.",
