@@ -200,8 +200,25 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [platformSlug, guildId, loggedIn]);
 
+  // Platforms send retry_after in seconds; setTimeout takes milliseconds.
+  function retryLoadPageAfter(
+    platform: PlatformConfig,
+    token: string,
+    retryAfterSeconds: number,
+  ) {
+    setTimeout(() => {
+      loadPage(platform, token);
+    }, retryAfterSeconds * 1000 + 50);
+  }
+
   async function loadPage(platform: PlatformConfig, token: string) {
     const userDatas = await fetchPlatformUser(platform, token);
+    const userRetryAfter = (userDatas as { retry_after?: number } | null)
+      ?.retry_after;
+    if (userRetryAfter) {
+      retryLoadPageAfter(platform, token, userRetryAfter);
+      return;
+    }
     if (!userDatas || !userDatas.id) {
       // Token is no longer valid — fall back to the login view.
       setLoggedIn(false);
@@ -215,9 +232,7 @@ export default function JoinGroup({ pricingRegion }: JoinGroupProps) {
       | DiscordGuild[]
       | { retry_after?: number };
     if (!Array.isArray(guildsRes) && guildsRes.retry_after) {
-      setTimeout(() => {
-        loadPage(platform, token);
-      }, guildsRes.retry_after);
+      retryLoadPageAfter(platform, token, guildsRes.retry_after);
       return;
     }
     if (Array.isArray(guildsRes) && guildsRes.length > 0)
